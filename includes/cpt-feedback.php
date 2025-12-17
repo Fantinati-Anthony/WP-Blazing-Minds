@@ -828,6 +828,21 @@ class WPVFH_CPT_Feedback {
             update_post_meta( $post_id, '_wpvfh_scroll_y', $data['scroll_y'] );
         }
 
+        // Nouvelles métadonnées système étendues
+        $extended_meta_fields = array(
+            'device_pixel_ratio', 'color_depth', 'orientation',
+            'browser_version', 'os_version', 'platform',
+            'language', 'languages', 'timezone', 'timezone_offset', 'local_time',
+            'cookies_enabled', 'online', 'touch_support', 'max_touch_points',
+            'device_memory', 'hardware_concurrency', 'connection_type', 'referrer',
+        );
+
+        foreach ( $extended_meta_fields as $field ) {
+            if ( isset( $data[ $field ] ) && ! empty( $data[ $field ] ) ) {
+                update_post_meta( $post_id, '_wpvfh_' . $field, $data[ $field ] );
+            }
+        }
+
         // Statut par défaut
         $status = isset( $data['status'] ) ? $data['status'] : 'new';
         update_post_meta( $post_id, '_wpvfh_status', $status );
@@ -930,6 +945,29 @@ class WPVFH_CPT_Feedback {
             'element_offset_x'  => (float) get_post_meta( $post->ID, '_wpvfh_element_offset_x', true ),
             'element_offset_y'  => (float) get_post_meta( $post->ID, '_wpvfh_element_offset_y', true ),
             'replies'           => self::get_feedback_replies( $post->ID ),
+            // Informations système complètes
+            'system_info'       => array(
+                'device_pixel_ratio'    => get_post_meta( $post->ID, '_wpvfh_device_pixel_ratio', true ),
+                'color_depth'           => get_post_meta( $post->ID, '_wpvfh_color_depth', true ),
+                'orientation'           => get_post_meta( $post->ID, '_wpvfh_orientation', true ),
+                'browser_version'       => get_post_meta( $post->ID, '_wpvfh_browser_version', true ),
+                'os_version'            => get_post_meta( $post->ID, '_wpvfh_os_version', true ),
+                'platform'              => get_post_meta( $post->ID, '_wpvfh_platform', true ),
+                'language'              => get_post_meta( $post->ID, '_wpvfh_language', true ),
+                'languages'             => get_post_meta( $post->ID, '_wpvfh_languages', true ),
+                'timezone'              => get_post_meta( $post->ID, '_wpvfh_timezone', true ),
+                'timezone_offset'       => get_post_meta( $post->ID, '_wpvfh_timezone_offset', true ),
+                'local_time'            => get_post_meta( $post->ID, '_wpvfh_local_time', true ),
+                'cookies_enabled'       => get_post_meta( $post->ID, '_wpvfh_cookies_enabled', true ),
+                'online'                => get_post_meta( $post->ID, '_wpvfh_online', true ),
+                'touch_support'         => get_post_meta( $post->ID, '_wpvfh_touch_support', true ),
+                'max_touch_points'      => get_post_meta( $post->ID, '_wpvfh_max_touch_points', true ),
+                'device_memory'         => get_post_meta( $post->ID, '_wpvfh_device_memory', true ),
+                'hardware_concurrency'  => get_post_meta( $post->ID, '_wpvfh_hardware_concurrency', true ),
+                'connection_type'       => get_post_meta( $post->ID, '_wpvfh_connection_type', true ),
+                'referrer'              => get_post_meta( $post->ID, '_wpvfh_referrer', true ),
+                'user_agent'            => get_post_meta( $post->ID, '_wpvfh_user_agent', true ),
+            ),
         );
 
         /**

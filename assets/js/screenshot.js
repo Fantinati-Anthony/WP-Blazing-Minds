@@ -212,7 +212,7 @@
             const ua = navigator.userAgent;
 
             return {
-                // Dimensions
+                // Dimensions écran
                 screenWidth: window.screen.width,
                 screenHeight: window.screen.height,
                 viewportWidth: window.innerWidth,
@@ -220,17 +220,120 @@
                 scrollX: window.scrollX || window.pageXOffset,
                 scrollY: window.scrollY || window.pageYOffset,
                 devicePixelRatio: window.devicePixelRatio || 1,
+                colorDepth: window.screen.colorDepth || null,
+                orientation: window.screen.orientation?.type || null,
 
                 // Navigateur
                 browser: this.detectBrowser(ua),
+                browserVersion: this.detectBrowserVersion(ua),
                 os: this.detectOS(ua),
+                osVersion: this.detectOSVersion(ua),
                 device: this.detectDevice(),
                 userAgent: ua,
+                platform: navigator.platform || null,
+                language: navigator.language || navigator.userLanguage || null,
+                languages: navigator.languages ? navigator.languages.join(', ') : null,
+
+                // Capacités
+                cookiesEnabled: navigator.cookieEnabled,
+                javaEnabled: navigator.javaEnabled ? navigator.javaEnabled() : false,
+                touchSupport: this.detectTouchSupport(),
+                maxTouchPoints: navigator.maxTouchPoints || 0,
+                onLine: navigator.onLine,
+                doNotTrack: navigator.doNotTrack || null,
+
+                // Connexion réseau (si disponible)
+                connectionType: this.getConnectionInfo(),
+
+                // Mémoire (si disponible)
+                deviceMemory: navigator.deviceMemory || null,
+                hardwareConcurrency: navigator.hardwareConcurrency || null,
+
+                // Timezone
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                timezoneOffset: new Date().getTimezoneOffset(),
 
                 // Page
                 url: window.location.href,
                 title: document.title,
+                referrer: document.referrer || null,
                 timestamp: new Date().toISOString(),
+                localTime: new Date().toLocaleString(),
+            };
+        },
+
+        /**
+         * Détecter la version du navigateur
+         * @param {string} ua - User agent
+         * @returns {string} Version du navigateur
+         */
+        detectBrowserVersion: function(ua) {
+            let match;
+            if (ua.includes('Firefox')) {
+                match = ua.match(/Firefox\/(\d+\.\d+)/);
+            } else if (ua.includes('Edg/')) {
+                match = ua.match(/Edg\/(\d+\.\d+)/);
+            } else if (ua.includes('Chrome')) {
+                match = ua.match(/Chrome\/(\d+\.\d+)/);
+            } else if (ua.includes('Safari') && !ua.includes('Chrome')) {
+                match = ua.match(/Version\/(\d+\.\d+)/);
+            } else if (ua.includes('OPR')) {
+                match = ua.match(/OPR\/(\d+\.\d+)/);
+            }
+            return match ? match[1] : 'Inconnue';
+        },
+
+        /**
+         * Détecter la version de l'OS
+         * @param {string} ua - User agent
+         * @returns {string} Version de l'OS
+         */
+        detectOSVersion: function(ua) {
+            let match;
+            if (ua.includes('Windows NT')) {
+                match = ua.match(/Windows NT (\d+\.\d+)/);
+                if (match) {
+                    const versions = { '10.0': '10/11', '6.3': '8.1', '6.2': '8', '6.1': '7' };
+                    return versions[match[1]] || match[1];
+                }
+            } else if (ua.includes('Mac OS X')) {
+                match = ua.match(/Mac OS X (\d+[._]\d+[._]?\d*)/);
+                return match ? match[1].replace(/_/g, '.') : 'Inconnue';
+            } else if (ua.includes('Android')) {
+                match = ua.match(/Android (\d+\.?\d*\.?\d*)/);
+                return match ? match[1] : 'Inconnue';
+            } else if (ua.includes('iPhone') || ua.includes('iPad')) {
+                match = ua.match(/OS (\d+[._]\d+[._]?\d*)/);
+                return match ? match[1].replace(/_/g, '.') : 'Inconnue';
+            }
+            return 'Inconnue';
+        },
+
+        /**
+         * Détecter le support tactile
+         * @returns {Object} Infos tactile
+         */
+        detectTouchSupport: function() {
+            return {
+                touchEvents: 'ontouchstart' in window,
+                touchPoints: navigator.maxTouchPoints > 0,
+                pointerEvents: 'PointerEvent' in window,
+            };
+        },
+
+        /**
+         * Obtenir les infos de connexion
+         * @returns {Object|null} Infos connexion
+         */
+        getConnectionInfo: function() {
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (!connection) return null;
+
+            return {
+                effectiveType: connection.effectiveType || null,
+                downlink: connection.downlink || null,
+                rtt: connection.rtt || null,
+                saveData: connection.saveData || false,
             };
         },
 

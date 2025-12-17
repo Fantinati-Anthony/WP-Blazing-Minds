@@ -223,9 +223,23 @@
                 this.elements.selectElementBtn.addEventListener('click', this.handleSelectElement.bind(this));
             }
 
-            // Bouton effacer la sélection
+            // Bouton effacer la sélection (avec délégation d'événements)
             if (this.elements.clearSelectionBtn) {
-                this.elements.clearSelectionBtn.addEventListener('click', this.handleClearSelection.bind(this));
+                this.elements.clearSelectionBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.handleClearSelection(e);
+                });
+            }
+            // Délégation d'événements pour le bouton clear dans selectedElement
+            if (this.elements.selectedElement) {
+                this.elements.selectedElement.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('wpvfh-clear-selection')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.handleClearSelection(e);
+                    }
+                });
             }
 
             // Boutons du panel
@@ -1375,30 +1389,69 @@
             this.setSubmitState(true);
 
             try {
-                // Collecter les métadonnées
+                // Collecter les métadonnées système complètes
                 const metadata = window.BlazingScreenshot ? window.BlazingScreenshot.getMetadata() : {};
 
-                // Préparer les données
+                // Capture d'écran automatique si pas déjà fournie
+                let screenshotData = this.state.screenshotData || null;
+                if (!screenshotData && window.BlazingScreenshot && window.BlazingScreenshot.isAvailable()) {
+                    try {
+                        console.log('[Blazing Feedback] Capture d\'écran automatique...');
+                        screenshotData = await window.BlazingScreenshot.capture();
+                        console.log('[Blazing Feedback] Screenshot automatique capturé');
+                    } catch (screenshotError) {
+                        console.warn('[Blazing Feedback] Erreur capture auto:', screenshotError);
+                        // Continuer sans screenshot
+                    }
+                }
+
+                // Préparer les données avec toutes les infos système
                 const feedbackData = {
                     comment: comment,
                     url: this.config.currentUrl || window.location.href,
                     position_x: this.state.pinPosition?.position_x || this.elements.positionX?.value || null,
                     position_y: this.state.pinPosition?.position_y || this.elements.positionY?.value || null,
-                    screenshot_data: this.state.screenshotData || null,
+                    screenshot_data: screenshotData,
+                    // Dimensions écran
                     screen_width: metadata.screenWidth,
                     screen_height: metadata.screenHeight,
                     viewport_width: metadata.viewportWidth,
                     viewport_height: metadata.viewportHeight,
+                    device_pixel_ratio: metadata.devicePixelRatio,
+                    color_depth: metadata.colorDepth,
+                    orientation: metadata.orientation,
+                    // Navigateur & OS
                     browser: metadata.browser,
+                    browser_version: metadata.browserVersion,
                     os: metadata.os,
+                    os_version: metadata.osVersion,
                     device: metadata.device,
+                    platform: metadata.platform,
                     user_agent: metadata.userAgent,
+                    // Langue & locale
+                    language: metadata.language,
+                    languages: metadata.languages,
+                    timezone: metadata.timezone,
+                    timezone_offset: metadata.timezoneOffset,
+                    local_time: metadata.localTime,
+                    // Capacités
+                    cookies_enabled: metadata.cookiesEnabled,
+                    online: metadata.onLine,
+                    touch_support: metadata.touchSupport ? JSON.stringify(metadata.touchSupport) : null,
+                    max_touch_points: metadata.maxTouchPoints,
+                    // Hardware (si disponible)
+                    device_memory: metadata.deviceMemory,
+                    hardware_concurrency: metadata.hardwareConcurrency,
+                    // Connexion (si disponible)
+                    connection_type: metadata.connectionType ? JSON.stringify(metadata.connectionType) : null,
                     // DOM Anchoring data
                     selector: this.state.pinPosition?.selector || null,
                     element_offset_x: this.state.pinPosition?.element_offset_x || null,
                     element_offset_y: this.state.pinPosition?.element_offset_y || null,
                     scroll_x: this.state.pinPosition?.scrollX || metadata.scrollX,
                     scroll_y: this.state.pinPosition?.scrollY || metadata.scrollY,
+                    // Référent
+                    referrer: metadata.referrer,
                 };
 
                 console.log('[Blazing Feedback] Envoi du feedback:', feedbackData);

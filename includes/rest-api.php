@@ -735,19 +735,46 @@ class WPVFH_REST_API {
             'url'              => $request->get_param( 'url' ),
             'position_x'       => $request->get_param( 'position_x' ),
             'position_y'       => $request->get_param( 'position_y' ),
+            // Dimensions écran
             'screen_width'     => $request->get_param( 'screen_width' ),
             'screen_height'    => $request->get_param( 'screen_height' ),
             'viewport_width'   => $request->get_param( 'viewport_width' ),
             'viewport_height'  => $request->get_param( 'viewport_height' ),
+            'device_pixel_ratio' => $request->get_param( 'device_pixel_ratio' ),
+            'color_depth'      => $request->get_param( 'color_depth' ),
+            'orientation'      => $request->get_param( 'orientation' ),
+            // Navigateur & OS
             'browser'          => $request->get_param( 'browser' ),
+            'browser_version'  => $request->get_param( 'browser_version' ),
             'os'               => $request->get_param( 'os' ),
+            'os_version'       => $request->get_param( 'os_version' ),
             'device'           => $request->get_param( 'device' ),
+            'platform'         => $request->get_param( 'platform' ),
             'user_agent'       => $request->get_param( 'user_agent' ),
+            // Langue & locale
+            'language'         => $request->get_param( 'language' ),
+            'languages'        => $request->get_param( 'languages' ),
+            'timezone'         => $request->get_param( 'timezone' ),
+            'timezone_offset'  => $request->get_param( 'timezone_offset' ),
+            'local_time'       => $request->get_param( 'local_time' ),
+            // Capacités
+            'cookies_enabled'  => $request->get_param( 'cookies_enabled' ),
+            'online'           => $request->get_param( 'online' ),
+            'touch_support'    => $request->get_param( 'touch_support' ),
+            'max_touch_points' => $request->get_param( 'max_touch_points' ),
+            // Hardware
+            'device_memory'    => $request->get_param( 'device_memory' ),
+            'hardware_concurrency' => $request->get_param( 'hardware_concurrency' ),
+            // Connexion
+            'connection_type'  => $request->get_param( 'connection_type' ),
+            // DOM Anchoring
             'selector'         => $request->get_param( 'selector' ),
             'element_offset_x' => $request->get_param( 'element_offset_x' ),
             'element_offset_y' => $request->get_param( 'element_offset_y' ),
             'scroll_x'         => $request->get_param( 'scroll_x' ),
             'scroll_y'         => $request->get_param( 'scroll_y' ),
+            // Référent
+            'referrer'         => $request->get_param( 'referrer' ),
         );
 
         // Créer le feedback

@@ -43,11 +43,36 @@
 
 .wpvfh-container button,
 .wpvfh-container input,
-.wpvfh-container textarea {
+.wpvfh-container textarea,
+.wpvfh-panel button,
+.wpvfh-panel input,
+.wpvfh-panel textarea {
     font-family: inherit !important;
     font-size: inherit !important;
     line-height: inherit !important;
     margin: 0 !important;
+}
+
+/* Reset agressif pour tous les boutons - contre Elementor */
+.wpvfh-container button,
+.wpvfh-panel button,
+body .wpvfh-container button,
+body .wpvfh-panel button,
+.elementor-widget-container .wpvfh-container button,
+.elementor-widget-container .wpvfh-panel button {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    text-decoration: none !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    word-spacing: normal !important;
+    text-indent: 0 !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    min-height: auto !important;
+    min-width: auto !important;
+    vertical-align: middle !important;
 }
 
 /* ==========================================================================
@@ -730,8 +755,18 @@ body.wpvfh-panel-active .wpvfh-floating-buttons {
     color: #721c24 !important;
     font-size: 18px !important;
     cursor: pointer !important;
-    padding: 0 4px !important;
+    padding: 4px 8px !important;
     line-height: 1 !important;
+    pointer-events: auto !important;
+    z-index: 10 !important;
+    position: relative !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+}
+
+.wpvfh-container .wpvfh-clear-selection:hover {
+    color: #c0392b !important;
+    transform: scale(1.2) !important;
 }
 
 /* ==========================================================================
