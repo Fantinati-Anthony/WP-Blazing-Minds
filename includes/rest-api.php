@@ -333,6 +333,16 @@ class WPVFH_REST_API {
                 'sanitize_callback' => 'sanitize_text_field',
                 'description'       => __( 'Sélecteur CSS de l\'élément', 'blazing-feedback' ),
             ),
+            'element_offset_x' => array(
+                'type'              => 'number',
+                'sanitize_callback' => function( $value ) { return floatval( $value ); },
+                'description'       => __( 'Offset X dans l\'élément (%)', 'blazing-feedback' ),
+            ),
+            'element_offset_y' => array(
+                'type'              => 'number',
+                'sanitize_callback' => function( $value ) { return floatval( $value ); },
+                'description'       => __( 'Offset Y dans l\'élément (%)', 'blazing-feedback' ),
+            ),
             'scroll_x'        => array(
                 'type'              => 'integer',
                 'sanitize_callback' => function( $value ) { return absint( $value ); },
@@ -610,21 +620,23 @@ class WPVFH_REST_API {
      */
     public static function create_feedback( $request ) {
         $data = array(
-            'comment'         => $request->get_param( 'comment' ),
-            'url'             => $request->get_param( 'url' ),
-            'position_x'      => $request->get_param( 'position_x' ),
-            'position_y'      => $request->get_param( 'position_y' ),
-            'screen_width'    => $request->get_param( 'screen_width' ),
-            'screen_height'   => $request->get_param( 'screen_height' ),
-            'viewport_width'  => $request->get_param( 'viewport_width' ),
-            'viewport_height' => $request->get_param( 'viewport_height' ),
-            'browser'         => $request->get_param( 'browser' ),
-            'os'              => $request->get_param( 'os' ),
-            'device'          => $request->get_param( 'device' ),
-            'user_agent'      => $request->get_param( 'user_agent' ),
-            'selector'        => $request->get_param( 'selector' ),
-            'scroll_x'        => $request->get_param( 'scroll_x' ),
-            'scroll_y'        => $request->get_param( 'scroll_y' ),
+            'comment'          => $request->get_param( 'comment' ),
+            'url'              => $request->get_param( 'url' ),
+            'position_x'       => $request->get_param( 'position_x' ),
+            'position_y'       => $request->get_param( 'position_y' ),
+            'screen_width'     => $request->get_param( 'screen_width' ),
+            'screen_height'    => $request->get_param( 'screen_height' ),
+            'viewport_width'   => $request->get_param( 'viewport_width' ),
+            'viewport_height'  => $request->get_param( 'viewport_height' ),
+            'browser'          => $request->get_param( 'browser' ),
+            'os'               => $request->get_param( 'os' ),
+            'device'           => $request->get_param( 'device' ),
+            'user_agent'       => $request->get_param( 'user_agent' ),
+            'selector'         => $request->get_param( 'selector' ),
+            'element_offset_x' => $request->get_param( 'element_offset_x' ),
+            'element_offset_y' => $request->get_param( 'element_offset_y' ),
+            'scroll_x'         => $request->get_param( 'scroll_x' ),
+            'scroll_y'         => $request->get_param( 'scroll_y' ),
         );
 
         // Créer le feedback
@@ -693,7 +705,8 @@ class WPVFH_REST_API {
         $meta_fields = array(
             'position_x', 'position_y', 'screen_width', 'screen_height',
             'viewport_width', 'viewport_height', 'browser', 'os', 'device',
-            'user_agent', 'selector', 'scroll_x', 'scroll_y',
+            'user_agent', 'selector', 'element_offset_x', 'element_offset_y',
+            'scroll_x', 'scroll_y',
         );
 
         foreach ( $meta_fields as $field ) {

@@ -395,6 +395,17 @@ class WPVFH_Permissions {
             $sanitized['user_agent'] = sanitize_text_field( $data['user_agent'] );
         }
 
+        // DOM Anchoring - Sélecteur et offsets
+        if ( isset( $data['selector'] ) ) {
+            $sanitized['selector'] = sanitize_text_field( $data['selector'] );
+        }
+        if ( isset( $data['element_offset_x'] ) ) {
+            $sanitized['element_offset_x'] = floatval( $data['element_offset_x'] );
+        }
+        if ( isset( $data['element_offset_y'] ) ) {
+            $sanitized['element_offset_y'] = floatval( $data['element_offset_y'] );
+        }
+
         // Statut
         if ( isset( $data['status'] ) ) {
             $allowed_statuses = array_keys( WPVFH_CPT_Feedback::get_statuses() );

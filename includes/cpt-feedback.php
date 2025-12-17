@@ -94,6 +94,8 @@ class WPVFH_CPT_Feedback {
         '_wpvfh_user_agent',
         '_wpvfh_status',
         '_wpvfh_selector',
+        '_wpvfh_element_offset_x',
+        '_wpvfh_element_offset_y',
         '_wpvfh_scroll_x',
         '_wpvfh_scroll_y',
     );
@@ -352,10 +354,21 @@ class WPVFH_CPT_Feedback {
             'default'           => 'new',
         ) ) );
 
-        // Sélecteur CSS (pour repositionnement intelligent)
+        // Sélecteur CSS (pour DOM anchoring / repositionnement intelligent)
         register_post_meta( self::POST_TYPE, '_wpvfh_selector', array_merge( $meta_args, array(
             'type'              => 'string',
             'sanitize_callback' => 'sanitize_text_field',
+        ) ) );
+
+        // DOM Anchoring - Offset relatif à l'élément ancre (en pourcentage)
+        register_post_meta( self::POST_TYPE, '_wpvfh_element_offset_x', array_merge( $meta_args, array(
+            'type'              => 'number',
+            'sanitize_callback' => function( $value ) { return floatval( $value ); },
+        ) ) );
+
+        register_post_meta( self::POST_TYPE, '_wpvfh_element_offset_y', array_merge( $meta_args, array(
+            'type'              => 'number',
+            'sanitize_callback' => function( $value ) { return floatval( $value ); },
         ) ) );
 
         // Position de scroll
@@ -802,6 +815,12 @@ class WPVFH_CPT_Feedback {
         if ( isset( $data['selector'] ) ) {
             update_post_meta( $post_id, '_wpvfh_selector', $data['selector'] );
         }
+        if ( isset( $data['element_offset_x'] ) ) {
+            update_post_meta( $post_id, '_wpvfh_element_offset_x', $data['element_offset_x'] );
+        }
+        if ( isset( $data['element_offset_y'] ) ) {
+            update_post_meta( $post_id, '_wpvfh_element_offset_y', $data['element_offset_y'] );
+        }
         if ( isset( $data['scroll_x'] ) ) {
             update_post_meta( $post_id, '_wpvfh_scroll_x', $data['scroll_x'] );
         }
@@ -907,8 +926,10 @@ class WPVFH_CPT_Feedback {
             'browser'         => get_post_meta( $post->ID, '_wpvfh_browser', true ),
             'os'              => get_post_meta( $post->ID, '_wpvfh_os', true ),
             'device'          => get_post_meta( $post->ID, '_wpvfh_device', true ),
-            'selector'        => get_post_meta( $post->ID, '_wpvfh_selector', true ),
-            'replies'         => self::get_feedback_replies( $post->ID ),
+            'selector'          => get_post_meta( $post->ID, '_wpvfh_selector', true ),
+            'element_offset_x'  => (float) get_post_meta( $post->ID, '_wpvfh_element_offset_x', true ),
+            'element_offset_y'  => (float) get_post_meta( $post->ID, '_wpvfh_element_offset_y', true ),
+            'replies'           => self::get_feedback_replies( $post->ID ),
         );
 
         /**
