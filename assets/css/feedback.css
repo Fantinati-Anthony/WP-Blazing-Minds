@@ -260,16 +260,27 @@ html body .wpvfh-cancel-btn:active,
     transform: translateY(0) !important;
 }
 
-/* Bouton Submit/Envoyer - Style primaire rouge */
+/* Bouton Submit/Envoyer - Style primaire rouge - NUCLEAR */
 .wpvfh-container .wpvfh-submit-btn,
 .wpvfh-container button.wpvfh-submit-btn,
 .wpvfh-container [type=submit].wpvfh-submit-btn,
+.wpvfh-container .wpvfh-btn.wpvfh-btn-primary.wpvfh-submit-btn,
+.wpvfh-container button.wpvfh-btn.wpvfh-btn-primary.wpvfh-submit-btn,
 .wpvfh-panel .wpvfh-submit-btn,
+.wpvfh-panel button.wpvfh-submit-btn,
+.wpvfh-panel [type=submit].wpvfh-submit-btn,
 html body .wpvfh-submit-btn,
+html body [type=submit].wpvfh-submit-btn,
+html body button.wpvfh-submit-btn,
 html body.elementor-page .wpvfh-submit-btn,
+html body.elementor-page [type=submit].wpvfh-submit-btn,
+html body.elementor-page button.wpvfh-submit-btn,
 html body.elementor-default .wpvfh-submit-btn,
+html body.elementor-default [type=submit].wpvfh-submit-btn,
 .elementor .wpvfh-submit-btn,
+.elementor [type=submit].wpvfh-submit-btn,
 .elementor-widget-container .wpvfh-submit-btn {
+    all: revert !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -291,11 +302,20 @@ html body.elementor-default .wpvfh-submit-btn,
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
     text-decoration: none !important;
     text-transform: none !important;
+    letter-spacing: normal !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    box-sizing: border-box !important;
 }
 
 .wpvfh-container .wpvfh-submit-btn:hover,
+.wpvfh-container button.wpvfh-submit-btn:hover,
+.wpvfh-container [type=submit].wpvfh-submit-btn:hover,
 .wpvfh-panel .wpvfh-submit-btn:hover,
 html body .wpvfh-submit-btn:hover,
+html body [type=submit].wpvfh-submit-btn:hover,
+html body.elementor-page .wpvfh-submit-btn:hover,
+html body.elementor-default .wpvfh-submit-btn:hover,
 .elementor .wpvfh-submit-btn:hover {
     background: linear-gradient(135deg, #c0392b 0%, #a93226 100%) !important;
     background-color: #c0392b !important;
@@ -310,6 +330,7 @@ html body .wpvfh-submit-btn:hover,
 .wpvfh-container .wpvfh-submit-btn:active,
 .wpvfh-panel .wpvfh-submit-btn:active,
 html body .wpvfh-submit-btn:active,
+html body [type=submit].wpvfh-submit-btn:active,
 .elementor .wpvfh-submit-btn:active {
     transform: translateY(0) !important;
 }
@@ -642,8 +663,14 @@ body.wpvfh-panel-active .wpvfh-floating-buttons {
     color: var(--wpvfh-text) !important;
 }
 
-/* Onglets de navigation */
-.wpvfh-tabs {
+/* Onglets de navigation - Style agressif contre Elementor */
+.wpvfh-tabs,
+.wpvfh-container .wpvfh-tabs,
+.wpvfh-panel .wpvfh-tabs,
+html body .wpvfh-tabs,
+html body.elementor-page .wpvfh-tabs,
+html body.elementor-default .wpvfh-tabs,
+.elementor .wpvfh-tabs {
     display: flex !important;
     border-bottom: 2px solid #e9ecef !important;
     background: #f8f9fa !important;
@@ -653,15 +680,31 @@ body.wpvfh-panel-active .wpvfh-floating-buttons {
 }
 
 .wpvfh-container .wpvfh-tab,
-.wpvfh-container button.wpvfh-tab {
+.wpvfh-container button.wpvfh-tab,
+.wpvfh-panel .wpvfh-tab,
+.wpvfh-panel button.wpvfh-tab,
+html body .wpvfh-tab,
+html body .wpvfh-tabs .wpvfh-tab,
+html body.elementor-page .wpvfh-tab,
+html body.elementor-page .wpvfh-tabs .wpvfh-tab,
+html body.elementor-default .wpvfh-tab,
+html body.elementor-default .wpvfh-tabs .wpvfh-tab,
+.elementor .wpvfh-tab,
+.elementor .wpvfh-tabs .wpvfh-tab,
+.elementor-widget-container .wpvfh-tab {
+    all: revert !important;
     flex: 1 !important;
     padding: 14px 16px !important;
     background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
     border: none !important;
     border-bottom: 3px solid transparent !important;
+    border-radius: 0 !important;
     margin-bottom: -2px !important;
     font-size: 14px !important;
     font-weight: 600 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     color: #6c757d !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
@@ -671,19 +714,42 @@ body.wpvfh-panel-active .wpvfh-floating-buttons {
     gap: 8px !important;
     -webkit-appearance: none !important;
     appearance: none !important;
+    text-decoration: none !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    line-height: 1.4 !important;
+    box-shadow: none !important;
 }
 
 .wpvfh-container .wpvfh-tab:hover,
-.wpvfh-container button.wpvfh-tab:hover {
+.wpvfh-container button.wpvfh-tab:hover,
+.wpvfh-panel .wpvfh-tab:hover,
+html body .wpvfh-tab:hover,
+html body .wpvfh-tabs .wpvfh-tab:hover,
+html body.elementor-page .wpvfh-tab:hover,
+html body.elementor-default .wpvfh-tab:hover,
+.elementor .wpvfh-tab:hover {
     color: #495057 !important;
     background: rgba(0, 0, 0, 0.03) !important;
+    background-color: rgba(0, 0, 0, 0.03) !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    text-decoration: none !important;
 }
 
 .wpvfh-container .wpvfh-tab.active,
-.wpvfh-container button.wpvfh-tab.active {
+.wpvfh-container button.wpvfh-tab.active,
+.wpvfh-panel .wpvfh-tab.active,
+html body .wpvfh-tab.active,
+html body .wpvfh-tabs .wpvfh-tab.active,
+html body.elementor-page .wpvfh-tab.active,
+html body.elementor-default .wpvfh-tab.active,
+.elementor .wpvfh-tab.active {
     color: var(--wpvfh-primary) !important;
-    border-bottom-color: var(--wpvfh-primary) !important;
+    border: none !important;
+    border-bottom: 3px solid var(--wpvfh-primary) !important;
     background: #fff !important;
+    background-color: #fff !important;
 }
 
 .wpvfh-tab-icon {
