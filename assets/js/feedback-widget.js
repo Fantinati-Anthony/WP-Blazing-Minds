@@ -69,6 +69,7 @@
                 container: document.getElementById('wpvfh-container'),
                 toggleBtn: document.getElementById('wpvfh-toggle-btn'),
                 panel: document.getElementById('wpvfh-panel'),
+                sidebarOverlay: document.getElementById('wpvfh-sidebar-overlay'),
                 form: document.getElementById('wpvfh-form'),
                 commentField: document.getElementById('wpvfh-comment'),
                 screenshotPreview: document.getElementById('wpvfh-screenshot-preview'),
@@ -81,7 +82,15 @@
                 submitBtn: document.querySelector('.wpvfh-submit-btn'),
                 notifications: document.getElementById('wpvfh-notifications'),
                 overlay: document.getElementById('wpvfh-annotation-overlay'),
-                // Nouveaux éléments média
+                // Onglets et liste
+                tabs: document.querySelectorAll('.wpvfh-tab'),
+                tabNew: document.getElementById('wpvfh-tab-new'),
+                tabList: document.getElementById('wpvfh-tab-list'),
+                pinsList: document.getElementById('wpvfh-pins-list'),
+                pinsCount: document.getElementById('wpvfh-pins-count'),
+                emptyState: document.getElementById('wpvfh-empty-state'),
+                addFeedbackBtn: document.querySelector('.wpvfh-add-feedback-btn'),
+                // Éléments média
                 mediaToolbar: document.querySelector('.wpvfh-media-toolbar'),
                 toolButtons: document.querySelectorAll('.wpvfh-tool-btn'),
                 voiceSection: document.getElementById('wpvfh-voice-section'),
@@ -175,6 +184,26 @@
                 hintClose.addEventListener('click', () => {
                     this.emitEvent('stop-annotation');
                     this.state.feedbackMode = 'view';
+                });
+            }
+
+            // Sidebar overlay (fermer au clic)
+            if (this.elements.sidebarOverlay) {
+                this.elements.sidebarOverlay.addEventListener('click', this.closePanel.bind(this));
+            }
+
+            // Onglets
+            if (this.elements.tabs) {
+                this.elements.tabs.forEach(tab => {
+                    tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
+                });
+            }
+
+            // Bouton "Ajouter un feedback" dans l'onglet liste
+            if (this.elements.addFeedbackBtn) {
+                this.elements.addFeedbackBtn.addEventListener('click', () => {
+                    this.switchTab('new');
+                    this.startFeedbackMode();
                 });
             }
         },
@@ -423,7 +452,7 @@
         },
 
         /**
-         * Ouvrir le panel de feedback
+         * Ouvrir le panel de feedback (sidebar)
          * @returns {void}
          */
         openPanel: function() {
@@ -432,22 +461,31 @@
             if (this.elements.panel) {
                 this.elements.panel.hidden = false;
                 this.elements.panel.setAttribute('aria-hidden', 'false');
+                // Déclencher l'animation après un petit délai pour l'affichage
+                requestAnimationFrame(() => {
+                    this.elements.panel.classList.add('wpvfh-panel-open');
+                });
+            }
+
+            // Afficher l'overlay
+            if (this.elements.sidebarOverlay) {
+                this.elements.sidebarOverlay.classList.add('wpvfh-overlay-visible');
             }
 
             if (this.elements.toggleBtn) {
                 this.elements.toggleBtn.setAttribute('aria-expanded', 'true');
             }
 
-            // Focus sur le champ de commentaire
-            if (this.elements.commentField) {
-                setTimeout(() => this.elements.commentField.focus(), 100);
+            // Focus sur le champ de commentaire si onglet nouveau
+            if (this.elements.commentField && this.elements.tabNew?.classList.contains('active')) {
+                setTimeout(() => this.elements.commentField.focus(), 300);
             }
 
             this.emitEvent('panel-opened');
         },
 
         /**
-         * Fermer le panel de feedback
+         * Fermer le panel de feedback (sidebar)
          * @returns {void}
          */
         closePanel: function() {
@@ -455,8 +493,19 @@
             this.state.feedbackMode = 'view';
 
             if (this.elements.panel) {
-                this.elements.panel.hidden = true;
-                this.elements.panel.setAttribute('aria-hidden', 'true');
+                this.elements.panel.classList.remove('wpvfh-panel-open');
+                // Masquer après l'animation
+                setTimeout(() => {
+                    if (!this.state.isOpen) {
+                        this.elements.panel.hidden = true;
+                        this.elements.panel.setAttribute('aria-hidden', 'true');
+                    }
+                }, 300);
+            }
+
+            // Masquer l'overlay
+            if (this.elements.sidebarOverlay) {
+                this.elements.sidebarOverlay.classList.remove('wpvfh-overlay-visible');
             }
 
             if (this.elements.toggleBtn) {
@@ -467,6 +516,128 @@
             this.resetForm();
 
             this.emitEvent('panel-closed');
+        },
+
+        /**
+         * Changer d'onglet
+         * @param {string} tabName - Nom de l'onglet ('new' ou 'list')
+         */
+        switchTab: function(tabName) {
+            // Mettre à jour les boutons d'onglet
+            this.elements.tabs.forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.tab === tabName);
+            });
+
+            // Afficher/masquer les contenus
+            if (this.elements.tabNew) {
+                this.elements.tabNew.classList.toggle('active', tabName === 'new');
+            }
+            if (this.elements.tabList) {
+                this.elements.tabList.classList.toggle('active', tabName === 'list');
+            }
+
+            // Si on va sur la liste, charger les feedbacks
+            if (tabName === 'list') {
+                this.renderPinsList();
+            }
+
+            // Focus si onglet nouveau
+            if (tabName === 'new' && this.elements.commentField) {
+                setTimeout(() => this.elements.commentField.focus(), 100);
+            }
+        },
+
+        /**
+         * Afficher la liste des pins dans la sidebar
+         */
+        renderPinsList: function() {
+            if (!this.elements.pinsList) return;
+
+            const feedbacks = this.state.currentFeedbacks || [];
+
+            // Mettre à jour le compteur
+            if (this.elements.pinsCount) {
+                this.elements.pinsCount.textContent = feedbacks.length > 0 ? `(${feedbacks.length})` : '';
+            }
+
+            // Afficher/masquer l'état vide
+            if (this.elements.emptyState) {
+                this.elements.emptyState.hidden = feedbacks.length > 0;
+            }
+            this.elements.pinsList.hidden = feedbacks.length === 0;
+
+            if (feedbacks.length === 0) return;
+
+            // Générer le HTML des pins
+            const html = feedbacks.map((feedback, index) => {
+                const statusLabels = {
+                    new: this.config.i18n?.statusNew || 'Nouveau',
+                    in_progress: this.config.i18n?.statusInProgress || 'En cours',
+                    resolved: this.config.i18n?.statusResolved || 'Résolu',
+                    rejected: this.config.i18n?.statusRejected || 'Rejeté',
+                };
+
+                const statusIcons = {
+                    new: '!',
+                    in_progress: '⏳',
+                    resolved: '✓',
+                    rejected: '✗',
+                };
+
+                const status = feedback.status || 'new';
+                const date = feedback.date ? new Date(feedback.date).toLocaleDateString() : '';
+
+                return `
+                    <div class="wpvfh-pin-item" data-feedback-id="${feedback.id}">
+                        <div class="wpvfh-pin-marker status-${status}">
+                            ${statusIcons[status] || (index + 1)}
+                        </div>
+                        <div class="wpvfh-pin-content">
+                            <p class="wpvfh-pin-text">${this.escapeHtml(feedback.comment || feedback.content || '')}</p>
+                            <div class="wpvfh-pin-meta">
+                                <span class="wpvfh-pin-status status-${status}">${statusLabels[status]}</span>
+                                ${date ? `<span class="wpvfh-pin-date">${date}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="wpvfh-pin-actions">
+                            <button type="button" class="wpvfh-pin-action wpvfh-pin-goto" title="Aller au pin">
+                                📍
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            this.elements.pinsList.innerHTML = html;
+
+            // Ajouter les événements aux items
+            this.elements.pinsList.querySelectorAll('.wpvfh-pin-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const feedbackId = parseInt(item.dataset.feedbackId, 10);
+                    this.scrollToPin(feedbackId);
+                });
+            });
+        },
+
+        /**
+         * Scroller vers un pin sur la page
+         * @param {number} feedbackId
+         */
+        scrollToPin: function(feedbackId) {
+            if (window.BlazingAnnotation) {
+                window.BlazingAnnotation.scrollToPin(feedbackId);
+            }
+        },
+
+        /**
+         * Échapper le HTML
+         * @param {string} str
+         * @returns {string}
+         */
+        escapeHtml: function(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         },
 
         /**

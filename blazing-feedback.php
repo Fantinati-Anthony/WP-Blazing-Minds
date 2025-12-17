@@ -3,7 +3,7 @@
  * Plugin Name: Blazing Feedback
  * Plugin URI: https://github.com/Fantinati-Anthony/Blazing-Feedback-WP
  * Description: Plugin de feedback visuel autonome pour WordPress. Annotations, captures d'écran, gestion de statuts. Alternative open-source à ProjectHuddle, Feedbucket et Marker.io.
- * Version: 1.4.1
+ * Version: 1.5.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: Blazing Feedback Team
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Constantes du plugin
  */
-define( 'WPVFH_VERSION', '1.4.1' );
+define( 'WPVFH_VERSION', '1.5.0' );
 define( 'WPVFH_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WPVFH_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'WPVFH_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
@@ -505,6 +505,9 @@ final class WP_Visual_Feedback_Hub {
     private function render_default_widget() {
         ?>
         <div id="wpvfh-container" class="wpvfh-container" role="complementary" aria-label="<?php esc_attr_e( 'Feedback visuel', 'blazing-feedback' ); ?>">
+            <!-- Overlay pour la sidebar -->
+            <div id="wpvfh-sidebar-overlay" class="wpvfh-sidebar-overlay"></div>
+
             <!-- Bouton flottant -->
             <button
                 type="button"
@@ -518,16 +521,32 @@ final class WP_Visual_Feedback_Hub {
                 <span class="wpvfh-btn-text"><?php esc_html_e( 'Feedback', 'blazing-feedback' ); ?></span>
             </button>
 
-            <!-- Panneau de feedback -->
+            <!-- Sidebar de feedback -->
             <div id="wpvfh-panel" class="wpvfh-panel" hidden aria-hidden="true">
                 <div class="wpvfh-panel-header">
-                    <h3 class="wpvfh-panel-title"><?php esc_html_e( 'Nouveau feedback', 'blazing-feedback' ); ?></h3>
+                    <h3 class="wpvfh-panel-title"><?php esc_html_e( 'Feedbacks', 'blazing-feedback' ); ?></h3>
                     <button type="button" class="wpvfh-close-btn" aria-label="<?php esc_attr_e( 'Fermer', 'blazing-feedback' ); ?>">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
+
+                <!-- Onglets -->
+                <div class="wpvfh-tabs">
+                    <button type="button" class="wpvfh-tab active" data-tab="new">
+                        <span class="wpvfh-tab-icon" aria-hidden="true">➕</span>
+                        <?php esc_html_e( 'Nouveau', 'blazing-feedback' ); ?>
+                    </button>
+                    <button type="button" class="wpvfh-tab" data-tab="list">
+                        <span class="wpvfh-tab-icon" aria-hidden="true">📋</span>
+                        <?php esc_html_e( 'Liste', 'blazing-feedback' ); ?>
+                        <span class="wpvfh-tab-count" id="wpvfh-pins-count"></span>
+                    </button>
+                </div>
+
                 <div class="wpvfh-panel-body">
-                    <form id="wpvfh-form" class="wpvfh-form">
+                    <!-- Onglet: Nouveau feedback -->
+                    <div id="wpvfh-tab-new" class="wpvfh-tab-content active">
+                        <form id="wpvfh-form" class="wpvfh-form">
                         <!-- Zone de texte principale -->
                         <div class="wpvfh-form-group">
                             <textarea
@@ -640,6 +659,21 @@ final class WP_Visual_Feedback_Hub {
                             </button>
                         </div>
                     </form>
+                    </div><!-- /wpvfh-tab-new -->
+
+                    <!-- Onglet: Liste des feedbacks -->
+                    <div id="wpvfh-tab-list" class="wpvfh-tab-content">
+                        <div id="wpvfh-pins-list" class="wpvfh-pins-list">
+                            <!-- Les pins seront chargés dynamiquement -->
+                        </div>
+                        <div id="wpvfh-empty-state" class="wpvfh-empty-state">
+                            <div class="wpvfh-empty-icon" aria-hidden="true">📭</div>
+                            <p class="wpvfh-empty-text"><?php esc_html_e( 'Aucun feedback pour cette page', 'blazing-feedback' ); ?></p>
+                            <button type="button" class="wpvfh-btn wpvfh-btn-primary wpvfh-add-feedback-btn" style="margin-top: 16px;">
+                                <?php esc_html_e( 'Ajouter un feedback', 'blazing-feedback' ); ?>
+                            </button>
+                        </div>
+                    </div><!-- /wpvfh-tab-list -->
                 </div>
             </div>
 
