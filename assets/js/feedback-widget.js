@@ -972,9 +972,10 @@
             // Mettre à jour les boutons d'onglet
             if (this.elements.tabs && this.elements.tabs.length > 0) {
                 this.elements.tabs.forEach(tab => {
-                    // Masquer/Afficher le bouton détails selon l'onglet
+                    // L'onglet détails n'est visible QUE si un feedback est sélectionné ET on affiche les détails
                     if (tab.dataset.tab === 'details') {
-                        tab.hidden = (tabName !== 'details');
+                        const showDetailsTab = (tabName === 'details' && this.state.currentFeedbackId);
+                        tab.hidden = !showDetailsTab;
                     }
                     tab.classList.toggle('active', tab.dataset.tab === tabName);
                 });
