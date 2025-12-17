@@ -72,7 +72,7 @@ class WPVFH_REST_API {
                     'id' => array(
                         'required'          => true,
                         'type'              => 'integer',
-                        'sanitize_callback' => 'absint',
+                        'sanitize_callback' => function( $value ) { return absint( $value ); },
                     ),
                 ),
             ),
@@ -90,7 +90,7 @@ class WPVFH_REST_API {
                     'id' => array(
                         'required'          => true,
                         'type'              => 'integer',
-                        'sanitize_callback' => 'absint',
+                        'sanitize_callback' => function( $value ) { return absint( $value ); },
                     ),
                 ),
             ),
@@ -106,7 +106,7 @@ class WPVFH_REST_API {
                     'id'      => array(
                         'required'          => true,
                         'type'              => 'integer',
-                        'sanitize_callback' => 'absint',
+                        'sanitize_callback' => function( $value ) { return absint( $value ); },
                     ),
                     'content' => array(
                         'required'          => true,
@@ -127,7 +127,7 @@ class WPVFH_REST_API {
                     'id'     => array(
                         'required'          => true,
                         'type'              => 'integer',
-                        'sanitize_callback' => 'absint',
+                        'sanitize_callback' => function( $value ) { return absint( $value ); },
                     ),
                     'status' => array(
                         'required'          => true,
@@ -149,7 +149,7 @@ class WPVFH_REST_API {
                     'id'   => array(
                         'required'          => true,
                         'type'              => 'integer',
-                        'sanitize_callback' => 'absint',
+                        'sanitize_callback' => function( $value ) { return absint( $value ); },
                     ),
                     'data' => array(
                         'required'    => true,
@@ -219,14 +219,14 @@ class WPVFH_REST_API {
                 'type'              => 'integer',
                 'default'           => 1,
                 'minimum'           => 1,
-                'sanitize_callback' => 'absint',
+                'sanitize_callback' => function( $value ) { return absint( $value ); },
             ),
             'per_page' => array(
                 'type'              => 'integer',
                 'default'           => 20,
                 'minimum'           => 1,
                 'maximum'           => 100,
-                'sanitize_callback' => 'absint',
+                'sanitize_callback' => function( $value ) { return absint( $value ); },
             ),
             'status'   => array(
                 'type'              => 'string',
@@ -235,7 +235,7 @@ class WPVFH_REST_API {
             ),
             'author'   => array(
                 'type'              => 'integer',
-                'sanitize_callback' => 'absint',
+                'sanitize_callback' => function( $value ) { return absint( $value ); },
             ),
             'search'   => array(
                 'type'              => 'string',
@@ -285,24 +285,32 @@ class WPVFH_REST_API {
                 'description'       => __( 'Position Y du marqueur (%)', 'blazing-feedback' ),
             ),
             'screenshot_data' => array(
-                'type'        => 'string',
-                'description' => __( 'Screenshot en base64', 'blazing-feedback' ),
+                'type'              => 'string',
+                'description'       => __( 'Screenshot en base64', 'blazing-feedback' ),
+                'validate_callback' => function( $value ) {
+                    // Accepter null, chaîne vide, ou chaîne valide
+                    return $value === null || is_string( $value );
+                },
+                'sanitize_callback' => function( $value ) {
+                    // Retourner tel quel pour les données base64
+                    return is_string( $value ) ? $value : '';
+                },
             ),
             'screen_width'    => array(
                 'type'              => 'integer',
-                'sanitize_callback' => 'absint',
+                'sanitize_callback' => function( $value ) { return absint( $value ); },
             ),
             'screen_height'   => array(
                 'type'              => 'integer',
-                'sanitize_callback' => 'absint',
+                'sanitize_callback' => function( $value ) { return absint( $value ); },
             ),
             'viewport_width'  => array(
                 'type'              => 'integer',
-                'sanitize_callback' => 'absint',
+                'sanitize_callback' => function( $value ) { return absint( $value ); },
             ),
             'viewport_height' => array(
                 'type'              => 'integer',
-                'sanitize_callback' => 'absint',
+                'sanitize_callback' => function( $value ) { return absint( $value ); },
             ),
             'browser'         => array(
                 'type'              => 'string',
@@ -327,11 +335,11 @@ class WPVFH_REST_API {
             ),
             'scroll_x'        => array(
                 'type'              => 'integer',
-                'sanitize_callback' => 'absint',
+                'sanitize_callback' => function( $value ) { return absint( $value ); },
             ),
             'scroll_y'        => array(
                 'type'              => 'integer',
-                'sanitize_callback' => 'absint',
+                'sanitize_callback' => function( $value ) { return absint( $value ); },
             ),
         );
     }
@@ -353,7 +361,7 @@ class WPVFH_REST_API {
         $params['id'] = array(
             'required'          => true,
             'type'              => 'integer',
-            'sanitize_callback' => 'absint',
+            'sanitize_callback' => function( $value ) { return absint( $value ); },
         );
 
         $params['status'] = array(
