@@ -1,0 +1,688 @@
+/**
+ * Blazing Feedback - Styles
+ *
+ * Styles pour le widget de feedback visuel
+ * Compatible desktop, tablet et mobile
+ *
+ * @package Blazing_Feedback
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   Variables CSS
+   ========================================================================== */
+
+:root {
+    --wpvfh-primary: #e74c3c;
+    --wpvfh-primary-hover: #c0392b;
+    --wpvfh-secondary: #3498db;
+    --wpvfh-success: #27ae60;
+    --wpvfh-warning: #f39c12;
+    --wpvfh-danger: #e74c3c;
+    --wpvfh-text: #333;
+    --wpvfh-text-light: #666;
+    --wpvfh-bg: #fff;
+    --wpvfh-bg-light: #f5f5f5;
+    --wpvfh-border: #ddd;
+    --wpvfh-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    --wpvfh-radius: 8px;
+    --wpvfh-radius-sm: 4px;
+    --wpvfh-transition: 0.2s ease;
+    --wpvfh-z-index: 999999;
+}
+
+/* ==========================================================================
+   Conteneur principal
+   ========================================================================== */
+
+.wpvfh-container {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--wpvfh-text);
+    box-sizing: border-box;
+}
+
+.wpvfh-container *,
+.wpvfh-container *::before,
+.wpvfh-container *::after {
+    box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Bouton flottant
+   ========================================================================== */
+
+.wpvfh-toggle-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: var(--wpvfh-z-index);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--wpvfh-primary);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: var(--wpvfh-shadow);
+    transition: all var(--wpvfh-transition);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.wpvfh-toggle-btn:hover {
+    background: var(--wpvfh-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(231, 76, 60, 0.35);
+}
+
+.wpvfh-toggle-btn:focus {
+    outline: 2px solid var(--wpvfh-primary);
+    outline-offset: 2px;
+}
+
+.wpvfh-toggle-btn:active {
+    transform: translateY(0);
+}
+
+.wpvfh-btn-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.wpvfh-btn-text {
+    white-space: nowrap;
+}
+
+/* Positions alternatives du bouton */
+.wpvfh-container[data-position="bottom-left"] .wpvfh-toggle-btn {
+    right: auto;
+    left: 24px;
+}
+
+.wpvfh-container[data-position="top-right"] .wpvfh-toggle-btn {
+    bottom: auto;
+    top: 24px;
+}
+
+.wpvfh-container[data-position="top-left"] .wpvfh-toggle-btn {
+    bottom: auto;
+    top: 24px;
+    right: auto;
+    left: 24px;
+}
+
+/* ==========================================================================
+   Panel de feedback
+   ========================================================================== */
+
+.wpvfh-panel {
+    position: fixed;
+    bottom: 90px;
+    right: 24px;
+    z-index: var(--wpvfh-z-index);
+    width: 380px;
+    max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 120px);
+    background: var(--wpvfh-bg);
+    border-radius: var(--wpvfh-radius);
+    box-shadow: var(--wpvfh-shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: wpvfh-slide-up 0.3s ease;
+}
+
+.wpvfh-panel[hidden] {
+    display: none;
+}
+
+@keyframes wpvfh-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header du panel */
+.wpvfh-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--wpvfh-border);
+    background: var(--wpvfh-bg-light);
+}
+
+.wpvfh-panel-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--wpvfh-text);
+}
+
+.wpvfh-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    color: var(--wpvfh-text-light);
+    transition: all var(--wpvfh-transition);
+}
+
+.wpvfh-close-btn:hover {
+    background: var(--wpvfh-border);
+    color: var(--wpvfh-text);
+}
+
+/* Body du panel */
+.wpvfh-panel-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* ==========================================================================
+   Formulaire
+   ========================================================================== */
+
+.wpvfh-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.wpvfh-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.wpvfh-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--wpvfh-text);
+}
+
+.wpvfh-required {
+    color: var(--wpvfh-danger);
+}
+
+.wpvfh-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--wpvfh-border);
+    border-radius: var(--wpvfh-radius-sm);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color var(--wpvfh-transition);
+}
+
+.wpvfh-textarea:focus {
+    outline: none;
+    border-color: var(--wpvfh-secondary);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.wpvfh-textarea::placeholder {
+    color: #999;
+}
+
+/* Checkbox de screenshot */
+.wpvfh-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.wpvfh-checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+/* Aperçu du screenshot */
+.wpvfh-screenshot-preview {
+    border: 1px solid var(--wpvfh-border);
+    border-radius: var(--wpvfh-radius-sm);
+    overflow: hidden;
+    background: var(--wpvfh-bg-light);
+}
+
+.wpvfh-screenshot-preview img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Info du pin */
+.wpvfh-pin-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wpvfh-help-text {
+    margin: 0;
+    padding: 10px 12px;
+    background: #e8f5e9;
+    border-radius: var(--wpvfh-radius-sm);
+    font-size: 13px;
+    color: #2e7d32;
+}
+
+.wpvfh-pin-icon {
+    font-size: 16px;
+}
+
+/* Actions du formulaire */
+.wpvfh-form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+/* ==========================================================================
+   Boutons
+   ========================================================================== */
+
+.wpvfh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--wpvfh-radius-sm);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--wpvfh-transition);
+}
+
+.wpvfh-btn:focus {
+    outline: 2px solid var(--wpvfh-secondary);
+    outline-offset: 2px;
+}
+
+.wpvfh-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.wpvfh-btn-primary {
+    background: var(--wpvfh-primary);
+    color: #fff;
+    flex: 1;
+}
+
+.wpvfh-btn-primary:hover:not(:disabled) {
+    background: var(--wpvfh-primary-hover);
+}
+
+.wpvfh-btn-secondary {
+    background: var(--wpvfh-bg-light);
+    color: var(--wpvfh-text);
+    border: 1px solid var(--wpvfh-border);
+}
+
+.wpvfh-btn-secondary:hover:not(:disabled) {
+    background: var(--wpvfh-border);
+}
+
+/* Spinner de chargement */
+.wpvfh-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: wpvfh-spin 0.8s linear infinite;
+}
+
+@keyframes wpvfh-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ==========================================================================
+   Overlay d'annotation
+   ========================================================================== */
+
+.wpvfh-annotation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: calc(var(--wpvfh-z-index) - 1);
+    background: rgba(0, 0, 0, 0.1);
+    cursor: crosshair;
+}
+
+.wpvfh-annotation-overlay[hidden] {
+    display: none;
+}
+
+/* Hint d'annotation */
+.wpvfh-annotation-hint {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 32px;
+    background: var(--wpvfh-bg);
+    border-radius: var(--wpvfh-radius);
+    box-shadow: var(--wpvfh-shadow);
+    text-align: center;
+    pointer-events: auto;
+}
+
+.wpvfh-hint-icon {
+    font-size: 32px;
+}
+
+.wpvfh-hint-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--wpvfh-text);
+}
+
+.wpvfh-hint-close {
+    padding: 8px 16px;
+    background: var(--wpvfh-bg-light);
+    border: 1px solid var(--wpvfh-border);
+    border-radius: var(--wpvfh-radius-sm);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all var(--wpvfh-transition);
+}
+
+.wpvfh-hint-close:hover {
+    background: var(--wpvfh-border);
+}
+
+/* Mode annotation sur le body */
+body.wpvfh-annotation-mode {
+    cursor: crosshair !important;
+}
+
+body.wpvfh-annotation-mode * {
+    cursor: crosshair !important;
+}
+
+/* ==========================================================================
+   Conteneur des pins
+   ========================================================================== */
+
+.wpvfh-pins-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: calc(var(--wpvfh-z-index) - 2);
+}
+
+.wpvfh-pins-container .wpvfh-pin {
+    pointer-events: auto;
+}
+
+/* Animation d'apparition des pins */
+@keyframes wpvfh-pin-appear {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.wpvfh-pin {
+    animation: wpvfh-pin-appear 0.3s ease-out;
+}
+
+.wpvfh-pin-selected {
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ==========================================================================
+   Notifications
+   ========================================================================== */
+
+.wpvfh-notifications {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: calc(var(--wpvfh-z-index) + 1);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.wpvfh-notification {
+    padding: 12px 20px;
+    border-radius: var(--wpvfh-radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: var(--wpvfh-shadow);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    pointer-events: auto;
+}
+
+.wpvfh-notification-show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.wpvfh-notification-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-left: 4px solid var(--wpvfh-success);
+}
+
+.wpvfh-notification-error {
+    background: #ffebee;
+    color: #c62828;
+    border-left: 4px solid var(--wpvfh-danger);
+}
+
+.wpvfh-notification-info {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-left: 4px solid var(--wpvfh-secondary);
+}
+
+.wpvfh-notification-warning {
+    background: #fff3e0;
+    color: #ef6c00;
+    border-left: 4px solid var(--wpvfh-warning);
+}
+
+/* ==========================================================================
+   Responsive - Tablet
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .wpvfh-toggle-btn {
+        bottom: 16px;
+        right: 16px;
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    .wpvfh-panel {
+        bottom: 70px;
+        right: 16px;
+        width: calc(100vw - 32px);
+        max-height: calc(100vh - 100px);
+    }
+
+    .wpvfh-btn-text {
+        display: none;
+    }
+
+    .wpvfh-toggle-btn {
+        padding: 12px;
+        border-radius: 50%;
+    }
+
+    .wpvfh-btn-icon {
+        font-size: 22px;
+    }
+}
+
+/* ==========================================================================
+   Responsive - Mobile
+   ========================================================================== */
+
+@media (max-width: 480px) {
+    .wpvfh-panel {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
+        max-height: 70vh;
+        border-radius: var(--wpvfh-radius) var(--wpvfh-radius) 0 0;
+    }
+
+    .wpvfh-toggle-btn {
+        bottom: 12px;
+        right: 12px;
+    }
+
+    .wpvfh-panel-body {
+        padding: 16px;
+    }
+
+    .wpvfh-form-actions {
+        flex-direction: column;
+    }
+
+    .wpvfh-btn {
+        width: 100%;
+    }
+}
+
+/* ==========================================================================
+   Mode sombre (si préféré par l'utilisateur)
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .wpvfh-container {
+        --wpvfh-text: #e0e0e0;
+        --wpvfh-text-light: #999;
+        --wpvfh-bg: #1e1e1e;
+        --wpvfh-bg-light: #2d2d2d;
+        --wpvfh-border: #404040;
+    }
+
+    .wpvfh-textarea {
+        background: var(--wpvfh-bg-light);
+        color: var(--wpvfh-text);
+    }
+
+    .wpvfh-help-text {
+        background: #1b4332;
+        color: #74c69d;
+    }
+
+    .wpvfh-notification-success {
+        background: #1b4332;
+        color: #74c69d;
+    }
+
+    .wpvfh-notification-error {
+        background: #450a0a;
+        color: #fca5a5;
+    }
+
+    .wpvfh-notification-info {
+        background: #0c4a6e;
+        color: #7dd3fc;
+    }
+
+    .wpvfh-notification-warning {
+        background: #78350f;
+        color: #fcd34d;
+    }
+}
+
+/* ==========================================================================
+   Accessibilité
+   ========================================================================== */
+
+/* Focus visible pour la navigation clavier */
+.wpvfh-container :focus-visible {
+    outline: 2px solid var(--wpvfh-secondary);
+    outline-offset: 2px;
+}
+
+/* Réduire les animations si l'utilisateur le préfère */
+@media (prefers-reduced-motion: reduce) {
+    .wpvfh-container *,
+    .wpvfh-container *::before,
+    .wpvfh-container *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ==========================================================================
+   Utilitaires
+   ========================================================================== */
+
+/* Masquer visuellement mais garder accessible */
+.wpvfh-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Empêcher l'impact SEO */
+.wpvfh-container {
+    contain: layout style;
+}
