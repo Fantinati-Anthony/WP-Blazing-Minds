@@ -257,6 +257,7 @@ body.wpvfh-panel-active .wpvfh-floating-buttons {
 
 @media screen and (max-width: 782px) {
     .admin-bar .wpvfh-panel {
+        top: 46px !important;
         height: calc(100vh - 46px) !important;
     }
 }
@@ -264,10 +265,11 @@ body.wpvfh-panel-active .wpvfh-floating-buttons {
 .wpvfh-panel.wpvfh-panel-open {
     transform: translateX(0) !important;
     visibility: visible !important;
+    pointer-events: auto !important;
 }
 
-/* Quand caché, rester hors écran */
-.wpvfh-panel[hidden] {
+/* Quand caché (sans la classe open), rester hors écran */
+.wpvfh-panel[hidden]:not(.wpvfh-panel-open) {
     display: flex !important;
     visibility: hidden !important;
     transform: translateX(100%) !important;
