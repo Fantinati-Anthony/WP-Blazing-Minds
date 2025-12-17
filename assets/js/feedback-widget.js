@@ -1051,12 +1051,17 @@
                 const isCreator = feedback.author?.id === this.config.userId;
                 const canDelete = isCreator || this.config.canManage;
 
+                // Vérifier si un élément a été ciblé (position ou sélecteur)
+                const hasPosition = feedback.selector || feedback.position_x || feedback.position_y;
+
                 return `
                     <div class="wpvfh-pin-item" data-feedback-id="${feedback.id}" data-pin-number="${pinNumber}" draggable="true">
                         <div class="wpvfh-drag-handle" title="Glisser pour réorganiser">⋮⋮</div>
+                        ${hasPosition ? `
                         <div class="wpvfh-pin-marker status-${status}">
                             ${pinNumber}
                         </div>
+                        ` : ''}
                         <div class="wpvfh-pin-content">
                             <p class="wpvfh-pin-text">${this.escapeHtml(feedback.comment || feedback.content || '')}</p>
                             <div class="wpvfh-pin-meta">
@@ -1065,9 +1070,11 @@
                             </div>
                         </div>
                         <div class="wpvfh-pin-actions">
+                            ${hasPosition ? `
                             <button type="button" class="wpvfh-pin-action wpvfh-pin-goto" title="Aller au pin">
                                 📍
                             </button>
+                            ` : ''}
                             ${canDelete ? `
                             <button type="button" class="wpvfh-pin-action wpvfh-pin-delete" title="Supprimer" data-feedback-id="${feedback.id}">
                                 🗑️

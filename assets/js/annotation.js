@@ -565,8 +565,11 @@
             // Effacer les pins existants
             this.clearPins();
 
-            // Créer les nouveaux pins avec numérotation
-            pins.forEach((pinData, index) => {
+            // Filtrer les feedbacks qui ont une position (élément ciblé)
+            const pinsWithPosition = pins.filter(pin => pin.selector || pin.position_x || pin.position_y);
+
+            // Créer les nouveaux pins avec numérotation (seulement ceux avec position)
+            pinsWithPosition.forEach((pinData, index) => {
                 pinData._displayOrder = index + 1;
                 this.createPin(pinData);
             });
