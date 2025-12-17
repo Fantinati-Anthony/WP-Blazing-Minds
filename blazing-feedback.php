@@ -687,12 +687,6 @@ final class WP_Visual_Feedback_Hub {
                             <p class="wpvfh-attachments-hint"><?php esc_html_e( 'Images, PDF, documents (max 5 fichiers, 10 Mo chacun)', 'blazing-feedback' ); ?></p>
                         </div>
 
-                        <!-- Aide pour les mentions -->
-                        <p class="wpvfh-mention-hint">
-                            <span class="wpvfh-hint-icon">💡</span>
-                            <?php esc_html_e( 'Utilisez @ pour mentionner quelqu\'un', 'blazing-feedback' ); ?>
-                        </p>
-
                         <!-- Info pin -->
                         <div class="wpvfh-form-group wpvfh-pin-info" hidden>
                             <p class="wpvfh-help-text">
