@@ -3,7 +3,7 @@
  * Plugin Name: Blazing Feedback
  * Plugin URI: https://github.com/Fantinati-Anthony/Blazing-Feedback-WP
  * Description: Plugin de feedback visuel autonome pour WordPress. Annotations, captures d'écran, gestion de statuts. Alternative open-source à ProjectHuddle, Feedbucket et Marker.io.
- * Version: 1.3.0
+ * Version: 1.4.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: Blazing Feedback Team
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Constantes du plugin
  */
-define( 'WPVFH_VERSION', '1.3.0' );
+define( 'WPVFH_VERSION', '1.4.0' );
 define( 'WPVFH_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WPVFH_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'WPVFH_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
@@ -271,11 +271,29 @@ final class WP_Visual_Feedback_Hub {
             true
         );
 
+        // Voice recorder
+        wp_enqueue_script(
+            'wpvfh-voice-recorder',
+            WPVFH_PLUGIN_URL . 'assets/js/voice-recorder.js',
+            array(),
+            WPVFH_VERSION,
+            true
+        );
+
+        // Screen recorder
+        wp_enqueue_script(
+            'wpvfh-screen-recorder',
+            WPVFH_PLUGIN_URL . 'assets/js/screen-recorder.js',
+            array(),
+            WPVFH_VERSION,
+            true
+        );
+
         // Widget principal
         wp_enqueue_script(
             'wpvfh-widget',
             WPVFH_PLUGIN_URL . 'assets/js/feedback-widget.js',
-            array( 'wpvfh-annotation', 'wp-i18n' ),
+            array( 'wpvfh-annotation', 'wpvfh-voice-recorder', 'wpvfh-screen-recorder', 'wp-i18n' ),
             WPVFH_VERSION,
             true
         );
@@ -510,32 +528,93 @@ final class WP_Visual_Feedback_Hub {
                 </div>
                 <div class="wpvfh-panel-body">
                     <form id="wpvfh-form" class="wpvfh-form">
+                        <!-- Zone de texte principale -->
                         <div class="wpvfh-form-group">
-                            <label for="wpvfh-comment" class="wpvfh-label">
-                                <?php esc_html_e( 'Votre commentaire', 'blazing-feedback' ); ?>
-                                <span class="wpvfh-required">*</span>
-                            </label>
                             <textarea
                                 id="wpvfh-comment"
                                 name="comment"
                                 class="wpvfh-textarea"
-                                rows="4"
+                                rows="3"
                                 required
                                 placeholder="<?php esc_attr_e( 'Décrivez votre feedback...', 'blazing-feedback' ); ?>"
                             ></textarea>
                         </div>
 
-                        <div class="wpvfh-form-group wpvfh-screenshot-toggle">
-                            <label class="wpvfh-checkbox-label">
-                                <input type="checkbox" id="wpvfh-screenshot-enabled" name="screenshot_enabled" checked>
-                                <span><?php esc_html_e( 'Capturer l\'écran', 'blazing-feedback' ); ?></span>
-                            </label>
+                        <!-- Barre d'outils média -->
+                        <div class="wpvfh-media-toolbar">
+                            <button type="button" class="wpvfh-tool-btn wpvfh-tool-screenshot" data-tool="screenshot" title="<?php esc_attr_e( 'Capture d\'écran', 'blazing-feedback' ); ?>">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                                <span><?php esc_html_e( 'Capture', 'blazing-feedback' ); ?></span>
+                            </button>
+                            <button type="button" class="wpvfh-tool-btn wpvfh-tool-voice" data-tool="voice" title="<?php esc_attr_e( 'Message vocal', 'blazing-feedback' ); ?>">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                                </svg>
+                                <span><?php esc_html_e( 'Audio', 'blazing-feedback' ); ?></span>
+                            </button>
+                            <button type="button" class="wpvfh-tool-btn wpvfh-tool-video" data-tool="video" title="<?php esc_attr_e( 'Enregistrer l\'écran', 'blazing-feedback' ); ?>">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                                </svg>
+                                <span><?php esc_html_e( 'Vidéo', 'blazing-feedback' ); ?></span>
+                            </button>
                         </div>
 
+                        <!-- Section enregistrement vocal -->
+                        <div id="wpvfh-voice-section" class="wpvfh-media-section" hidden>
+                            <div class="wpvfh-recorder-controls">
+                                <button type="button" id="wpvfh-voice-record" class="wpvfh-record-btn">
+                                    <span class="wpvfh-record-icon"></span>
+                                    <span class="wpvfh-record-text"><?php esc_html_e( 'Enregistrer', 'blazing-feedback' ); ?></span>
+                                </button>
+                                <div class="wpvfh-recorder-status">
+                                    <span class="wpvfh-recorder-time">0:00</span>
+                                    <span class="wpvfh-recorder-max">/ 2:00</span>
+                                </div>
+                            </div>
+                            <div id="wpvfh-voice-preview" class="wpvfh-audio-preview" hidden>
+                                <audio controls></audio>
+                                <button type="button" class="wpvfh-remove-media">&times;</button>
+                            </div>
+                            <div id="wpvfh-transcript-preview" class="wpvfh-transcript-preview" hidden>
+                                <label><?php esc_html_e( 'Transcription:', 'blazing-feedback' ); ?></label>
+                                <p class="wpvfh-transcript-text"></p>
+                            </div>
+                        </div>
+
+                        <!-- Section enregistrement vidéo -->
+                        <div id="wpvfh-video-section" class="wpvfh-media-section" hidden>
+                            <div class="wpvfh-recorder-controls">
+                                <button type="button" id="wpvfh-video-record" class="wpvfh-record-btn">
+                                    <span class="wpvfh-record-icon"></span>
+                                    <span class="wpvfh-record-text"><?php esc_html_e( 'Enregistrer l\'écran', 'blazing-feedback' ); ?></span>
+                                </button>
+                                <div class="wpvfh-recorder-status">
+                                    <span class="wpvfh-recorder-time">0:00</span>
+                                    <span class="wpvfh-recorder-max">/ 5:00</span>
+                                </div>
+                            </div>
+                            <div id="wpvfh-video-preview" class="wpvfh-video-preview" hidden>
+                                <video controls></video>
+                                <button type="button" class="wpvfh-remove-media">&times;</button>
+                            </div>
+                        </div>
+
+                        <!-- Aperçu capture d'écran -->
                         <div id="wpvfh-screenshot-preview" class="wpvfh-screenshot-preview" hidden>
                             <img src="" alt="<?php esc_attr_e( 'Aperçu de la capture', 'blazing-feedback' ); ?>">
+                            <button type="button" class="wpvfh-remove-media">&times;</button>
                         </div>
 
+                        <!-- Info pin -->
                         <div class="wpvfh-form-group wpvfh-pin-info" hidden>
                             <p class="wpvfh-help-text">
                                 <span class="wpvfh-pin-icon" aria-hidden="true">📍</span>
@@ -543,10 +622,15 @@ final class WP_Visual_Feedback_Hub {
                             </p>
                         </div>
 
+                        <!-- Champs cachés -->
                         <input type="hidden" id="wpvfh-position-x" name="position_x" value="">
                         <input type="hidden" id="wpvfh-position-y" name="position_y" value="">
                         <input type="hidden" id="wpvfh-screenshot-data" name="screenshot_data" value="">
+                        <input type="hidden" id="wpvfh-audio-data" name="audio_data" value="">
+                        <input type="hidden" id="wpvfh-video-data" name="video_data" value="">
+                        <input type="hidden" id="wpvfh-transcript" name="transcript" value="">
 
+                        <!-- Actions -->
                         <div class="wpvfh-form-actions">
                             <button type="button" class="wpvfh-btn wpvfh-btn-secondary wpvfh-cancel-btn">
                                 <?php esc_html_e( 'Annuler', 'blazing-feedback' ); ?>

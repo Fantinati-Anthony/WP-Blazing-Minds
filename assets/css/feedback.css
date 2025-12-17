@@ -261,6 +261,7 @@
 
 /* Aperçu du screenshot */
 .wpvfh-screenshot-preview {
+    position: relative;
     border: 1px solid var(--wpvfh-border);
     border-radius: var(--wpvfh-radius-sm);
     overflow: hidden;
@@ -271,6 +272,195 @@
     display: block;
     width: 100%;
     height: auto;
+}
+
+/* ==========================================================================
+   Barre d'outils média
+   ========================================================================== */
+
+.wpvfh-media-toolbar {
+    display: flex;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--wpvfh-border);
+    margin-bottom: 12px;
+}
+
+.wpvfh-tool-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--wpvfh-bg-light);
+    border: 1px solid var(--wpvfh-border);
+    border-radius: var(--wpvfh-radius-sm);
+    font-size: 13px;
+    color: var(--wpvfh-text);
+    cursor: pointer;
+    transition: all var(--wpvfh-transition);
+}
+
+.wpvfh-tool-btn:hover {
+    background: var(--wpvfh-bg);
+    border-color: var(--wpvfh-primary);
+    color: var(--wpvfh-primary);
+}
+
+.wpvfh-tool-btn.active {
+    background: var(--wpvfh-primary);
+    border-color: var(--wpvfh-primary);
+    color: #fff;
+}
+
+.wpvfh-tool-btn svg {
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Sections médias (voice/video)
+   ========================================================================== */
+
+.wpvfh-media-section {
+    padding: 12px;
+    background: var(--wpvfh-bg-light);
+    border-radius: var(--wpvfh-radius-sm);
+    margin-bottom: 12px;
+}
+
+.wpvfh-recorder-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wpvfh-record-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--wpvfh-bg);
+    border: 2px solid var(--wpvfh-border);
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--wpvfh-text);
+    cursor: pointer;
+    transition: all var(--wpvfh-transition);
+}
+
+.wpvfh-record-btn:hover {
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+.wpvfh-record-btn.recording {
+    background: #e74c3c;
+    border-color: #e74c3c;
+    color: #fff;
+}
+
+.wpvfh-record-icon {
+    width: 12px;
+    height: 12px;
+    background: #e74c3c;
+    border-radius: 50%;
+    transition: all var(--wpvfh-transition);
+}
+
+.wpvfh-record-btn.recording .wpvfh-record-icon {
+    background: #fff;
+    animation: wpvfh-pulse 1s ease-in-out infinite;
+}
+
+@keyframes wpvfh-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+}
+
+.wpvfh-recorder-status {
+    font-size: 14px;
+    color: var(--wpvfh-text-light);
+}
+
+.wpvfh-recorder-time {
+    font-weight: 600;
+    color: var(--wpvfh-text);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Aperçu audio */
+.wpvfh-audio-preview {
+    position: relative;
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--wpvfh-bg);
+    border-radius: var(--wpvfh-radius-sm);
+}
+
+.wpvfh-audio-preview audio {
+    width: 100%;
+    height: 40px;
+}
+
+/* Aperçu vidéo */
+.wpvfh-video-preview {
+    position: relative;
+    margin-top: 12px;
+    border-radius: var(--wpvfh-radius-sm);
+    overflow: hidden;
+}
+
+.wpvfh-video-preview video {
+    width: 100%;
+    max-height: 200px;
+    background: #000;
+}
+
+/* Transcription */
+.wpvfh-transcript-preview {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--wpvfh-bg);
+    border-radius: var(--wpvfh-radius-sm);
+    border-left: 3px solid var(--wpvfh-primary);
+}
+
+.wpvfh-transcript-preview label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--wpvfh-text-light);
+    margin-bottom: 4px;
+}
+
+.wpvfh-transcript-text {
+    margin: 0;
+    font-size: 14px;
+    color: var(--wpvfh-text);
+    line-height: 1.5;
+}
+
+/* Bouton supprimer média */
+.wpvfh-remove-media {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.6);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--wpvfh-transition);
+}
+
+.wpvfh-remove-media:hover {
+    background: rgba(0, 0, 0, 0.8);
 }
 
 /* Info du pin */

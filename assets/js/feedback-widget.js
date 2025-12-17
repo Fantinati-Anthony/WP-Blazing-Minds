@@ -71,7 +71,6 @@
                 panel: document.getElementById('wpvfh-panel'),
                 form: document.getElementById('wpvfh-form'),
                 commentField: document.getElementById('wpvfh-comment'),
-                screenshotToggle: document.getElementById('wpvfh-screenshot-enabled'),
                 screenshotPreview: document.getElementById('wpvfh-screenshot-preview'),
                 screenshotData: document.getElementById('wpvfh-screenshot-data'),
                 positionX: document.getElementById('wpvfh-position-x'),
@@ -82,6 +81,19 @@
                 submitBtn: document.querySelector('.wpvfh-submit-btn'),
                 notifications: document.getElementById('wpvfh-notifications'),
                 overlay: document.getElementById('wpvfh-annotation-overlay'),
+                // Nouveaux éléments média
+                mediaToolbar: document.querySelector('.wpvfh-media-toolbar'),
+                toolButtons: document.querySelectorAll('.wpvfh-tool-btn'),
+                voiceSection: document.getElementById('wpvfh-voice-section'),
+                voiceRecordBtn: document.getElementById('wpvfh-voice-record'),
+                voicePreview: document.getElementById('wpvfh-voice-preview'),
+                transcriptPreview: document.getElementById('wpvfh-transcript-preview'),
+                videoSection: document.getElementById('wpvfh-video-section'),
+                videoRecordBtn: document.getElementById('wpvfh-video-record'),
+                videoPreview: document.getElementById('wpvfh-video-preview'),
+                audioData: document.getElementById('wpvfh-audio-data'),
+                videoData: document.getElementById('wpvfh-video-data'),
+                transcriptField: document.getElementById('wpvfh-transcript'),
             };
         },
 
@@ -108,22 +120,47 @@
                 this.elements.form.addEventListener('submit', this.handleSubmit.bind(this));
             }
 
-            // Toggle screenshot
-            if (this.elements.screenshotToggle) {
-                this.elements.screenshotToggle.addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        this.captureScreenshot();
-                    } else {
-                        this.clearScreenshot();
-                    }
+            // Boutons de la barre d'outils média
+            if (this.elements.toolButtons) {
+                this.elements.toolButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => this.handleToolClick(e, btn.dataset.tool));
                 });
             }
+
+            // Bouton enregistrement vocal
+            if (this.elements.voiceRecordBtn) {
+                this.elements.voiceRecordBtn.addEventListener('click', this.handleVoiceRecord.bind(this));
+            }
+
+            // Bouton enregistrement vidéo
+            if (this.elements.videoRecordBtn) {
+                this.elements.videoRecordBtn.addEventListener('click', this.handleVideoRecord.bind(this));
+            }
+
+            // Boutons supprimer média
+            document.querySelectorAll('.wpvfh-remove-media').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const parent = e.target.closest('.wpvfh-screenshot-preview, .wpvfh-audio-preview, .wpvfh-video-preview');
+                    if (parent) {
+                        if (parent.classList.contains('wpvfh-screenshot-preview')) this.clearScreenshot();
+                        if (parent.classList.contains('wpvfh-audio-preview')) this.clearVoiceRecording();
+                        if (parent.classList.contains('wpvfh-video-preview')) this.clearVideoRecording();
+                    }
+                });
+            });
 
             // Événements des modules
             document.addEventListener('blazing-feedback:pin-placed', this.handlePinPlaced.bind(this));
             document.addEventListener('blazing-feedback:pin-selected', this.handlePinSelected.bind(this));
             document.addEventListener('blazing-feedback:capture-success', this.handleCaptureSuccess.bind(this));
             document.addEventListener('blazing-feedback:capture-error', this.handleCaptureError.bind(this));
+
+            // Événements enregistrement vocal
+            document.addEventListener('blazing-feedback:voice-recording-complete', this.handleVoiceComplete.bind(this));
+            document.addEventListener('blazing-feedback:voice-transcription-update', this.handleTranscriptionUpdate.bind(this));
+
+            // Événements enregistrement vidéo
+            document.addEventListener('blazing-feedback:screen-recording-complete', this.handleVideoComplete.bind(this));
 
             // Échap pour fermer
             document.addEventListener('keydown', (e) => {
@@ -140,6 +177,220 @@
                     this.state.feedbackMode = 'view';
                 });
             }
+        },
+
+        /**
+         * Gérer le clic sur un outil média
+         * @param {Event} event - Événement
+         * @param {string} tool - Nom de l'outil
+         */
+        handleToolClick: function(event, tool) {
+            event.preventDefault();
+
+            // Désactiver tous les boutons
+            this.elements.toolButtons.forEach(btn => btn.classList.remove('active'));
+
+            // Masquer toutes les sections
+            if (this.elements.voiceSection) this.elements.voiceSection.hidden = true;
+            if (this.elements.videoSection) this.elements.videoSection.hidden = true;
+
+            switch (tool) {
+                case 'screenshot':
+                    event.target.closest('.wpvfh-tool-btn').classList.add('active');
+                    this.captureScreenshot();
+                    break;
+                case 'voice':
+                    event.target.closest('.wpvfh-tool-btn').classList.add('active');
+                    if (this.elements.voiceSection) this.elements.voiceSection.hidden = false;
+                    break;
+                case 'video':
+                    event.target.closest('.wpvfh-tool-btn').classList.add('active');
+                    if (this.elements.videoSection) this.elements.videoSection.hidden = false;
+                    break;
+            }
+        },
+
+        /**
+         * Gérer l'enregistrement vocal
+         */
+        handleVoiceRecord: async function() {
+            if (!window.BlazingVoiceRecorder) {
+                this.showNotification('Enregistrement vocal non disponible', 'error');
+                return;
+            }
+
+            const recorder = window.BlazingVoiceRecorder;
+
+            if (recorder.state.isRecording) {
+                recorder.stop();
+                this.elements.voiceRecordBtn.classList.remove('recording');
+                this.elements.voiceRecordBtn.querySelector('.wpvfh-record-text').textContent = 'Enregistrer';
+                if (this.voiceTimer) clearInterval(this.voiceTimer);
+            } else {
+                const started = await recorder.start();
+                if (started) {
+                    this.elements.voiceRecordBtn.classList.add('recording');
+                    this.elements.voiceRecordBtn.querySelector('.wpvfh-record-text').textContent = 'Arrêter';
+                    this.startVoiceTimer();
+                } else {
+                    this.showNotification('Impossible d\'accéder au microphone', 'error');
+                }
+            }
+        },
+
+        /**
+         * Démarrer le timer d'enregistrement vocal
+         */
+        startVoiceTimer: function() {
+            const timeDisplay = this.elements.voiceSection?.querySelector('.wpvfh-recorder-time');
+            if (!timeDisplay) return;
+
+            this.voiceTimer = setInterval(() => {
+                if (window.BlazingVoiceRecorder) {
+                    const duration = window.BlazingVoiceRecorder.getCurrentDuration();
+                    timeDisplay.textContent = window.BlazingVoiceRecorder.formatDuration(duration);
+                }
+            }, 100);
+        },
+
+        /**
+         * Gérer la fin de l'enregistrement vocal
+         * @param {CustomEvent} event
+         */
+        handleVoiceComplete: async function(event) {
+            const { audioUrl, transcript } = event.detail;
+
+            if (this.elements.voicePreview) {
+                const audio = this.elements.voicePreview.querySelector('audio');
+                if (audio) audio.src = audioUrl;
+                this.elements.voicePreview.hidden = false;
+            }
+
+            // Stocker les données audio en base64
+            if (window.BlazingVoiceRecorder && this.elements.audioData) {
+                const base64 = await window.BlazingVoiceRecorder.getAudioBase64();
+                this.elements.audioData.value = base64 || '';
+            }
+
+            // Afficher la transcription
+            if (transcript && this.elements.transcriptPreview) {
+                const textEl = this.elements.transcriptPreview.querySelector('.wpvfh-transcript-text');
+                if (textEl) textEl.textContent = transcript;
+                this.elements.transcriptPreview.hidden = false;
+                if (this.elements.transcriptField) {
+                    this.elements.transcriptField.value = transcript;
+                }
+            }
+        },
+
+        /**
+         * Gérer la mise à jour de la transcription
+         * @param {CustomEvent} event
+         */
+        handleTranscriptionUpdate: function(event) {
+            const { final, interim } = event.detail;
+            if (this.elements.transcriptPreview) {
+                const textEl = this.elements.transcriptPreview.querySelector('.wpvfh-transcript-text');
+                if (textEl) {
+                    textEl.textContent = final + (interim ? ' ' + interim : '');
+                }
+                this.elements.transcriptPreview.hidden = false;
+            }
+        },
+
+        /**
+         * Effacer l'enregistrement vocal
+         */
+        clearVoiceRecording: function() {
+            if (window.BlazingVoiceRecorder) {
+                window.BlazingVoiceRecorder.clear();
+            }
+            if (this.elements.voicePreview) {
+                this.elements.voicePreview.hidden = true;
+                const audio = this.elements.voicePreview.querySelector('audio');
+                if (audio) audio.src = '';
+            }
+            if (this.elements.transcriptPreview) {
+                this.elements.transcriptPreview.hidden = true;
+            }
+            if (this.elements.audioData) this.elements.audioData.value = '';
+            if (this.elements.transcriptField) this.elements.transcriptField.value = '';
+        },
+
+        /**
+         * Gérer l'enregistrement vidéo
+         */
+        handleVideoRecord: async function() {
+            if (!window.BlazingScreenRecorder) {
+                this.showNotification('Enregistrement d\'écran non disponible', 'error');
+                return;
+            }
+
+            const recorder = window.BlazingScreenRecorder;
+
+            if (recorder.state.isRecording) {
+                recorder.stop();
+                this.elements.videoRecordBtn.classList.remove('recording');
+                this.elements.videoRecordBtn.querySelector('.wpvfh-record-text').textContent = 'Enregistrer l\'écran';
+                if (this.videoTimer) clearInterval(this.videoTimer);
+            } else {
+                const started = await recorder.start({ includeMicrophone: true });
+                if (started) {
+                    this.elements.videoRecordBtn.classList.add('recording');
+                    this.elements.videoRecordBtn.querySelector('.wpvfh-record-text').textContent = 'Arrêter';
+                    this.startVideoTimer();
+                } else {
+                    this.showNotification('Impossible d\'accéder à l\'écran', 'error');
+                }
+            }
+        },
+
+        /**
+         * Démarrer le timer d'enregistrement vidéo
+         */
+        startVideoTimer: function() {
+            const timeDisplay = this.elements.videoSection?.querySelector('.wpvfh-recorder-time');
+            if (!timeDisplay) return;
+
+            this.videoTimer = setInterval(() => {
+                if (window.BlazingScreenRecorder) {
+                    const duration = window.BlazingScreenRecorder.getCurrentDuration();
+                    timeDisplay.textContent = window.BlazingScreenRecorder.formatDuration(duration);
+                }
+            }, 100);
+        },
+
+        /**
+         * Gérer la fin de l'enregistrement vidéo
+         * @param {CustomEvent} event
+         */
+        handleVideoComplete: async function(event) {
+            const { videoUrl } = event.detail;
+
+            if (this.elements.videoPreview) {
+                const video = this.elements.videoPreview.querySelector('video');
+                if (video) video.src = videoUrl;
+                this.elements.videoPreview.hidden = false;
+            }
+
+            // Note: Les vidéos sont trop volumineuses pour base64
+            // On stocke l'URL blob pour l'upload séparé
+            this.state.videoBlob = event.detail.videoBlob;
+        },
+
+        /**
+         * Effacer l'enregistrement vidéo
+         */
+        clearVideoRecording: function() {
+            if (window.BlazingScreenRecorder) {
+                window.BlazingScreenRecorder.clear();
+            }
+            if (this.elements.videoPreview) {
+                this.elements.videoPreview.hidden = true;
+                const video = this.elements.videoPreview.querySelector('video');
+                if (video) video.src = '';
+            }
+            this.state.videoBlob = null;
         },
 
         /**
