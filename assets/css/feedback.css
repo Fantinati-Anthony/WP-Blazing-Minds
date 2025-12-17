@@ -200,7 +200,7 @@
 .wpvfh-panel {
     position: fixed !important;
     right: 0 !important;
-    bottom: 0 !important;
+    top: 0 !important;
     height: 100vh !important;
     z-index: var(--wpvfh-z-index) !important;
     width: 400px !important;
@@ -219,9 +219,40 @@
     padding: 0 !important;
 }
 
+/* Mode push content - le panel pousse le contenu au lieu de l'overlay */
+body.wpvfh-panel-active {
+    margin-right: 400px !important;
+    transition: margin-right 0.3s ease !important;
+}
+
+/* Masquer l'overlay en mode push */
+body.wpvfh-panel-active .wpvfh-sidebar-overlay {
+    display: none !important;
+}
+
+/* Ajuster les boutons flottants quand le panel est ouvert */
+body.wpvfh-panel-active .wpvfh-floating-buttons {
+    right: 424px !important;
+    transition: right 0.3s ease !important;
+}
+
 /* Ajuster pour la barre admin WordPress */
 .admin-bar .wpvfh-panel {
+    top: 32px !important;
     height: calc(100vh - 32px) !important;
+}
+
+/* Responsive: sur mobile, pas de push mais overlay */
+@media screen and (max-width: 600px) {
+    body.wpvfh-panel-active {
+        margin-right: 0 !important;
+    }
+    body.wpvfh-panel-active .wpvfh-floating-buttons {
+        right: 24px !important;
+    }
+    body.wpvfh-panel-active .wpvfh-sidebar-overlay {
+        display: block !important;
+    }
 }
 
 @media screen and (max-width: 782px) {
@@ -511,6 +542,16 @@
 .wpvfh-pin-action:hover {
     background: var(--wpvfh-border);
     color: var(--wpvfh-text);
+}
+
+/* Bouton supprimer dans la liste */
+.wpvfh-pin-action.wpvfh-pin-delete {
+    color: #bdc3c7;
+}
+
+.wpvfh-pin-action.wpvfh-pin-delete:hover {
+    background: #ffebee;
+    color: #e74c3c;
 }
 
 /* Message liste vide */

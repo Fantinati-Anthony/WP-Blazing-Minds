@@ -815,6 +815,9 @@
 
             this.state.isOpen = true;
 
+            // Ajouter la classe au body pour pousser le contenu
+            document.body.classList.add('wpvfh-panel-active');
+
             if (this.elements.panel) {
                 // Retirer l'attribut hidden
                 this.elements.panel.removeAttribute('hidden');
@@ -830,7 +833,7 @@
                 console.log('[Blazing Feedback] Panel classes:', this.elements.panel.className);
             }
 
-            // Afficher l'overlay
+            // Afficher l'overlay (visible seulement sur mobile en mode push)
             if (this.elements.sidebarOverlay) {
                 this.elements.sidebarOverlay.classList.add('wpvfh-overlay-visible');
             }
@@ -859,6 +862,9 @@
         closePanel: function() {
             this.state.isOpen = false;
             this.state.feedbackMode = 'view';
+
+            // Retirer la classe du body
+            document.body.classList.remove('wpvfh-panel-active');
 
             if (this.elements.panel) {
                 this.elements.panel.classList.remove('wpvfh-panel-open');
@@ -972,6 +978,10 @@
                 const date = feedback.date ? new Date(feedback.date).toLocaleDateString() : '';
                 const pinNumber = index + 1;
 
+                // Vérifier si l'utilisateur peut supprimer ce feedback
+                const isCreator = feedback.author?.id === this.config.userId;
+                const canDelete = isCreator || this.config.canManage;
+
                 return `
                     <div class="wpvfh-pin-item" data-feedback-id="${feedback.id}" data-pin-number="${pinNumber}" draggable="true">
                         <div class="wpvfh-drag-handle" title="Glisser pour réorganiser">⋮⋮</div>
@@ -989,6 +999,11 @@
                             <button type="button" class="wpvfh-pin-action wpvfh-pin-goto" title="Aller au pin">
                                 📍
                             </button>
+                            ${canDelete ? `
+                            <button type="button" class="wpvfh-pin-action wpvfh-pin-delete" title="Supprimer" data-feedback-id="${feedback.id}">
+                                🗑️
+                            </button>
+                            ` : ''}
                         </div>
                     </div>
                 `;
@@ -1007,6 +1022,16 @@
                     const feedbackId = parseInt(item.dataset.feedbackId, 10);
                     this.scrollToPin(feedbackId);
                 });
+
+                // Clic sur le bouton supprimer
+                const deleteBtn = item.querySelector('.wpvfh-pin-delete');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const feedbackId = parseInt(deleteBtn.dataset.feedbackId, 10);
+                        this.showDeleteModalForFeedback(feedbackId);
+                    });
+                }
             });
 
             // Initialiser le drag-and-drop
@@ -1943,6 +1968,19 @@
             if (!this.state.currentFeedbackId) return;
 
             this.state.feedbackToDelete = this.state.currentFeedbackId;
+            if (this.elements.confirmModal) {
+                this.elements.confirmModal.hidden = false;
+            }
+        },
+
+        /**
+         * Afficher le modal de suppression pour un feedback spécifique
+         * @param {number} feedbackId - ID du feedback
+         */
+        showDeleteModalForFeedback: function(feedbackId) {
+            if (!feedbackId) return;
+
+            this.state.feedbackToDelete = feedbackId;
             if (this.elements.confirmModal) {
                 this.elements.confirmModal.hidden = false;
             }

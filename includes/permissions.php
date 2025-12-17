@@ -163,9 +163,16 @@ class WPVFH_Permissions {
             return false;
         }
 
-        // L'auteur peut supprimer son propre feedback
+        // Les admins peuvent toujours supprimer
+        if ( user_can( $user_id, 'manage_feedback' ) || user_can( $user_id, 'manage_options' ) ) {
+            return true;
+        }
+
+        // L'auteur peut supprimer son propre feedback s'il peut créer des feedbacks
         if ( (int) $feedback->post_author === $user_id ) {
-            return user_can( $user_id, 'delete_feedback' );
+            return user_can( $user_id, 'delete_feedback' ) ||
+                   user_can( $user_id, 'publish_feedbacks' ) ||
+                   user_can( $user_id, 'delete_feedbacks' );
         }
 
         // Sinon, vérifier la capacité de supprimer les autres
