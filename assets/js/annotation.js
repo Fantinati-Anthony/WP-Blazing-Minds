@@ -57,9 +57,51 @@
          */
         init: function() {
             this.cacheElements();
+            this.setupPinsContainer();
             this.bindEvents();
 
             console.log('[Blazing Feedback] Module Annotation initialisé');
+        },
+
+        /**
+         * Configurer le conteneur des pins pour couvrir toute la page
+         * @returns {void}
+         */
+        setupPinsContainer: function() {
+            if (!this.elements.pinsContainer) return;
+
+            // Déplacer le conteneur au niveau du body pour un positionnement correct
+            document.body.appendChild(this.elements.pinsContainer);
+
+            // Mettre à jour la taille du conteneur pour couvrir toute la page
+            this.updateContainerSize();
+        },
+
+        /**
+         * Mettre à jour la taille du conteneur des pins
+         * @returns {void}
+         */
+        updateContainerSize: function() {
+            if (!this.elements.pinsContainer) return;
+
+            const docHeight = Math.max(
+                document.body.scrollHeight,
+                document.body.offsetHeight,
+                document.documentElement.clientHeight,
+                document.documentElement.scrollHeight,
+                document.documentElement.offsetHeight
+            );
+
+            const docWidth = Math.max(
+                document.body.scrollWidth,
+                document.body.offsetWidth,
+                document.documentElement.clientWidth,
+                document.documentElement.scrollWidth,
+                document.documentElement.offsetWidth
+            );
+
+            this.elements.pinsContainer.style.width = docWidth + 'px';
+            this.elements.pinsContainer.style.height = docHeight + 'px';
         },
 
         /**
@@ -84,6 +126,15 @@
 
             // Redimensionnement de la fenêtre
             window.addEventListener('resize', this.handleResize.bind(this));
+
+            // Mettre à jour le conteneur quand le contenu change
+            window.addEventListener('load', () => this.updateContainerSize());
+
+            // Observer les changements de taille du document
+            if (typeof ResizeObserver !== 'undefined') {
+                const resizeObserver = new ResizeObserver(() => this.updateContainerSize());
+                resizeObserver.observe(document.body);
+            }
 
             // Créer le gestionnaire de clics global (stocké pour pouvoir le retirer)
             this.state.clickHandler = this.handleGlobalClick.bind(this);
@@ -603,6 +654,9 @@
          * @returns {void}
          */
         handleResize: function() {
+            // Mettre à jour la taille du conteneur
+            this.updateContainerSize();
+
             // Les pins en pourcentage se repositionnent automatiquement
             // Mais on peut déclencher une vérification de repositionnement intelligent
 
