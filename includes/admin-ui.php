@@ -211,7 +211,7 @@ class WPVFH_Admin_UI {
             array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_key',
-                'default'           => 'light',
+                'default'           => 'none',
             )
         );
 
@@ -623,27 +623,37 @@ class WPVFH_Admin_UI {
      * @return void
      */
     public static function render_logo_mode_field() {
-        $mode = get_option( 'wpvfh_logo_mode', 'light' );
+        $mode = get_option( 'wpvfh_logo_mode', 'none' );
         $custom_url = get_option( 'wpvfh_logo_custom_url', '' );
         $light_logo = WPVFH_PLUGIN_URL . 'assets/logo/light-mode-feedback.png';
         $dark_logo = WPVFH_PLUGIN_URL . 'assets/logo/dark-mode-feedback.png';
         ?>
         <fieldset>
             <label style="display: block; margin-bottom: 10px;">
+                <input type="radio" name="wpvfh_logo_mode" value="none" <?php checked( $mode, 'none' ); ?>>
+                <?php esc_html_e( 'Aucun (affiche le titre "Feedbacks")', 'blazing-feedback' ); ?>
+            </label>
+            <label style="display: block; margin-bottom: 10px;">
                 <input type="radio" name="wpvfh_logo_mode" value="light" <?php checked( $mode, 'light' ); ?>>
-                <?php esc_html_e( 'Mode clair', 'blazing-feedback' ); ?>
-                <img src="<?php echo esc_url( $light_logo ); ?>" alt="Light mode" style="height: 30px; vertical-align: middle; margin-left: 10px; background: #333; padding: 5px; border-radius: 4px;">
+                <?php esc_html_e( 'Mode clair (light-mode-feedback.png)', 'blazing-feedback' ); ?>
             </label>
             <label style="display: block; margin-bottom: 10px;">
                 <input type="radio" name="wpvfh_logo_mode" value="dark" <?php checked( $mode, 'dark' ); ?>>
-                <?php esc_html_e( 'Mode sombre', 'blazing-feedback' ); ?>
-                <img src="<?php echo esc_url( $dark_logo ); ?>" alt="Dark mode" style="height: 30px; vertical-align: middle; margin-left: 10px; background: #fff; padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+                <?php esc_html_e( 'Mode sombre (dark-mode-feedback.png)', 'blazing-feedback' ); ?>
             </label>
             <label style="display: block; margin-bottom: 10px;">
                 <input type="radio" name="wpvfh_logo_mode" value="custom" <?php checked( $mode, 'custom' ); ?>>
-                <?php esc_html_e( 'Personnalisé', 'blazing-feedback' ); ?>
+                <?php esc_html_e( 'Personnalisé (URL ou bibliothèque)', 'blazing-feedback' ); ?>
             </label>
         </fieldset>
+        <p class="description" style="margin-top: 10px;">
+            <?php
+            printf(
+                esc_html__( 'Pour les modes clair/sombre, placez vos logos dans : %s', 'blazing-feedback' ),
+                '<code>assets/logo/</code>'
+            );
+            ?>
+        </p>
 
         <div id="wpvfh-custom-logo-wrapper" style="margin-top: 15px; <?php echo $mode !== 'custom' ? 'display: none;' : ''; ?>">
             <div style="display: flex; gap: 10px; align-items: center;">

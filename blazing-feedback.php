@@ -551,7 +551,7 @@ final class WP_Visual_Feedback_Hub {
             <div id="wpvfh-panel" class="wpvfh-panel" hidden aria-hidden="true">
                 <div class="wpvfh-panel-header">
                     <?php
-                    $logo_mode = get_option( 'wpvfh_logo_mode', 'light' );
+                    $logo_mode = get_option( 'wpvfh_logo_mode', 'none' );
                     $logo_url = '';
                     if ( $logo_mode === 'light' ) {
                         $logo_url = WPVFH_PLUGIN_URL . 'assets/logo/light-mode-feedback.png';
@@ -560,7 +560,7 @@ final class WP_Visual_Feedback_Hub {
                     } elseif ( $logo_mode === 'custom' ) {
                         $logo_url = get_option( 'wpvfh_logo_custom_url', '' );
                     }
-                    if ( $logo_url ) : ?>
+                    if ( $logo_mode !== 'none' && $logo_url ) : ?>
                     <img src="<?php echo esc_url( $logo_url ); ?>" alt="<?php esc_attr_e( 'Blazing Feedback', 'blazing-feedback' ); ?>" class="wpvfh-panel-logo">
                     <?php else : ?>
                     <h3 class="wpvfh-panel-title"><?php esc_html_e( 'Feedbacks', 'blazing-feedback' ); ?></h3>
