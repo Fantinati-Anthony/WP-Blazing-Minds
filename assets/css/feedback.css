@@ -627,6 +627,12 @@ body.wpvfh-panel-active .wpvfh-floating-buttons {
     color: var(--wpvfh-text);
 }
 
+.wpvfh-panel-logo {
+    max-height: 36px;
+    width: auto;
+    object-fit: contain;
+}
+
 .wpvfh-close-btn {
     display: flex !important;
     align-items: center !important;

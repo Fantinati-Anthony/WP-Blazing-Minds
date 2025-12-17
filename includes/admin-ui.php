@@ -197,6 +197,42 @@ class WPVFH_Admin_UI {
             'wpvfh_general_section'
         );
 
+        // Section Logo
+        add_settings_section(
+            'wpvfh_logo_section',
+            __( 'Logo du panneau', 'blazing-feedback' ),
+            array( __CLASS__, 'render_logo_section' ),
+            'wpvfh_settings'
+        );
+
+        register_setting(
+            'wpvfh_general_settings',
+            'wpvfh_logo_mode',
+            array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_key',
+                'default'           => 'light',
+            )
+        );
+
+        register_setting(
+            'wpvfh_general_settings',
+            'wpvfh_logo_custom_url',
+            array(
+                'type'              => 'string',
+                'sanitize_callback' => 'esc_url_raw',
+                'default'           => '',
+            )
+        );
+
+        add_settings_field(
+            'wpvfh_logo_mode',
+            __( 'Mode du logo', 'blazing-feedback' ),
+            array( __CLASS__, 'render_logo_mode_field' ),
+            'wpvfh_settings',
+            'wpvfh_logo_section'
+        );
+
         // Section notifications
         add_settings_section(
             'wpvfh_notification_section',
@@ -253,6 +289,11 @@ class WPVFH_Admin_UI {
         // Charger sur toutes les pages du plugin
         if ( strpos( $hook, 'wpvfh' ) !== false || get_current_screen()->post_type === 'visual_feedback' ) {
             wp_add_inline_style( 'wp-admin', self::get_admin_inline_styles() );
+
+            // Charger la bibliothèque de médias sur la page des paramètres
+            if ( strpos( $hook, 'wpvfh-settings' ) !== false ) {
+                wp_enqueue_media();
+            }
         }
     }
 
@@ -563,6 +604,96 @@ class WPVFH_Admin_UI {
      */
     public static function render_notification_section() {
         echo '<p>' . esc_html__( 'Configurez les notifications par email pour les nouveaux feedbacks.', 'blazing-feedback' ) . '</p>';
+    }
+
+    /**
+     * Rendu de la section logo
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    public static function render_logo_section() {
+        echo '<p>' . esc_html__( 'Personnalisez le logo affiché dans l\'entête du panneau de feedback.', 'blazing-feedback' ) . '</p>';
+    }
+
+    /**
+     * Champ Mode du logo
+     *
+     * @since 1.0.0
+     * @return void
+     */
+    public static function render_logo_mode_field() {
+        $mode = get_option( 'wpvfh_logo_mode', 'light' );
+        $custom_url = get_option( 'wpvfh_logo_custom_url', '' );
+        $light_logo = WPVFH_PLUGIN_URL . 'assets/logo/light-mode-feedback.png';
+        $dark_logo = WPVFH_PLUGIN_URL . 'assets/logo/dark-mode-feedback.png';
+        ?>
+        <fieldset>
+            <label style="display: block; margin-bottom: 10px;">
+                <input type="radio" name="wpvfh_logo_mode" value="light" <?php checked( $mode, 'light' ); ?>>
+                <?php esc_html_e( 'Mode clair', 'blazing-feedback' ); ?>
+                <img src="<?php echo esc_url( $light_logo ); ?>" alt="Light mode" style="height: 30px; vertical-align: middle; margin-left: 10px; background: #333; padding: 5px; border-radius: 4px;">
+            </label>
+            <label style="display: block; margin-bottom: 10px;">
+                <input type="radio" name="wpvfh_logo_mode" value="dark" <?php checked( $mode, 'dark' ); ?>>
+                <?php esc_html_e( 'Mode sombre', 'blazing-feedback' ); ?>
+                <img src="<?php echo esc_url( $dark_logo ); ?>" alt="Dark mode" style="height: 30px; vertical-align: middle; margin-left: 10px; background: #fff; padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+            </label>
+            <label style="display: block; margin-bottom: 10px;">
+                <input type="radio" name="wpvfh_logo_mode" value="custom" <?php checked( $mode, 'custom' ); ?>>
+                <?php esc_html_e( 'Personnalisé', 'blazing-feedback' ); ?>
+            </label>
+        </fieldset>
+
+        <div id="wpvfh-custom-logo-wrapper" style="margin-top: 15px; <?php echo $mode !== 'custom' ? 'display: none;' : ''; ?>">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" name="wpvfh_logo_custom_url" id="wpvfh_logo_custom_url"
+                       value="<?php echo esc_attr( $custom_url ); ?>"
+                       class="regular-text"
+                       placeholder="<?php esc_attr_e( 'URL du logo ou sélectionner depuis la bibliothèque', 'blazing-feedback' ); ?>">
+                <button type="button" class="button" id="wpvfh-select-logo-btn">
+                    <?php esc_html_e( 'Bibliothèque', 'blazing-feedback' ); ?>
+                </button>
+            </div>
+            <?php if ( $custom_url ) : ?>
+            <div style="margin-top: 10px;">
+                <img src="<?php echo esc_url( $custom_url ); ?>" alt="Preview" style="max-height: 50px; background: #f0f0f0; padding: 5px; border-radius: 4px;">
+            </div>
+            <?php endif; ?>
+            <p class="description">
+                <?php esc_html_e( 'Entrez une URL ou sélectionnez une image depuis la bibliothèque de médias.', 'blazing-feedback' ); ?>
+            </p>
+        </div>
+
+        <script>
+        jQuery(document).ready(function($) {
+            // Toggle custom logo input
+            $('input[name="wpvfh_logo_mode"]').on('change', function() {
+                if ($(this).val() === 'custom') {
+                    $('#wpvfh-custom-logo-wrapper').slideDown();
+                } else {
+                    $('#wpvfh-custom-logo-wrapper').slideUp();
+                }
+            });
+
+            // Media library
+            $('#wpvfh-select-logo-btn').on('click', function(e) {
+                e.preventDefault();
+                var frame = wp.media({
+                    title: '<?php echo esc_js( __( 'Sélectionner un logo', 'blazing-feedback' ) ); ?>',
+                    button: { text: '<?php echo esc_js( __( 'Utiliser ce logo', 'blazing-feedback' ) ); ?>' },
+                    multiple: false,
+                    library: { type: 'image' }
+                });
+                frame.on('select', function() {
+                    var attachment = frame.state().get('selection').first().toJSON();
+                    $('#wpvfh_logo_custom_url').val(attachment.url);
+                });
+                frame.open();
+            });
+        });
+        </script>
+        <?php
     }
 
     /**
