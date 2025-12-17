@@ -627,10 +627,23 @@ body.wpvfh-panel-active .wpvfh-floating-buttons {
     color: var(--wpvfh-text);
 }
 
-.wpvfh-panel-logo {
-    max-height: 36px;
-    width: auto;
-    object-fit: contain;
+.wpvfh-panel-logo,
+.wpvfh-panel-header .wpvfh-panel-logo,
+.wpvfh-panel .wpvfh-panel-header .wpvfh-panel-logo,
+.elementor-widget-container .wpvfh-panel-logo,
+body .wpvfh-panel-logo {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-height: 36px !important;
+    height: auto !important;
+    width: auto !important;
+    max-width: 200px !important;
+    object-fit: contain !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .wpvfh-close-btn {
