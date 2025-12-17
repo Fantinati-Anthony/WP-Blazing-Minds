@@ -3,7 +3,7 @@
  * Plugin Name: Blazing Feedback
  * Plugin URI: https://github.com/Fantinati-Anthony/Blazing-Feedback-WP
  * Description: Plugin de feedback visuel autonome pour WordPress. Annotations, captures d'écran, gestion de statuts. Alternative open-source à ProjectHuddle, Feedbucket et Marker.io.
- * Version: 1.5.0
+ * Version: 1.6.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: Blazing Feedback Team
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Constantes du plugin
  */
-define( 'WPVFH_VERSION', '1.5.0' );
+define( 'WPVFH_VERSION', '1.6.0' );
 define( 'WPVFH_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WPVFH_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'WPVFH_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
@@ -562,27 +562,15 @@ final class WP_Visual_Feedback_Hub {
                         <!-- Barre d'outils média -->
                         <div class="wpvfh-media-toolbar">
                             <button type="button" class="wpvfh-tool-btn wpvfh-tool-screenshot" data-tool="screenshot" title="<?php esc_attr_e( 'Capture d\'écran', 'blazing-feedback' ); ?>">
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                    <polyline points="21 15 16 10 5 21"></polyline>
-                                </svg>
+                                <span class="wpvfh-tool-emoji">📸</span>
                                 <span><?php esc_html_e( 'Capture', 'blazing-feedback' ); ?></span>
                             </button>
                             <button type="button" class="wpvfh-tool-btn wpvfh-tool-voice" data-tool="voice" title="<?php esc_attr_e( 'Message vocal', 'blazing-feedback' ); ?>">
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                                    <line x1="12" y1="19" x2="12" y2="23"></line>
-                                    <line x1="8" y1="23" x2="16" y2="23"></line>
-                                </svg>
+                                <span class="wpvfh-tool-emoji">🎤</span>
                                 <span><?php esc_html_e( 'Audio', 'blazing-feedback' ); ?></span>
                             </button>
                             <button type="button" class="wpvfh-tool-btn wpvfh-tool-video" data-tool="video" title="<?php esc_attr_e( 'Enregistrer l\'écran', 'blazing-feedback' ); ?>">
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                                </svg>
+                                <span class="wpvfh-tool-emoji">🎬</span>
                                 <span><?php esc_html_e( 'Vidéo', 'blazing-feedback' ); ?></span>
                             </button>
                         </div>
@@ -652,9 +640,11 @@ final class WP_Visual_Feedback_Hub {
                         <!-- Actions -->
                         <div class="wpvfh-form-actions">
                             <button type="button" class="wpvfh-btn wpvfh-btn-secondary wpvfh-cancel-btn">
+                                <span class="wpvfh-btn-emoji">✕</span>
                                 <?php esc_html_e( 'Annuler', 'blazing-feedback' ); ?>
                             </button>
                             <button type="submit" class="wpvfh-btn wpvfh-btn-primary wpvfh-submit-btn">
+                                <span class="wpvfh-btn-emoji">📨</span>
                                 <?php esc_html_e( 'Envoyer', 'blazing-feedback' ); ?>
                             </button>
                         </div>
@@ -670,6 +660,7 @@ final class WP_Visual_Feedback_Hub {
                             <div class="wpvfh-empty-icon" aria-hidden="true">📭</div>
                             <p class="wpvfh-empty-text"><?php esc_html_e( 'Aucun feedback pour cette page', 'blazing-feedback' ); ?></p>
                             <button type="button" class="wpvfh-btn wpvfh-btn-primary wpvfh-add-feedback-btn" style="margin-top: 16px;">
+                                <span class="wpvfh-btn-emoji">➕</span>
                                 <?php esc_html_e( 'Ajouter un feedback', 'blazing-feedback' ); ?>
                             </button>
                         </div>
