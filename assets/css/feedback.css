@@ -544,12 +544,6 @@ body.wpvfh-panel-active .wpvfh-floating-buttons {
     transition: right 0.3s ease !important;
 }
 
-/* Ajuster pour la barre admin WordPress */
-.admin-bar .wpvfh-panel {
-    top: 32px !important;
-    height: calc(100vh - 32px) !important;
-}
-
 /* Responsive: sur mobile, pas de push mais overlay */
 @media screen and (max-width: 600px) {
     body.wpvfh-panel-active {
@@ -560,13 +554,6 @@ body.wpvfh-panel-active .wpvfh-floating-buttons {
     }
     body.wpvfh-panel-active .wpvfh-sidebar-overlay {
         display: block !important;
-    }
-}
-
-@media screen and (max-width: 782px) {
-    .admin-bar .wpvfh-panel {
-        top: 46px !important;
-        height: calc(100vh - 46px) !important;
     }
 }
 
@@ -2997,6 +2984,11 @@ body.wpvfh-inspector-mode .wpvfh-pins-container {
 /* Pièces jointes */
 .wpvfh-attachments-section {
     margin-top: 12px;
+    border: 1px solid #888;
+    padding: 10px;
+    border-radius: 5px;
+    background: #efefef;
+    text-align: center;
 }
 
 .wpvfh-attachments-list {
@@ -3506,6 +3498,7 @@ button.wpvfh-btn-validate:not(:disabled):hover {
     font-weight: 600;
     color: #495057;
     margin-bottom: 8px;
+    justify-content: center;
 }
 
 .wpvfh-attachments-label .wpvfh-label-icon {
