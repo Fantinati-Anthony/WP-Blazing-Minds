@@ -558,11 +558,11 @@ final class WP_Visual_Feedback_Hub {
 
                 <!-- Onglets -->
                 <div class="wpvfh-tabs">
-                    <button type="button" class="wpvfh-tab active" data-tab="new">
+                    <button type="button" class="wpvfh-tab" data-tab="new" id="wpvfh-tab-new-btn" hidden>
                         <span class="wpvfh-tab-icon" aria-hidden="true">➕</span>
                         <?php esc_html_e( 'Nouveau', 'blazing-feedback' ); ?>
                     </button>
-                    <button type="button" class="wpvfh-tab" data-tab="list">
+                    <button type="button" class="wpvfh-tab active" data-tab="list">
                         <span class="wpvfh-tab-icon" aria-hidden="true">📋</span>
                         <?php esc_html_e( 'Liste', 'blazing-feedback' ); ?>
                         <span class="wpvfh-tab-count" id="wpvfh-pins-count"></span>
@@ -579,7 +579,7 @@ final class WP_Visual_Feedback_Hub {
 
                 <div class="wpvfh-panel-body">
                     <!-- Onglet: Nouveau feedback -->
-                    <div id="wpvfh-tab-new" class="wpvfh-tab-content active">
+                    <div id="wpvfh-tab-new" class="wpvfh-tab-content">
                         <form id="wpvfh-form" class="wpvfh-form">
                         <!-- Zone de texte principale -->
                         <div class="wpvfh-form-group">
@@ -718,7 +718,7 @@ final class WP_Visual_Feedback_Hub {
                     </div><!-- /wpvfh-tab-new -->
 
                     <!-- Onglet: Liste des feedbacks -->
-                    <div id="wpvfh-tab-list" class="wpvfh-tab-content">
+                    <div id="wpvfh-tab-list" class="wpvfh-tab-content active">
                         <!-- Filtres par état -->
                         <div class="wpvfh-filters" id="wpvfh-filters">
                             <button type="button" class="wpvfh-filter-btn active" data-status="all">

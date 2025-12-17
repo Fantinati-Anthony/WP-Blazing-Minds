@@ -124,6 +124,7 @@
                 // Onglets et liste
                 tabs: document.querySelectorAll('.wpvfh-tab'),
                 tabNew: document.getElementById('wpvfh-tab-new'),
+                tabNewBtn: document.getElementById('wpvfh-tab-new-btn'),
                 tabList: document.getElementById('wpvfh-tab-list'),
                 tabDetails: document.getElementById('wpvfh-tab-details'),
                 tabDetailsBtn: document.getElementById('wpvfh-tab-details-btn'),
@@ -966,13 +967,17 @@
 
         /**
          * Changer d'onglet
-         * @param {string} tabName - Nom de l'onglet ('new', 'list' ou 'details')
+         * @param {string} tabName - Nom de l'onglet ('new', 'list', 'pages' ou 'details')
          */
         switchTab: function(tabName) {
             // Mettre à jour les boutons d'onglet
             if (this.elements.tabs && this.elements.tabs.length > 0) {
                 this.elements.tabs.forEach(tab => {
-                    // L'onglet détails n'est visible QUE si un feedback est sélectionné ET on affiche les détails
+                    // L'onglet "Nouveau" n'est visible QUE quand on crée un feedback
+                    if (tab.dataset.tab === 'new') {
+                        tab.hidden = (tabName !== 'new');
+                    }
+                    // L'onglet "Détails" n'est visible QUE si un feedback est sélectionné
                     if (tab.dataset.tab === 'details') {
                         const showDetailsTab = (tabName === 'details' && this.state.currentFeedbackId);
                         tab.hidden = !showDetailsTab;
