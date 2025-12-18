@@ -44,34 +44,6 @@ class WPVFH_CPT_Feedback {
      */
     const TAX_PAGE = 'feedback_page';
 
-    /**
-     * Liste des statuts de feedback
-     *
-     * @since 1.0.0
-     * @var array
-     */
-    private static $statuses = array(
-        'new'         => array(
-            'label' => 'Nouveau',
-            'color' => '#3498db',
-            'icon'  => '🆕',
-        ),
-        'in_progress' => array(
-            'label' => 'En cours',
-            'color' => '#f39c12',
-            'icon'  => '🔄',
-        ),
-        'resolved'    => array(
-            'label' => 'Résolu',
-            'color' => '#27ae60',
-            'icon'  => '✅',
-        ),
-        'rejected'    => array(
-            'label' => 'Rejeté',
-            'color' => '#e74c3c',
-            'icon'  => '❌',
-        ),
-    );
 
     /**
      * Meta keys pour les feedbacks
@@ -161,14 +133,14 @@ class WPVFH_CPT_Feedback {
             'public'              => false,
             'publicly_queryable'  => false,
             'show_ui'             => true,
-            'show_in_menu'        => true,
+            'show_in_menu'        => 'wpvfh-dashboard',
             'query_var'           => false,
             'rewrite'             => false,
             'capability_type'     => array( 'feedback', 'feedbacks' ),
             'map_meta_cap'        => true,
             'has_archive'         => false,
             'hierarchical'        => false,
-            'menu_position'       => 30,
+            'menu_position'       => null,
             'menu_icon'           => 'dashicons-format-chat',
             'supports'            => array( 'title', 'editor', 'author', 'comments' ),
             'show_in_rest'        => true,
@@ -210,7 +182,7 @@ class WPVFH_CPT_Feedback {
         $status_args = array(
             'hierarchical'      => false,
             'labels'            => $status_labels,
-            'show_ui'           => true,
+            'show_ui'           => false,
             'show_admin_column' => true,
             'show_in_rest'      => true,
             'query_var'         => false,
@@ -238,7 +210,7 @@ class WPVFH_CPT_Feedback {
         $page_args = array(
             'hierarchical'      => false,
             'labels'            => $page_labels,
-            'show_ui'           => true,
+            'show_ui'           => false,
             'show_admin_column' => true,
             'show_in_rest'      => true,
             'query_var'         => false,
@@ -255,12 +227,13 @@ class WPVFH_CPT_Feedback {
      * @return void
      */
     private static function create_default_status_terms() {
-        foreach ( self::$statuses as $slug => $status ) {
-            if ( ! term_exists( $slug, self::TAX_STATUS ) ) {
+        $statuses = WPVFH_Options_Manager::get_statuses();
+        foreach ( $statuses as $status ) {
+            if ( ! term_exists( $status['id'], self::TAX_STATUS ) ) {
                 wp_insert_term(
                     $status['label'],
                     self::TAX_STATUS,
-                    array( 'slug' => $slug )
+                    array( 'slug' => $status['id'] )
                 );
             }
         }
@@ -432,15 +405,16 @@ class WPVFH_CPT_Feedback {
     public static function render_info_meta_box( $post ) {
         wp_nonce_field( 'wpvfh_save_feedback', 'wpvfh_feedback_nonce' );
 
-        $status = get_post_meta( $post->ID, '_wpvfh_status', true ) ?: 'new';
+        $current_status = get_post_meta( $post->ID, '_wpvfh_status', true ) ?: 'new';
         $url = get_post_meta( $post->ID, '_wpvfh_url', true );
+        $statuses = WPVFH_Options_Manager::get_statuses();
         ?>
         <p>
             <label for="wpvfh_status"><strong><?php esc_html_e( 'Statut', 'blazing-feedback' ); ?></strong></label>
             <select id="wpvfh_status" name="wpvfh_status" class="widefat">
-                <?php foreach ( self::$statuses as $key => $data ) : ?>
-                    <option value="<?php echo esc_attr( $key ); ?>" <?php selected( $status, $key ); ?>>
-                        <?php echo esc_html( $data['icon'] . ' ' . $data['label'] ); ?>
+                <?php foreach ( $statuses as $status ) : ?>
+                    <option value="<?php echo esc_attr( $status['id'] ); ?>" <?php selected( $current_status, $status['id'] ); ?>>
+                        <?php echo esc_html( $status['emoji'] . ' ' . $status['label'] ); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
@@ -565,7 +539,8 @@ class WPVFH_CPT_Feedback {
         // Sauvegarder le statut
         if ( isset( $_POST['wpvfh_status'] ) ) {
             $status = sanitize_key( $_POST['wpvfh_status'] );
-            if ( array_key_exists( $status, self::$statuses ) ) {
+            $status_data = WPVFH_Options_Manager::get_status_by_id( $status );
+            if ( $status_data ) {
                 update_post_meta( $post_id, '_wpvfh_status', $status );
 
                 // Mettre à jour la taxonomie également
@@ -590,13 +565,14 @@ class WPVFH_CPT_Feedback {
      * @return array
      */
     public static function get_statuses() {
+        $statuses = WPVFH_Options_Manager::get_statuses();
         /**
          * Filtre les statuts de feedback
          *
          * @since 1.0.0
          * @param array $statuses Liste des statuts
          */
-        return apply_filters( 'wpvfh_feedback_statuses', self::$statuses );
+        return apply_filters( 'wpvfh_feedback_statuses', $statuses );
     }
 
     /**
@@ -634,14 +610,19 @@ class WPVFH_CPT_Feedback {
         switch ( $column ) {
             case 'feedback_status':
                 $status = get_post_meta( $post_id, '_wpvfh_status', true ) ?: 'new';
-                $status_data = self::$statuses[ $status ] ?? self::$statuses['new'];
-                printf(
-                    '<span class="wpvfh-status wpvfh-status-%s" style="color: %s;">%s %s</span>',
-                    esc_attr( $status ),
-                    esc_attr( $status_data['color'] ),
-                    esc_html( $status_data['icon'] ),
-                    esc_html( $status_data['label'] )
-                );
+                $status_data = WPVFH_Options_Manager::get_status_by_id( $status );
+                if ( ! $status_data ) {
+                    $status_data = WPVFH_Options_Manager::get_status_by_id( 'new' );
+                }
+                if ( $status_data ) {
+                    printf(
+                        '<span class="wpvfh-status wpvfh-status-%s" style="color: %s;">%s %s</span>',
+                        esc_attr( $status ),
+                        esc_attr( $status_data['color'] ),
+                        esc_html( $status_data['emoji'] ),
+                        esc_html( $status_data['label'] )
+                    );
+                }
                 break;
 
             case 'feedback_page':
@@ -696,12 +677,13 @@ class WPVFH_CPT_Feedback {
 
         // Filtre par statut
         $current_status = isset( $_GET['feedback_status_filter'] ) ? sanitize_key( $_GET['feedback_status_filter'] ) : '';
+        $statuses = WPVFH_Options_Manager::get_statuses();
         ?>
         <select name="feedback_status_filter">
             <option value=""><?php esc_html_e( 'Tous les statuts', 'blazing-feedback' ); ?></option>
-            <?php foreach ( self::$statuses as $key => $data ) : ?>
-                <option value="<?php echo esc_attr( $key ); ?>" <?php selected( $current_status, $key ); ?>>
-                    <?php echo esc_html( $data['label'] ); ?>
+            <?php foreach ( $statuses as $status ) : ?>
+                <option value="<?php echo esc_attr( $status['id'] ); ?>" <?php selected( $current_status, $status['id'] ); ?>>
+                    <?php echo esc_html( $status['label'] ); ?>
                 </option>
             <?php endforeach; ?>
         </select>

@@ -60,7 +60,7 @@ class WPVFH_Admin_UI {
             30
         );
 
-        // Sous-page - Dashboard (redirection)
+        // Sous-page - Dashboard (redirection pour remplacer le titre auto)
         add_submenu_page(
             'wpvfh-dashboard',
             __( 'Tableau de bord', 'blazing-feedback' ),
@@ -70,14 +70,8 @@ class WPVFH_Admin_UI {
             array( __CLASS__, 'render_dashboard_page' )
         );
 
-        // Sous-page - Tous les feedbacks
-        add_submenu_page(
-            'wpvfh-dashboard',
-            __( 'Tous les feedbacks', 'blazing-feedback' ),
-            __( 'Tous les feedbacks', 'blazing-feedback' ),
-            'read_feedback',
-            'edit.php?post_type=visual_feedback'
-        );
+        // Note: "Tous les feedbacks" est ajouté automatiquement par le CPT
+        // avec show_in_menu => 'wpvfh-dashboard'
 
         // Sous-page - Paramètres
         add_submenu_page(

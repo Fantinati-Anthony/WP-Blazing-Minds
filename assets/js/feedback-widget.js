@@ -1209,14 +1209,9 @@
 
             // Générer le HTML des pins avec handle de drag et numéro
             const html = feedbacks.map((feedback, index) => {
-                const statusLabels = {
-                    new: this.config.i18n?.statusNew || 'Nouveau',
-                    in_progress: this.config.i18n?.statusInProgress || 'En cours',
-                    resolved: this.config.i18n?.statusResolved || 'Résolu',
-                    rejected: this.config.i18n?.statusRejected || 'Rejeté',
-                };
-
                 const status = feedback.status || 'new';
+                const statusLabel = this.getStatusLabel(status);
+                const statusColor = this.getStatusColor(status);
                 const date = feedback.date ? new Date(feedback.date).toLocaleDateString() : '';
                 const pinNumber = index + 1;
 
@@ -1230,7 +1225,7 @@
                 return `
                     <div class="wpvfh-pin-item" data-feedback-id="${feedback.id}" data-pin-number="${pinNumber}">
                         ${hasPosition ? `
-                        <div class="wpvfh-pin-marker status-${status}">
+                        <div class="wpvfh-pin-marker status-${status}" style="background-color: ${statusColor};">
                             ${pinNumber}
                         </div>
                         ` : ''}
@@ -1240,7 +1235,7 @@
                             </div>
                             <p class="wpvfh-pin-text">${this.escapeHtml(feedback.comment || feedback.content || '')}</p>
                             <div class="wpvfh-pin-meta">
-                                <span class="wpvfh-pin-status status-${status}">${statusLabels[status]}</span>
+                                <span class="wpvfh-pin-status status-${status}" style="color: ${statusColor};">${statusLabel}</span>
                                 ${date ? `<span class="wpvfh-pin-date">${date}</span>` : ''}
                             </div>
                             ${this.generateFeedbackLabelsHtml(feedback)}
@@ -1840,22 +1835,10 @@
             // Stocker l'ID du feedback courant
             this.state.currentFeedbackId = feedback.id;
 
-            // Labels des statuts
-            const statusLabels = {
-                new: this.config.i18n?.statusNew || 'Nouveau',
-                in_progress: this.config.i18n?.statusInProgress || 'En cours',
-                resolved: this.config.i18n?.statusResolved || 'Résolu',
-                rejected: this.config.i18n?.statusRejected || 'Rejeté',
-            };
-
-            const statusIcons = {
-                new: '🆕',
-                in_progress: '⏳',
-                resolved: '✅',
-                rejected: '❌',
-            };
-
             const status = feedback.status || 'new';
+            const statusLabel = this.getStatusLabel(status);
+            const statusEmoji = this.getStatusEmoji(status);
+            const statusColor = this.getStatusColor(status);
 
             // Remplir les éléments
             if (this.elements.detailId) {
@@ -1864,8 +1847,8 @@
 
             if (this.elements.detailStatus) {
                 this.elements.detailStatus.innerHTML = `
-                    <span class="wpvfh-status-badge status-${status}">
-                        ${statusIcons[status] || ''} ${statusLabels[status] || status}
+                    <span class="wpvfh-status-badge status-${status}" style="background-color: ${statusColor}20; color: ${statusColor}; border-color: ${statusColor}40;">
+                        ${statusEmoji} ${statusLabel}
                     </span>
                 `;
             }
@@ -1976,21 +1959,12 @@
 
                 // Mettre à jour l'affichage du statut dans la sidebar
                 if (this.elements.detailStatus) {
-                    const statusLabels = {
-                        new: this.config.i18n?.statusNew || 'Nouveau',
-                        in_progress: this.config.i18n?.statusInProgress || 'En cours',
-                        resolved: this.config.i18n?.statusResolved || 'Résolu',
-                        rejected: this.config.i18n?.statusRejected || 'Rejeté',
-                    };
-                    const statusIcons = {
-                        new: '🆕',
-                        in_progress: '⏳',
-                        resolved: '✅',
-                        rejected: '❌',
-                    };
+                    const statusLabel = this.getStatusLabel(status);
+                    const statusEmoji = this.getStatusEmoji(status);
+                    const statusColor = this.getStatusColor(status);
                     this.elements.detailStatus.innerHTML = `
-                        <span class="wpvfh-status-badge status-${status}">
-                            ${statusIcons[status] || ''} ${statusLabels[status] || status}
+                        <span class="wpvfh-status-badge status-${status}" style="background-color: ${statusColor}20; color: ${statusColor}; border-color: ${statusColor}40;">
+                            ${statusEmoji} ${statusLabel}
                         </span>
                     `;
                 }
@@ -2174,27 +2148,18 @@
          */
         updateFilterCounts: function() {
             const feedbacks = this.state.currentFeedbacks || [];
+            const statuses = window.wpvfhData?.statuses || [];
 
-            const counts = {
-                all: feedbacks.length,
-                new: feedbacks.filter(f => f.status === 'new').length,
-                in_progress: feedbacks.filter(f => f.status === 'in_progress').length,
-                resolved: feedbacks.filter(f => f.status === 'resolved').length,
-                rejected: feedbacks.filter(f => f.status === 'rejected').length,
-            };
-
-            // Mettre à jour les badges (inner span)
+            // Mettre à jour le compteur "Tous"
             const allCount = document.querySelector('#wpvfh-filter-all-count span');
-            const newCount = document.querySelector('#wpvfh-filter-new-count span');
-            const progressCount = document.querySelector('#wpvfh-filter-progress-count span');
-            const resolvedCount = document.querySelector('#wpvfh-filter-resolved-count span');
-            const rejectedCount = document.querySelector('#wpvfh-filter-rejected-count span');
+            if (allCount) allCount.textContent = feedbacks.length;
 
-            if (allCount) allCount.textContent = counts.all;
-            if (newCount) newCount.textContent = counts.new;
-            if (progressCount) progressCount.textContent = counts.in_progress;
-            if (resolvedCount) resolvedCount.textContent = counts.resolved;
-            if (rejectedCount) rejectedCount.textContent = counts.rejected;
+            // Mettre à jour les compteurs pour chaque statut dynamique
+            statuses.forEach(status => {
+                const count = feedbacks.filter(f => f.status === status.id).length;
+                const countEl = document.querySelector(`#wpvfh-filter-${status.id}-count span`);
+                if (countEl) countEl.textContent = count;
+            });
         },
 
         /**
@@ -2502,6 +2467,46 @@
         getPriorityConfig: function(priorityId) {
             if (!window.wpvfhData || !window.wpvfhData.priorities) return null;
             return window.wpvfhData.priorities.find(p => p.id === priorityId) || null;
+        },
+
+        /**
+         * Obtenir la config d'un statut depuis les options dynamiques
+         * @param {string} statusId - ID du statut
+         * @returns {Object|null}
+         */
+        getStatusConfig: function(statusId) {
+            if (!window.wpvfhData || !window.wpvfhData.statuses) return null;
+            return window.wpvfhData.statuses.find(s => s.id === statusId) || null;
+        },
+
+        /**
+         * Obtenir le label d'un statut
+         * @param {string} statusId - ID du statut
+         * @returns {string}
+         */
+        getStatusLabel: function(statusId) {
+            const status = this.getStatusConfig(statusId);
+            return status ? status.label : statusId;
+        },
+
+        /**
+         * Obtenir l'emoji d'un statut
+         * @param {string} statusId - ID du statut
+         * @returns {string}
+         */
+        getStatusEmoji: function(statusId) {
+            const status = this.getStatusConfig(statusId);
+            return status ? status.emoji : '';
+        },
+
+        /**
+         * Obtenir la couleur d'un statut
+         * @param {string} statusId - ID du statut
+         * @returns {string}
+         */
+        getStatusColor: function(statusId) {
+            const status = this.getStatusConfig(statusId);
+            return status ? status.color : '#95a5a6';
         },
 
         /**
@@ -3237,23 +3242,20 @@
             item.draggable = true;
             item.dataset.feedbackId = feedback.id;
 
-            const statusClass = `status-${feedback.status || 'new'}`;
-            const statusLabels = {
-                'new': 'Nouveau',
-                'in_progress': 'En cours',
-                'resolved': 'Résolu',
-                'rejected': 'Rejeté'
-            };
+            const status = feedback.status || 'new';
+            const statusClass = `status-${status}`;
+            const statusLabel = BlazingFeedback.getStatusLabel(status);
+            const statusColor = BlazingFeedback.getStatusColor(status);
 
             item.innerHTML = `
-                <span class="wpvfh-pin-marker ${statusClass}"></span>
+                <span class="wpvfh-pin-marker ${statusClass}" style="background-color: ${statusColor};"></span>
                 <div class="wpvfh-pin-content">
                     <div class="wpvfh-pin-header">
                         <span class="wpvfh-pin-id">#${feedback.id}</span>
                     </div>
                     <div class="wpvfh-pin-text">${this.escapeHtml(feedback.content || feedback.comment || 'Sans commentaire')}</div>
                     <div class="wpvfh-pin-meta">
-                        <span class="wpvfh-pin-status ${statusClass}">${statusLabels[feedback.status] || 'Nouveau'}</span>
+                        <span class="wpvfh-pin-status ${statusClass}" style="color: ${statusColor};">${statusLabel}</span>
                     </div>
                 </div>
             `;
@@ -3589,15 +3591,8 @@
                 return;
             }
 
-            const statusColors = {
-                'open': '#e74c3c',
-                'in-progress': '#f39c12',
-                'resolved': '#27ae60',
-                'closed': '#95a5a6'
-            };
-
             this.elements.searchResultsList.innerHTML = results.map(feedback => {
-                const statusColor = statusColors[feedback.status] || '#95a5a6';
+                const statusColor = BlazingFeedback.getStatusColor(feedback.status);
                 const text = feedback.comment || feedback.transcript || 'Sans contenu';
                 const date = new Date(feedback.created_at).toLocaleDateString('fr-FR');
                 const pageUrl = feedback.page_url || '';

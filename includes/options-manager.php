@@ -1,6 +1,6 @@
 <?php
 /**
- * Gestionnaire des options personnalisables (Types, Priorités, Tags)
+ * Gestionnaire des options personnalisables (Types, Priorités, Tags, Statuts)
  *
  * @package WP_Visual_Feedback_Hub
  * @since 1.1.0
@@ -24,6 +24,7 @@ class WPVFH_Options_Manager {
     const OPTION_TYPES      = 'wpvfh_feedback_types';
     const OPTION_PRIORITIES = 'wpvfh_feedback_priorities';
     const OPTION_TAGS       = 'wpvfh_feedback_tags';
+    const OPTION_STATUSES   = 'wpvfh_feedback_statuses';
 
     /**
      * Initialiser le gestionnaire
@@ -214,6 +215,41 @@ class WPVFH_Options_Manager {
     }
 
     /**
+     * Obtenir les statuts par défaut
+     *
+     * @since 1.1.0
+     * @return array
+     */
+    public static function get_default_statuses() {
+        return array(
+            array(
+                'id'    => 'new',
+                'label' => __( 'Nouveau', 'blazing-feedback' ),
+                'emoji' => '🆕',
+                'color' => '#3498db',
+            ),
+            array(
+                'id'    => 'in_progress',
+                'label' => __( 'En cours', 'blazing-feedback' ),
+                'emoji' => '🔄',
+                'color' => '#f39c12',
+            ),
+            array(
+                'id'    => 'resolved',
+                'label' => __( 'Résolu', 'blazing-feedback' ),
+                'emoji' => '✅',
+                'color' => '#27ae60',
+            ),
+            array(
+                'id'    => 'rejected',
+                'label' => __( 'Rejeté', 'blazing-feedback' ),
+                'emoji' => '❌',
+                'color' => '#e74c3c',
+            ),
+        );
+    }
+
+    /**
      * Obtenir les types de feedback
      *
      * @since 1.1.0
@@ -292,6 +328,49 @@ class WPVFH_Options_Manager {
     }
 
     /**
+     * Obtenir les statuts
+     *
+     * @since 1.1.0
+     * @return array
+     */
+    public static function get_statuses() {
+        $statuses = get_option( self::OPTION_STATUSES );
+        if ( false === $statuses || empty( $statuses ) ) {
+            $statuses = self::get_default_statuses();
+            update_option( self::OPTION_STATUSES, $statuses );
+        }
+        return $statuses;
+    }
+
+    /**
+     * Sauvegarder les statuts
+     *
+     * @since 1.1.0
+     * @param array $statuses Statuts à sauvegarder
+     * @return bool
+     */
+    public static function save_statuses( $statuses ) {
+        return update_option( self::OPTION_STATUSES, $statuses );
+    }
+
+    /**
+     * Obtenir un statut par ID
+     *
+     * @since 1.1.0
+     * @param string $id ID du statut
+     * @return array|null
+     */
+    public static function get_status_by_id( $id ) {
+        $statuses = self::get_statuses();
+        foreach ( $statuses as $status ) {
+            if ( $status['id'] === $id ) {
+                return $status;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Obtenir un type par ID
      *
      * @since 1.1.0
@@ -356,6 +435,9 @@ class WPVFH_Options_Manager {
                 case 'tags':
                     delete_option( self::OPTION_TAGS );
                     break;
+                case 'statuses':
+                    delete_option( self::OPTION_STATUSES );
+                    break;
             }
 
             wp_safe_redirect( admin_url( 'admin.php?page=wpvfh-options&tab=' . $tab . '&reset=1' ) );
@@ -394,6 +476,9 @@ class WPVFH_Options_Manager {
             case 'tags':
                 $items = self::get_predefined_tags();
                 break;
+            case 'statuses':
+                $items = self::get_statuses();
+                break;
         }
 
         // Réorganiser selon l'ordre
@@ -417,6 +502,9 @@ class WPVFH_Options_Manager {
                 break;
             case 'tags':
                 self::save_tags( $sorted );
+                break;
+            case 'statuses':
+                self::save_statuses( $sorted );
                 break;
         }
 
@@ -458,8 +546,8 @@ class WPVFH_Options_Manager {
             'color' => $color,
         );
 
-        // Ajouter l'emoji seulement pour types et priorities
-        if ( in_array( $option_type, array( 'types', 'priorities' ), true ) ) {
+        // Ajouter l'emoji pour types, priorities et statuses
+        if ( in_array( $option_type, array( 'types', 'priorities', 'statuses' ), true ) ) {
             $new_item['emoji'] = $emoji;
         }
 
@@ -474,6 +562,9 @@ class WPVFH_Options_Manager {
                 break;
             case 'tags':
                 $items = self::get_predefined_tags();
+                break;
+            case 'statuses':
+                $items = self::get_statuses();
                 break;
         }
 
@@ -501,6 +592,9 @@ class WPVFH_Options_Manager {
                 break;
             case 'tags':
                 self::save_tags( $items );
+                break;
+            case 'statuses':
+                self::save_statuses( $items );
                 break;
         }
 
@@ -539,6 +633,9 @@ class WPVFH_Options_Manager {
             case 'tags':
                 $items = self::get_predefined_tags();
                 break;
+            case 'statuses':
+                $items = self::get_statuses();
+                break;
         }
 
         // Supprimer l'élément
@@ -558,6 +655,9 @@ class WPVFH_Options_Manager {
             case 'tags':
                 self::save_tags( $items );
                 break;
+            case 'statuses':
+                self::save_statuses( $items );
+                break;
         }
 
         wp_send_json_success();
@@ -574,8 +674,9 @@ class WPVFH_Options_Manager {
             wp_die( esc_html__( 'Permission refusée.', 'blazing-feedback' ) );
         }
 
-        $current_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'types';
+        $current_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'statuses';
         $tabs = array(
+            'statuses'   => __( 'Statuts', 'blazing-feedback' ),
             'types'      => __( 'Types de feedback', 'blazing-feedback' ),
             'priorities' => __( 'Niveaux de priorité', 'blazing-feedback' ),
             'tags'       => __( 'Tags prédéfinis', 'blazing-feedback' ),
@@ -604,6 +705,9 @@ class WPVFH_Options_Manager {
             <div class="wpvfh-options-content">
                 <?php
                 switch ( $current_tab ) {
+                    case 'statuses':
+                        self::render_statuses_tab();
+                        break;
                     case 'types':
                         self::render_types_tab();
                         break;
@@ -618,6 +722,17 @@ class WPVFH_Options_Manager {
             </div>
         </div>
         <?php
+    }
+
+    /**
+     * Rendu de l'onglet Statuts
+     *
+     * @since 1.1.0
+     * @return void
+     */
+    private static function render_statuses_tab() {
+        $statuses = self::get_statuses();
+        self::render_items_table( 'statuses', $statuses, true );
     }
 
     /**
@@ -672,6 +787,9 @@ class WPVFH_Options_Manager {
             <p class="description">
                 <?php
                 switch ( $type ) {
+                    case 'statuses':
+                        esc_html_e( 'Définissez les statuts des feedbacks. Glissez-déposez pour réorganiser.', 'blazing-feedback' );
+                        break;
                     case 'types':
                         esc_html_e( 'Définissez les types de feedback disponibles. Glissez-déposez pour réorganiser.', 'blazing-feedback' );
                         break;
@@ -781,6 +899,7 @@ class WPVFH_Options_Manager {
      */
     public static function get_all_options_for_frontend() {
         return array(
+            'statuses'   => self::get_statuses(),
             'types'      => self::get_types(),
             'priorities' => self::get_priorities(),
             'tags'       => self::get_predefined_tags(),

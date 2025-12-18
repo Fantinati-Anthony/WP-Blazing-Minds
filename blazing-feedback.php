@@ -101,9 +101,9 @@ final class WP_Visual_Feedback_Hub {
         // Fichiers du core
         require_once WPVFH_PLUGIN_DIR . 'includes/permissions.php';
         require_once WPVFH_PLUGIN_DIR . 'includes/roles.php';
+        require_once WPVFH_PLUGIN_DIR . 'includes/options-manager.php';
         require_once WPVFH_PLUGIN_DIR . 'includes/cpt-feedback.php';
         require_once WPVFH_PLUGIN_DIR . 'includes/rest-api.php';
-        require_once WPVFH_PLUGIN_DIR . 'includes/options-manager.php';
 
         // Admin uniquement
         if ( is_admin() ) {
@@ -815,22 +815,12 @@ final class WP_Visual_Feedback_Hub {
                                 <?php esc_html_e( 'Tous', 'blazing-feedback' ); ?>
                                 <span class="wpvfh-filter-count" id="wpvfh-filter-all-count"><span>0</span></span>
                             </button>
-                            <button type="button" class="wpvfh-filter-btn" data-status="new">
-                                <?php esc_html_e( 'Nouveau', 'blazing-feedback' ); ?>
-                                <span class="wpvfh-filter-count" id="wpvfh-filter-new-count"><span>0</span></span>
+                            <?php foreach ( WPVFH_Options_Manager::get_statuses() as $status ) : ?>
+                            <button type="button" class="wpvfh-filter-btn" data-status="<?php echo esc_attr( $status['id'] ); ?>">
+                                <?php echo esc_html( $status['label'] ); ?>
+                                <span class="wpvfh-filter-count" id="wpvfh-filter-<?php echo esc_attr( $status['id'] ); ?>-count"><span>0</span></span>
                             </button>
-                            <button type="button" class="wpvfh-filter-btn" data-status="in_progress">
-                                <?php esc_html_e( 'En cours', 'blazing-feedback' ); ?>
-                                <span class="wpvfh-filter-count" id="wpvfh-filter-progress-count"><span>0</span></span>
-                            </button>
-                            <button type="button" class="wpvfh-filter-btn" data-status="resolved">
-                                <?php esc_html_e( 'Résolu', 'blazing-feedback' ); ?>
-                                <span class="wpvfh-filter-count" id="wpvfh-filter-resolved-count"><span>0</span></span>
-                            </button>
-                            <button type="button" class="wpvfh-filter-btn" data-status="rejected">
-                                <?php esc_html_e( 'Rejeté', 'blazing-feedback' ); ?>
-                                <span class="wpvfh-filter-count" id="wpvfh-filter-rejected-count"><span>0</span></span>
-                            </button>
+                            <?php endforeach; ?>
                         </div>
 
                         <div id="wpvfh-pins-list" class="wpvfh-pins-list">
@@ -1030,10 +1020,11 @@ final class WP_Visual_Feedback_Hub {
                                 <div class="wpvfh-status-change">
                                     <label for="wpvfh-status-select"><?php esc_html_e( 'Statut:', 'blazing-feedback' ); ?></label>
                                     <select id="wpvfh-status-select" class="wpvfh-status-select">
-                                        <option value="new"><?php esc_html_e( 'Nouveau', 'blazing-feedback' ); ?></option>
-                                        <option value="in_progress"><?php esc_html_e( 'En cours', 'blazing-feedback' ); ?></option>
-                                        <option value="resolved"><?php esc_html_e( 'Résolu', 'blazing-feedback' ); ?></option>
-                                        <option value="rejected"><?php esc_html_e( 'Rejeté', 'blazing-feedback' ); ?></option>
+                                        <?php foreach ( WPVFH_Options_Manager::get_statuses() as $status ) : ?>
+                                            <option value="<?php echo esc_attr( $status['id'] ); ?>">
+                                                <?php echo esc_html( $status['emoji'] . ' ' . $status['label'] ); ?>
+                                            </option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
 
