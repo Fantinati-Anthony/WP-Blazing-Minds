@@ -79,7 +79,7 @@ class WPVFH_GitHub_Updater {
 
         // Configuration GitHub - À modifier selon votre repository
         $this->username     = 'Fantinati-Anthony';
-        $this->repo         = 'Blazing-Feedback-WP';
+        $this->repo         = 'WP-Blazing-Feedback';
         $this->access_token = ''; // Laisser vide pour les repos publics
 
         add_action( 'admin_init', array( $this, 'set_plugin_data' ) );

@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Blazing Feedback
- * Plugin URI: https://github.com/Fantinati-Anthony/Blazing-Feedback-WP
+ * Plugin URI: https://github.com/Fantinati-Anthony/WP-Blazing-Feedback
  * Description: Plugin de feedback visuel autonome pour WordPress. Annotations, captures d'écran, gestion de statuts. Alternative open-source à ProjectHuddle, Feedbucket et Marker.io.
  * Version: 1.6.0
  * Requires at least: 6.0
