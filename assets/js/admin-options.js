@@ -212,6 +212,82 @@
                     self.closeEmojiPicker();
                 }
             });
+
+            // Group settings toggle button
+            $(document).on('click', '.wpvfh-group-settings-btn', function(e) {
+                e.preventDefault();
+                var $panel = $(this).closest('.wpvfh-group-settings-panel');
+                self.toggleGroupSettings($panel);
+            });
+
+            // Group enabled toggle
+            $(document).on('change', '.wpvfh-group-enabled', function() {
+                var $panel = $(this).closest('.wpvfh-group-settings-panel');
+                if ($(this).is(':checked')) {
+                    $panel.removeClass('disabled');
+                } else {
+                    $panel.addClass('disabled');
+                }
+                // Auto-save on toggle
+                self.saveGroupSettings($panel);
+            });
+
+            // Rename group button
+            $(document).on('click', '.wpvfh-rename-group-btn', function(e) {
+                e.preventDefault();
+                var $title = $(this).closest('.wpvfh-group-title');
+                self.startRenameGroup($title);
+            });
+
+            // Rename group input blur/enter
+            $(document).on('blur', '.wpvfh-group-name-input', function() {
+                var $title = $(this).closest('.wpvfh-group-title');
+                self.finishRenameGroup($title);
+            });
+
+            $(document).on('keydown', '.wpvfh-group-name-input', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $(this).blur();
+                }
+                if (e.which === 27) {
+                    e.preventDefault();
+                    var $title = $(this).closest('.wpvfh-group-title');
+                    self.cancelRenameGroup($title);
+                }
+            });
+
+            // Save group settings button
+            $(document).on('click', '.wpvfh-save-group-settings-btn', function(e) {
+                e.preventDefault();
+                var $panel = $(this).closest('.wpvfh-group-settings-panel');
+                self.saveGroupSettings($panel);
+            });
+
+            // Group access search
+            $(document).on('input', '.wpvfh-group-access-search', function() {
+                var $wrapper = $(this).closest('.wpvfh-access-search-wrapper');
+                var $panel = $(this).closest('.wpvfh-group-settings-panel');
+                var query = $(this).val().trim();
+
+                if (query.length < 2) {
+                    $wrapper.find('.wpvfh-access-dropdown').hide();
+                    return;
+                }
+
+                self.searchUsersRoles(query, $wrapper, function(item) {
+                    self.addGroupAccessTag($panel, item);
+                });
+            });
+
+            // Remove group access tag
+            $(document).on('click', '.wpvfh-group-access-tags .wpvfh-access-tag-remove', function(e) {
+                e.preventDefault();
+                var $tag = $(this).closest('.wpvfh-access-tag');
+                var $panel = $tag.closest('.wpvfh-group-settings-panel');
+                $tag.remove();
+                self.updateGroupAccessHiddenFields($panel);
+            });
         },
 
         /**
@@ -770,6 +846,172 @@
             }
 
             this.closeEmojiPicker();
+        },
+
+        /**
+         * Toggle group settings panel
+         */
+        toggleGroupSettings: function($panel) {
+            var $body = $panel.find('.wpvfh-group-settings-body');
+            if ($panel.hasClass('settings-open')) {
+                $body.slideUp(200);
+                $panel.removeClass('settings-open');
+            } else {
+                $body.slideDown(200);
+                $panel.addClass('settings-open');
+            }
+        },
+
+        /**
+         * Start renaming a group
+         */
+        startRenameGroup: function($title) {
+            var $display = $title.find('.wpvfh-group-name-display');
+            var $input = $title.find('.wpvfh-group-name-input');
+            var $btn = $title.find('.wpvfh-rename-group-btn');
+
+            $input.data('original', $input.val());
+            $display.hide();
+            $btn.hide();
+            $input.show().focus().select();
+        },
+
+        /**
+         * Cancel renaming a group
+         */
+        cancelRenameGroup: function($title) {
+            var $display = $title.find('.wpvfh-group-name-display');
+            var $input = $title.find('.wpvfh-group-name-input');
+            var $btn = $title.find('.wpvfh-rename-group-btn');
+
+            $input.val($input.data('original'));
+            $input.hide();
+            $display.show();
+            $btn.show();
+        },
+
+        /**
+         * Finish renaming a group
+         */
+        finishRenameGroup: function($title) {
+            var self = this;
+            var $display = $title.find('.wpvfh-group-name-display');
+            var $input = $title.find('.wpvfh-group-name-input');
+            var $btn = $title.find('.wpvfh-rename-group-btn');
+            var $panel = $title.closest('.wpvfh-group-settings-panel');
+            var slug = $panel.data('group');
+            var newName = $input.val().trim();
+            var originalName = $input.data('original');
+
+            if (!newName || newName === originalName) {
+                self.cancelRenameGroup($title);
+                return;
+            }
+
+            $.post(wpvfhOptionsAdmin.ajaxUrl, {
+                action: 'wpvfh_rename_custom_group',
+                nonce: wpvfhOptionsAdmin.nonce,
+                slug: slug,
+                name: newName
+            }, function(response) {
+                if (response.success) {
+                    $display.text(newName);
+                    // Update tab name
+                    $('.nav-tab[data-tab="' + slug + '"]').contents().first().replaceWith(newName);
+                } else {
+                    alert(response.data || wpvfhOptionsAdmin.i18n.error);
+                    $input.val(originalName);
+                }
+                $input.hide();
+                $display.show();
+                $btn.show();
+            }).fail(function() {
+                alert(wpvfhOptionsAdmin.i18n.error);
+                $input.val(originalName);
+                $input.hide();
+                $display.show();
+                $btn.show();
+            });
+        },
+
+        /**
+         * Save group settings
+         */
+        saveGroupSettings: function($panel) {
+            var self = this;
+            var slug = $panel.data('group');
+            var enabled = $panel.find('.wpvfh-group-enabled').is(':checked');
+            var aiPrompt = $panel.find('.wpvfh-group-ai-prompt').val();
+            var allowedRoles = $panel.find('.wpvfh-group-allowed-roles').val();
+            var allowedUsers = $panel.find('.wpvfh-group-allowed-users').val();
+
+            var $btn = $panel.find('.wpvfh-save-group-settings-btn');
+            var $icon = $btn.find('.dashicons');
+            $icon.removeClass('dashicons-saved').addClass('dashicons-update spin');
+
+            $.post(wpvfhOptionsAdmin.ajaxUrl, {
+                action: 'wpvfh_save_group_settings',
+                nonce: wpvfhOptionsAdmin.nonce,
+                slug: slug,
+                enabled: enabled ? 'true' : 'false',
+                ai_prompt: aiPrompt,
+                allowed_roles: allowedRoles,
+                allowed_users: allowedUsers
+            }, function(response) {
+                $icon.removeClass('dashicons-update spin').addClass('dashicons-saved');
+                if (!response.success) {
+                    alert(response.data || wpvfhOptionsAdmin.i18n.error);
+                }
+            }).fail(function() {
+                $icon.removeClass('dashicons-update spin').addClass('dashicons-saved');
+                alert(wpvfhOptionsAdmin.i18n.error);
+            });
+        },
+
+        /**
+         * Add access tag for group
+         */
+        addGroupAccessTag: function($panel, item) {
+            var $tags = $panel.find('.wpvfh-group-access-tags');
+            var $search = $panel.find('.wpvfh-group-access-search');
+            var $dropdown = $panel.find('.wpvfh-access-dropdown');
+
+            // Check if already exists
+            if ($tags.find('.wpvfh-access-tag[data-type="' + item.type + '"][data-id="' + item.id + '"]').length) {
+                $search.val('');
+                $dropdown.hide();
+                return;
+            }
+
+            var $tag = $('<span class="wpvfh-access-tag" data-type="' + item.type + '" data-id="' + item.id + '">' +
+                item.label +
+                '<button type="button" class="wpvfh-access-tag-remove">&times;</button>' +
+                '</span>');
+
+            $tags.append($tag);
+            $search.val('');
+            $dropdown.hide();
+
+            this.updateGroupAccessHiddenFields($panel);
+        },
+
+        /**
+         * Update hidden fields for group access control
+         */
+        updateGroupAccessHiddenFields: function($panel) {
+            var roles = [];
+            var users = [];
+
+            $panel.find('.wpvfh-group-access-tags .wpvfh-access-tag').each(function() {
+                if ($(this).data('type') === 'role') {
+                    roles.push($(this).data('id'));
+                } else {
+                    users.push($(this).data('id'));
+                }
+            });
+
+            $panel.find('.wpvfh-group-allowed-roles').val(roles.join(','));
+            $panel.find('.wpvfh-group-allowed-users').val(users.join(','));
         }
     };
 

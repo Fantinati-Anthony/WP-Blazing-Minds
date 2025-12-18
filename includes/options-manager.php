@@ -26,6 +26,7 @@ class WPVFH_Options_Manager {
     const OPTION_TAGS          = 'wpvfh_feedback_tags';
     const OPTION_STATUSES      = 'wpvfh_feedback_statuses';
     const OPTION_CUSTOM_GROUPS = 'wpvfh_custom_option_groups';
+    const OPTION_GROUP_SETTINGS = 'wpvfh_group_settings';
 
     /**
      * Groupes par défaut (non supprimables)
@@ -48,6 +49,8 @@ class WPVFH_Options_Manager {
         add_action( 'wp_ajax_wpvfh_search_users_roles', array( __CLASS__, 'ajax_search_users_roles' ) );
         add_action( 'wp_ajax_wpvfh_create_custom_group', array( __CLASS__, 'ajax_create_custom_group' ) );
         add_action( 'wp_ajax_wpvfh_delete_custom_group', array( __CLASS__, 'ajax_delete_custom_group' ) );
+        add_action( 'wp_ajax_wpvfh_rename_custom_group', array( __CLASS__, 'ajax_rename_custom_group' ) );
+        add_action( 'wp_ajax_wpvfh_save_group_settings', array( __CLASS__, 'ajax_save_group_settings' ) );
     }
 
     /**
@@ -554,6 +557,110 @@ class WPVFH_Options_Manager {
     }
 
     /**
+     * Obtenir les paramètres d'un groupe
+     *
+     * @since 1.4.0
+     * @param string $slug Slug du groupe
+     * @return array
+     */
+    public static function get_group_settings( $slug ) {
+        $all_settings = get_option( self::OPTION_GROUP_SETTINGS, array() );
+
+        $defaults = array(
+            'enabled'       => true,
+            'allowed_roles' => array(),
+            'allowed_users' => array(),
+            'ai_prompt'     => '',
+        );
+
+        if ( isset( $all_settings[ $slug ] ) ) {
+            return array_merge( $defaults, $all_settings[ $slug ] );
+        }
+
+        return $defaults;
+    }
+
+    /**
+     * Sauvegarder les paramètres d'un groupe
+     *
+     * @since 1.4.0
+     * @param string $slug     Slug du groupe
+     * @param array  $settings Paramètres à sauvegarder
+     * @return bool
+     */
+    public static function save_group_settings( $slug, $settings ) {
+        $all_settings = get_option( self::OPTION_GROUP_SETTINGS, array() );
+        $all_settings[ $slug ] = $settings;
+        return update_option( self::OPTION_GROUP_SETTINGS, $all_settings );
+    }
+
+    /**
+     * Renommer un groupe personnalisé
+     *
+     * @since 1.4.0
+     * @param string $slug     Slug du groupe
+     * @param string $new_name Nouveau nom
+     * @return bool
+     */
+    public static function rename_custom_group( $slug, $new_name ) {
+        if ( self::is_default_group( $slug ) ) {
+            return false;
+        }
+
+        $groups = self::get_custom_groups();
+        if ( ! isset( $groups[ $slug ] ) ) {
+            return false;
+        }
+
+        $groups[ $slug ]['name'] = $new_name;
+        return self::save_custom_groups( $groups );
+    }
+
+    /**
+     * Vérifier si l'utilisateur a accès à un groupe
+     *
+     * @since 1.4.0
+     * @param string   $slug    Slug du groupe
+     * @param int|null $user_id ID utilisateur
+     * @return bool
+     */
+    public static function user_can_access_group( $slug, $user_id = null ) {
+        if ( null === $user_id ) {
+            $user_id = get_current_user_id();
+        }
+
+        $settings = self::get_group_settings( $slug );
+
+        // Si désactivé, pas d'accès (sauf admin)
+        if ( ! $settings['enabled'] && ! current_user_can( 'manage_feedback' ) ) {
+            return false;
+        }
+
+        // Si pas de restrictions, tout le monde a accès
+        $has_role_restriction = ! empty( $settings['allowed_roles'] );
+        $has_user_restriction = ! empty( $settings['allowed_users'] );
+
+        if ( ! $has_role_restriction && ! $has_user_restriction ) {
+            return true;
+        }
+
+        // Vérifier si l'utilisateur est dans la liste
+        if ( $has_user_restriction && in_array( $user_id, $settings['allowed_users'], true ) ) {
+            return true;
+        }
+
+        // Vérifier si l'utilisateur a un des rôles autorisés
+        if ( $has_role_restriction ) {
+            $user = get_user_by( 'id', $user_id );
+            if ( $user && ! empty( array_intersect( $user->roles, $settings['allowed_roles'] ) ) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Obtenir tous les onglets (par défaut + personnalisés)
      *
      * @since 1.3.0
@@ -1039,6 +1146,90 @@ class WPVFH_Options_Manager {
     }
 
     /**
+     * AJAX: Renommer un groupe personnalisé
+     *
+     * @since 1.4.0
+     * @return void
+     */
+    public static function ajax_rename_custom_group() {
+        check_ajax_referer( 'wpvfh_options_nonce', 'nonce' );
+
+        if ( ! current_user_can( 'manage_feedback' ) ) {
+            wp_send_json_error( __( 'Permission refusée.', 'blazing-feedback' ) );
+        }
+
+        $slug = isset( $_POST['slug'] ) ? sanitize_key( $_POST['slug'] ) : '';
+        $name = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : '';
+
+        if ( empty( $slug ) || empty( $name ) ) {
+            wp_send_json_error( __( 'Slug et nom du groupe requis.', 'blazing-feedback' ) );
+        }
+
+        if ( self::is_default_group( $slug ) ) {
+            wp_send_json_error( __( 'Les groupes par défaut ne peuvent pas être renommés.', 'blazing-feedback' ) );
+        }
+
+        if ( ! self::rename_custom_group( $slug, $name ) ) {
+            wp_send_json_error( __( 'Erreur lors du renommage du groupe.', 'blazing-feedback' ) );
+        }
+
+        wp_send_json_success( array(
+            'name' => $name,
+        ) );
+    }
+
+    /**
+     * AJAX: Sauvegarder les paramètres d'un groupe
+     *
+     * @since 1.4.0
+     * @return void
+     */
+    public static function ajax_save_group_settings() {
+        check_ajax_referer( 'wpvfh_options_nonce', 'nonce' );
+
+        if ( ! current_user_can( 'manage_feedback' ) ) {
+            wp_send_json_error( __( 'Permission refusée.', 'blazing-feedback' ) );
+        }
+
+        $slug = isset( $_POST['slug'] ) ? sanitize_key( $_POST['slug'] ) : '';
+
+        if ( empty( $slug ) ) {
+            wp_send_json_error( __( 'Slug du groupe requis.', 'blazing-feedback' ) );
+        }
+
+        // Récupérer et nettoyer les paramètres
+        $enabled = isset( $_POST['enabled'] ) && $_POST['enabled'] === 'true';
+        $ai_prompt = isset( $_POST['ai_prompt'] ) ? sanitize_textarea_field( $_POST['ai_prompt'] ) : '';
+
+        $allowed_roles = array();
+        if ( ! empty( $_POST['allowed_roles'] ) ) {
+            $allowed_roles = array_map( 'sanitize_key', explode( ',', $_POST['allowed_roles'] ) );
+            $allowed_roles = array_filter( $allowed_roles );
+        }
+
+        $allowed_users = array();
+        if ( ! empty( $_POST['allowed_users'] ) ) {
+            $allowed_users = array_map( 'intval', explode( ',', $_POST['allowed_users'] ) );
+            $allowed_users = array_filter( $allowed_users );
+        }
+
+        $settings = array(
+            'enabled'       => $enabled,
+            'allowed_roles' => $allowed_roles,
+            'allowed_users' => $allowed_users,
+            'ai_prompt'     => $ai_prompt,
+        );
+
+        if ( ! self::save_group_settings( $slug, $settings ) ) {
+            wp_send_json_error( __( 'Erreur lors de la sauvegarde des paramètres.', 'blazing-feedback' ) );
+        }
+
+        wp_send_json_success( array(
+            'message' => __( 'Paramètres enregistrés.', 'blazing-feedback' ),
+        ) );
+    }
+
+    /**
      * Rendu de la page d'options
      *
      * @since 1.1.0
@@ -1270,31 +1461,124 @@ class WPVFH_Options_Manager {
             admin_url( 'admin.php?page=wpvfh-options&tab=' . $type . '&action=reset' ),
             'wpvfh_reset_options'
         );
+
+        // Obtenir les paramètres du groupe
+        $group_settings = self::get_group_settings( $type );
+        $is_custom_group = ! self::is_default_group( $type );
+
+        // Préparer les labels d'accès pour affichage
+        $access_labels = array();
+        foreach ( $group_settings['allowed_roles'] as $role ) {
+            $role_name = wp_roles()->get_names()[ $role ] ?? $role;
+            $access_labels[] = array(
+                'type'  => 'role',
+                'id'    => $role,
+                'label' => $role_name,
+            );
+        }
+        foreach ( $group_settings['allowed_users'] as $user_id ) {
+            $user = get_user_by( 'id', $user_id );
+            if ( $user ) {
+                $access_labels[] = array(
+                    'type'  => 'user',
+                    'id'    => $user_id,
+                    'label' => $user->display_name,
+                );
+            }
+        }
         ?>
+        <!-- Paramètres du groupe -->
+        <div class="wpvfh-group-settings-panel" data-group="<?php echo esc_attr( $type ); ?>">
+            <div class="wpvfh-group-settings-header">
+                <div class="wpvfh-group-title-section">
+                    <?php if ( $is_custom_group && $group_name ) : ?>
+                        <h3 class="wpvfh-group-title">
+                            <span class="wpvfh-group-name-display"><?php echo esc_html( $group_name ); ?></span>
+                            <input type="text" class="wpvfh-group-name-input" value="<?php echo esc_attr( $group_name ); ?>" style="display: none;">
+                            <button type="button" class="wpvfh-rename-group-btn" title="<?php esc_attr_e( 'Renommer', 'blazing-feedback' ); ?>">
+                                <span class="dashicons dashicons-edit"></span>
+                            </button>
+                        </h3>
+                    <?php else : ?>
+                        <h3 class="wpvfh-group-title"><?php echo esc_html( self::get_all_tabs()[ $type ] ?? $type ); ?></h3>
+                    <?php endif; ?>
+                    <p class="description">
+                        <?php
+                        switch ( $type ) {
+                            case 'statuses':
+                                esc_html_e( 'Définissez les statuts des feedbacks. Glissez-déposez pour réorganiser.', 'blazing-feedback' );
+                                break;
+                            case 'types':
+                                esc_html_e( 'Définissez les types de feedback disponibles. Glissez-déposez pour réorganiser.', 'blazing-feedback' );
+                                break;
+                            case 'priorities':
+                                esc_html_e( 'Définissez les niveaux de priorité disponibles. Glissez-déposez pour réorganiser.', 'blazing-feedback' );
+                                break;
+                            case 'tags':
+                                esc_html_e( 'Définissez les tags prédéfinis. Les utilisateurs peuvent aussi créer leurs propres tags.', 'blazing-feedback' );
+                                break;
+                            default:
+                                if ( $group_name ) {
+                                    esc_html_e( 'Gérez les métadatas de ce groupe. Glissez-déposez pour réorganiser.', 'blazing-feedback' );
+                                }
+                                break;
+                        }
+                        ?>
+                    </p>
+                </div>
+                <div class="wpvfh-group-settings-toggle">
+                    <label class="wpvfh-toggle">
+                        <input type="checkbox" class="wpvfh-group-enabled" <?php checked( $group_settings['enabled'] ); ?>>
+                        <span class="wpvfh-toggle-slider"></span>
+                    </label>
+                    <span class="wpvfh-toggle-label"><?php esc_html_e( 'Activé', 'blazing-feedback' ); ?></span>
+                    <button type="button" class="button wpvfh-group-settings-btn" title="<?php esc_attr_e( 'Paramètres du groupe', 'blazing-feedback' ); ?>">
+                        <span class="dashicons dashicons-admin-generic"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="wpvfh-group-settings-body" style="display: none;">
+                <div class="wpvfh-form-row">
+                    <div class="wpvfh-form-group">
+                        <label><?php esc_html_e( 'Accès autorisé (vide = tous)', 'blazing-feedback' ); ?></label>
+                        <div class="wpvfh-access-control">
+                            <div class="wpvfh-access-search-wrapper">
+                                <input type="text" class="wpvfh-access-search wpvfh-group-access-search" placeholder="<?php esc_attr_e( 'Rechercher un rôle ou utilisateur...', 'blazing-feedback' ); ?>">
+                                <div class="wpvfh-access-dropdown" style="display: none;"></div>
+                            </div>
+                            <div class="wpvfh-access-tags wpvfh-group-access-tags">
+                                <?php foreach ( $access_labels as $access ) : ?>
+                                    <span class="wpvfh-access-tag" data-type="<?php echo esc_attr( $access['type'] ); ?>" data-id="<?php echo esc_attr( $access['id'] ); ?>">
+                                        <?php echo esc_html( $access['label'] ); ?>
+                                        <button type="button" class="wpvfh-access-tag-remove">&times;</button>
+                                    </span>
+                                <?php endforeach; ?>
+                            </div>
+                            <input type="hidden" class="wpvfh-group-allowed-roles" value="<?php echo esc_attr( implode( ',', $group_settings['allowed_roles'] ) ); ?>">
+                            <input type="hidden" class="wpvfh-group-allowed-users" value="<?php echo esc_attr( implode( ',', $group_settings['allowed_users'] ) ); ?>">
+                        </div>
+                        <p class="description"><?php esc_html_e( 'Si vide, tous les utilisateurs peuvent voir ce groupe.', 'blazing-feedback' ); ?></p>
+                    </div>
+                </div>
+                <div class="wpvfh-form-row">
+                    <div class="wpvfh-form-group">
+                        <label><?php esc_html_e( 'Prompt IA pour ce groupe (optionnel)', 'blazing-feedback' ); ?></label>
+                        <textarea class="wpvfh-group-ai-prompt large-text" rows="3" placeholder="<?php esc_attr_e( 'Instructions pour l\'IA pour toutes les métadatas de ce groupe...', 'blazing-feedback' ); ?>"><?php echo esc_textarea( $group_settings['ai_prompt'] ); ?></textarea>
+                        <p class="description"><?php esc_html_e( 'Ce prompt sera utilisé par l\'IA pour traiter les feedbacks utilisant ce groupe de métadatas.', 'blazing-feedback' ); ?></p>
+                    </div>
+                </div>
+                <div class="wpvfh-form-actions">
+                    <button type="button" class="button button-primary wpvfh-save-group-settings-btn">
+                        <span class="dashicons dashicons-saved"></span>
+                        <?php esc_html_e( 'Enregistrer les paramètres du groupe', 'blazing-feedback' ); ?>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div class="wpvfh-options-header">
             <p class="description">
-                <?php
-                switch ( $type ) {
-                    case 'statuses':
-                        esc_html_e( 'Définissez les statuts des feedbacks. Glissez-déposez pour réorganiser.', 'blazing-feedback' );
-                        break;
-                    case 'types':
-                        esc_html_e( 'Définissez les types de feedback disponibles. Glissez-déposez pour réorganiser.', 'blazing-feedback' );
-                        break;
-                    case 'priorities':
-                        esc_html_e( 'Définissez les niveaux de priorité disponibles. Glissez-déposez pour réorganiser.', 'blazing-feedback' );
-                        break;
-                    case 'tags':
-                        esc_html_e( 'Définissez les tags prédéfinis. Les utilisateurs peuvent aussi créer leurs propres tags.', 'blazing-feedback' );
-                        break;
-                    default:
-                        if ( $group_name ) {
-                            /* translators: %s: group name */
-                            printf( esc_html__( 'Gérez les métadatas du groupe "%s". Glissez-déposez pour réorganiser.', 'blazing-feedback' ), esc_html( $group_name ) );
-                        }
-                        break;
-                }
-                ?>
+                <?php esc_html_e( 'Éléments de ce groupe :', 'blazing-feedback' ); ?>
             </p>
             <div class="wpvfh-options-actions">
                 <button type="button" class="button button-primary wpvfh-add-item-btn" data-type="<?php echo esc_attr( $type ); ?>">

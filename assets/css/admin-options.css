@@ -837,3 +837,104 @@
 .wpvfh-emoji-picker-content::-webkit-scrollbar-thumb:hover {
     background: #a1a1a1;
 }
+
+/* Group Settings Panel */
+.wpvfh-group-settings-panel {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.wpvfh-group-settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 15px 20px;
+    gap: 20px;
+}
+
+.wpvfh-group-title-section {
+    flex: 1;
+}
+
+.wpvfh-group-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+.wpvfh-group-name-input {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border: 1px solid #2271b1;
+    border-radius: 4px;
+    width: 250px;
+}
+
+.wpvfh-rename-group-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #50575e;
+    border-radius: 4px;
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.wpvfh-rename-group-btn:hover {
+    color: #2271b1;
+    background: #f0f6fc;
+}
+
+.wpvfh-rename-group-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.wpvfh-group-title-section .description {
+    margin: 0;
+    color: #50575e;
+}
+
+.wpvfh-group-settings-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.wpvfh-toggle-label {
+    font-size: 13px;
+    color: #50575e;
+}
+
+.wpvfh-group-settings-btn {
+    padding: 0 8px !important;
+}
+
+.wpvfh-group-settings-btn .dashicons {
+    line-height: 1.5;
+}
+
+.wpvfh-group-settings-body {
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    background: #f9f9f9;
+}
+
+.wpvfh-group-settings-panel.settings-open .wpvfh-group-settings-body {
+    display: block !important;
+}
+
+.wpvfh-group-settings-panel.disabled {
+    opacity: 0.7;
+}
+
+.wpvfh-group-settings-panel.disabled .wpvfh-group-title {
+    color: #999;
+}
