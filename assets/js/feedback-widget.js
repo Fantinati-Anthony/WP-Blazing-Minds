@@ -477,6 +477,20 @@
                 });
             }
 
+            // Tags prédéfinis (boutons cliquables)
+            const predefinedTagBtns = document.querySelectorAll('.wpvfh-predefined-tag-btn');
+            predefinedTagBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tagLabel = btn.getAttribute('data-tag');
+                    const tagColor = btn.getAttribute('data-color');
+                    if (tagLabel) {
+                        this.addFormTag(tagLabel, tagColor);
+                        btn.classList.add('selected');
+                    }
+                });
+            });
+
             // Envoi de réponse
             if (this.elements.sendReplyBtn) {
                 this.elements.sendReplyBtn.addEventListener('click', () => {
@@ -2188,47 +2202,32 @@
          * @param {Object} feedback - Données du feedback
          */
         updateDetailLabels: function(feedback) {
-            // Configuration des types
-            const typeConfig = {
-                bug: { icon: '🐛', label: 'Bug' },
-                improvement: { icon: '💡', label: 'Amélioration' },
-                question: { icon: '❓', label: 'Question' },
-                design: { icon: '🎨', label: 'Design' },
-                content: { icon: '📝', label: 'Contenu' },
-                other: { icon: '📌', label: 'Autre' },
-            };
-
-            // Configuration des priorités
-            const priorityConfig = {
-                high: { icon: '🔴', label: 'Haute' },
-                medium: { icon: '🟠', label: 'Moyenne' },
-                low: { icon: '🟢', label: 'Basse' },
-            };
-
-            // Type label
+            // Type label - utiliser les options dynamiques
             if (this.elements.detailTypeLabel) {
-                const type = feedback.feedback_type;
-                if (type && typeConfig[type]) {
+                const type = this.getTypeConfig(feedback.feedback_type);
+                if (type) {
                     const iconEl = this.elements.detailTypeLabel.querySelector('.wpvfh-label-icon');
                     const textEl = this.elements.detailTypeLabel.querySelector('.wpvfh-label-text');
-                    if (iconEl) iconEl.textContent = typeConfig[type].icon;
-                    if (textEl) textEl.textContent = typeConfig[type].label;
-                    this.elements.detailTypeLabel.setAttribute('data-type', type);
+                    if (iconEl) iconEl.textContent = type.emoji;
+                    if (textEl) textEl.textContent = type.label;
+                    this.elements.detailTypeLabel.setAttribute('data-type', feedback.feedback_type);
+                    this.elements.detailTypeLabel.style.cssText = `background-color: ${type.color}20 !important; color: ${type.color} !important; border-color: ${type.color}40 !important;`;
                     this.elements.detailTypeLabel.hidden = false;
                 } else {
                     this.elements.detailTypeLabel.hidden = true;
                 }
             }
 
-            // Priority label
+            // Priority label - utiliser les options dynamiques
             if (this.elements.detailPriorityLabel) {
-                const priority = feedback.priority;
-                if (priority && priority !== 'none' && priorityConfig[priority]) {
+                const priority = this.getPriorityConfig(feedback.priority);
+                if (priority && feedback.priority !== 'none') {
                     const iconEl = this.elements.detailPriorityLabel.querySelector('.wpvfh-label-icon');
                     const textEl = this.elements.detailPriorityLabel.querySelector('.wpvfh-label-text');
-                    if (iconEl) iconEl.textContent = priorityConfig[priority].icon;
-                    if (textEl) textEl.textContent = priorityConfig[priority].label;
-                    this.elements.detailPriorityLabel.setAttribute('data-priority', priority);
+                    if (iconEl) iconEl.textContent = priority.emoji;
+                    if (textEl) textEl.textContent = priority.label;
+                    this.elements.detailPriorityLabel.setAttribute('data-priority', feedback.priority);
+                    this.elements.detailPriorityLabel.style.cssText = `background-color: ${priority.color}20 !important; color: ${priority.color} !important; border-color: ${priority.color}40 !important;`;
                     this.elements.detailPriorityLabel.hidden = false;
                 } else {
                     this.elements.detailPriorityLabel.hidden = true;
@@ -2255,8 +2254,10 @@
             if (tagsString && tagsString.trim()) {
                 const tagList = tagsString.split(',').map(t => t.trim()).filter(t => t);
                 tagList.forEach(tag => {
+                    const tagColor = this.getPredefinedTagColor(tag) || '#2980b9';
                     const badge = document.createElement('span');
                     badge.className = 'wpvfh-tag-badge';
+                    badge.style.cssText = `background-color: ${tagColor}20 !important; color: ${tagColor} !important; border: 1px solid ${tagColor}40 !important;`;
                     badge.innerHTML = `${this.escapeHtml(tag)}<button type="button" class="wpvfh-tag-remove" title="Supprimer">×</button>`;
 
                     // Gestionnaire pour le bouton X
@@ -2353,26 +2354,49 @@
         // =========================================
 
         /**
-         * État des tags du formulaire
+         * État des tags du formulaire [{name, color}]
          */
         formTags: [],
 
         /**
+         * Obtenir la couleur d'un tag prédéfini
+         * @param {string} tagName - Nom du tag
+         * @returns {string|null} - Couleur ou null
+         */
+        getPredefinedTagColor: function(tagName) {
+            if (!window.wpvfhData || !window.wpvfhData.predefinedTags) return null;
+            const found = window.wpvfhData.predefinedTags.find(t =>
+                t.label.toLowerCase() === tagName.toLowerCase()
+            );
+            return found ? found.color : null;
+        },
+
+        /**
          * Ajouter un tag au formulaire de création
          * @param {string} newTag - Tag à ajouter
+         * @param {string} color - Couleur optionnelle
          */
-        addFormTag: function(newTag) {
+        addFormTag: function(newTag, color) {
             const tagLower = newTag.toLowerCase();
 
             // Vérifier si le tag existe déjà
-            if (this.formTags.some(t => t.toLowerCase() === tagLower)) {
+            if (this.formTags.some(t => t.name.toLowerCase() === tagLower)) {
                 this.showNotification('Ce tag existe déjà', 'warning');
                 return;
             }
 
-            this.formTags.push(newTag);
+            // Chercher la couleur dans les tags prédéfinis si non fournie
+            const tagColor = color || this.getPredefinedTagColor(newTag) || '#2980b9';
+
+            this.formTags.push({ name: newTag, color: tagColor });
             this.renderFormTags();
             this.updateFormTagsHidden();
+
+            // Marquer le bouton prédéfini comme sélectionné
+            const predefinedBtn = document.querySelector(`.wpvfh-predefined-tag-btn[data-tag="${newTag}"]`);
+            if (predefinedBtn) {
+                predefinedBtn.classList.add('selected');
+            }
         },
 
         /**
@@ -2380,9 +2404,15 @@
          * @param {string} tagToRemove - Tag à supprimer
          */
         removeFormTag: function(tagToRemove) {
-            this.formTags = this.formTags.filter(t => t !== tagToRemove);
+            this.formTags = this.formTags.filter(t => t.name !== tagToRemove);
             this.renderFormTags();
             this.updateFormTagsHidden();
+
+            // Désélectionner le bouton prédéfini
+            const predefinedBtn = document.querySelector(`.wpvfh-predefined-tag-btn[data-tag="${tagToRemove}"]`);
+            if (predefinedBtn) {
+                predefinedBtn.classList.remove('selected');
+            }
         },
 
         /**
@@ -2390,9 +2420,17 @@
          */
         removeLastFormTag: function() {
             if (this.formTags.length === 0) return;
-            this.formTags.pop();
+            const removedTag = this.formTags.pop();
             this.renderFormTags();
             this.updateFormTagsHidden();
+
+            // Désélectionner le bouton prédéfini
+            if (removedTag) {
+                const predefinedBtn = document.querySelector(`.wpvfh-predefined-tag-btn[data-tag="${removedTag.name}"]`);
+                if (predefinedBtn) {
+                    predefinedBtn.classList.remove('selected');
+                }
+            }
         },
 
         /**
@@ -2401,22 +2439,23 @@
         renderFormTags: function() {
             if (!this.elements.feedbackTagsContainer) return;
 
-            // Supprimer les anciens badges (garder l'input)
+            // Supprimer les anciens badges (garder l'input et les tags prédéfinis)
             const existingBadges = this.elements.feedbackTagsContainer.querySelectorAll('.wpvfh-tag-badge');
             existingBadges.forEach(badge => badge.remove());
 
             // Ajouter les nouveaux badges avant l'input
             const input = this.elements.feedbackTagsInput;
-            this.formTags.forEach(tag => {
+            this.formTags.forEach(tagObj => {
                 const badge = document.createElement('span');
                 badge.className = 'wpvfh-tag-badge';
-                badge.innerHTML = `${this.escapeHtml(tag)}<button type="button" class="wpvfh-tag-remove" title="Supprimer">×</button>`;
+                badge.style.cssText = `background-color: ${tagObj.color}20 !important; color: ${tagObj.color} !important; border: 1px solid ${tagObj.color}40 !important;`;
+                badge.innerHTML = `${this.escapeHtml(tagObj.name)}<button type="button" class="wpvfh-tag-remove" title="Supprimer">×</button>`;
 
                 // Gestionnaire pour le bouton X
                 const removeBtn = badge.querySelector('.wpvfh-tag-remove');
                 removeBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    this.removeFormTag(tag);
+                    this.removeFormTag(tagObj.name);
                 });
 
                 this.elements.feedbackTagsContainer.insertBefore(badge, input);
@@ -2428,7 +2467,7 @@
          */
         updateFormTagsHidden: function() {
             if (this.elements.feedbackTags) {
-                this.elements.feedbackTags.value = this.formTags.join(', ');
+                this.elements.feedbackTags.value = this.formTags.map(t => t.name).join(', ');
             }
         },
 
@@ -2439,6 +2478,30 @@
             this.formTags = [];
             this.renderFormTags();
             this.updateFormTagsHidden();
+
+            // Désélectionner tous les boutons prédéfinis
+            const predefinedBtns = document.querySelectorAll('.wpvfh-predefined-tag-btn.selected');
+            predefinedBtns.forEach(btn => btn.classList.remove('selected'));
+        },
+
+        /**
+         * Obtenir la config d'un type depuis les options dynamiques
+         * @param {string} typeId - ID du type
+         * @returns {Object|null}
+         */
+        getTypeConfig: function(typeId) {
+            if (!window.wpvfhData || !window.wpvfhData.feedbackTypes) return null;
+            return window.wpvfhData.feedbackTypes.find(t => t.id === typeId) || null;
+        },
+
+        /**
+         * Obtenir la config d'une priorité depuis les options dynamiques
+         * @param {string} priorityId - ID de la priorité
+         * @returns {Object|null}
+         */
+        getPriorityConfig: function(priorityId) {
+            if (!window.wpvfhData || !window.wpvfhData.priorities) return null;
+            return window.wpvfhData.priorities.find(p => p.id === priorityId) || null;
         },
 
         /**
@@ -2449,36 +2512,28 @@
         generateFeedbackLabelsHtml: function(feedback) {
             let html = '';
 
-            // Type
-            const typeConfig = {
-                bug: { icon: '🐛', label: 'Bug' },
-                improvement: { icon: '💡', label: 'Amélioration' },
-                question: { icon: '❓', label: 'Question' },
-                design: { icon: '🎨', label: 'Design' },
-                content: { icon: '📝', label: 'Contenu' },
-                other: { icon: '📌', label: 'Autre' },
-            };
-
-            const priorityConfig = {
-                high: { icon: '🔴', label: 'Haute' },
-                medium: { icon: '🟠', label: 'Moyenne' },
-                low: { icon: '🟢', label: 'Basse' },
-            };
-
-            if (feedback.feedback_type && typeConfig[feedback.feedback_type]) {
-                const type = typeConfig[feedback.feedback_type];
-                html += `<span class="wpvfh-pin-label wpvfh-pin-label-type" data-type="${feedback.feedback_type}">${type.icon} ${type.label}</span>`;
+            // Type - utiliser les options dynamiques
+            if (feedback.feedback_type) {
+                const type = this.getTypeConfig(feedback.feedback_type);
+                if (type) {
+                    html += `<span class="wpvfh-pin-label wpvfh-pin-label-type" data-type="${feedback.feedback_type}" style="background-color: ${type.color}20; color: ${type.color}; border-color: ${type.color}40;">${type.emoji} ${type.label}</span>`;
+                }
             }
 
-            if (feedback.priority && feedback.priority !== 'none' && priorityConfig[feedback.priority]) {
-                const priority = priorityConfig[feedback.priority];
-                html += `<span class="wpvfh-pin-label wpvfh-pin-label-priority" data-priority="${feedback.priority}">${priority.icon} ${priority.label}</span>`;
+            // Priorité - utiliser les options dynamiques (exclure "none")
+            if (feedback.priority && feedback.priority !== 'none') {
+                const priority = this.getPriorityConfig(feedback.priority);
+                if (priority) {
+                    html += `<span class="wpvfh-pin-label wpvfh-pin-label-priority" data-priority="${feedback.priority}" style="background-color: ${priority.color}20; color: ${priority.color}; border-color: ${priority.color}40;">${priority.emoji} ${priority.label}</span>`;
+                }
             }
 
+            // Tags - utiliser les couleurs des tags prédéfinis si disponibles
             if (feedback.tags && feedback.tags.trim()) {
                 const tagList = feedback.tags.split(',').map(t => t.trim()).filter(t => t).slice(0, 3); // Max 3 tags visibles
                 tagList.forEach(tag => {
-                    html += `<span class="wpvfh-pin-label wpvfh-pin-label-tag">#${this.escapeHtml(tag)}</span>`;
+                    const tagColor = this.getPredefinedTagColor(tag) || '#2980b9';
+                    html += `<span class="wpvfh-pin-label wpvfh-pin-label-tag" style="background-color: ${tagColor}20; color: ${tagColor}; border-color: ${tagColor}40;">#${this.escapeHtml(tag)}</span>`;
                 });
             }
 

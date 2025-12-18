@@ -1,0 +1,249 @@
+/**
+ * Admin Options Manager Styles
+ *
+ * @package WP_Visual_Feedback_Hub
+ * @since 1.1.0
+ */
+
+/* Page Layout */
+.wpvfh-options-page .nav-tab-wrapper {
+    margin-bottom: 20px;
+}
+
+.wpvfh-options-content {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    border-top: none;
+}
+
+/* Header */
+.wpvfh-options-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.wpvfh-options-header .description {
+    margin: 0;
+    color: #666;
+}
+
+.wpvfh-options-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.wpvfh-options-actions .button .dashicons {
+    margin-top: 3px;
+    margin-right: 3px;
+}
+
+/* Table */
+.wpvfh-options-table {
+    border-collapse: collapse;
+}
+
+.wpvfh-options-table th {
+    text-align: left;
+    padding: 12px 10px;
+    font-weight: 600;
+}
+
+.wpvfh-options-table td {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+/* Drag Handle */
+.wpvfh-col-drag {
+    cursor: move;
+    text-align: center;
+}
+
+.wpvfh-drag-handle {
+    color: #ccc;
+    cursor: grab;
+}
+
+.wpvfh-drag-handle:hover {
+    color: #666;
+}
+
+.wpvfh-option-item.ui-sortable-helper {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.wpvfh-option-item.ui-sortable-placeholder {
+    visibility: visible !important;
+    background: #f0f6fc;
+    border: 2px dashed #2271b1;
+}
+
+/* Inputs */
+.wpvfh-emoji-input {
+    font-size: 20px !important;
+    text-align: center;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.wpvfh-label-input {
+    width: 100%;
+    max-width: 300px;
+}
+
+/* Color Picker */
+.wpvfh-col-color .wp-picker-container {
+    display: inline-block;
+}
+
+.wpvfh-col-color .wp-picker-container .wp-color-result {
+    height: 28px;
+    margin: 0;
+}
+
+.wpvfh-col-color .iris-picker {
+    position: absolute;
+    z-index: 100;
+}
+
+/* Preview Badge */
+.wpvfh-preview-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.wpvfh-preview-emoji {
+    font-size: 14px;
+}
+
+/* Action Buttons */
+.wpvfh-col-actions {
+    white-space: nowrap;
+}
+
+.wpvfh-col-actions .button {
+    padding: 0 8px;
+    min-height: 30px;
+}
+
+.wpvfh-col-actions .button .dashicons {
+    margin-top: 3px;
+}
+
+.wpvfh-save-item-btn .dashicons {
+    color: #00a32a;
+}
+
+.wpvfh-delete-item-btn .dashicons {
+    color: #d63638;
+}
+
+.wpvfh-save-item-btn:hover {
+    border-color: #00a32a;
+    background: #f0fff0;
+}
+
+.wpvfh-delete-item-btn:hover {
+    border-color: #d63638;
+    background: #fff0f0;
+}
+
+/* New Item Row */
+.wpvfh-new-item {
+    background: #f0f6fc !important;
+}
+
+.wpvfh-new-item .wpvfh-label-input {
+    border-color: #2271b1;
+}
+
+/* Saving State */
+.wpvfh-option-item.saving {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.wpvfh-option-item.saved {
+    animation: wpvfh-saved-flash 0.5s ease;
+}
+
+@keyframes wpvfh-saved-flash {
+    0% { background-color: #d4edda; }
+    100% { background-color: transparent; }
+}
+
+/* Responsive */
+@media screen and (max-width: 782px) {
+    .wpvfh-options-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .wpvfh-options-table th,
+    .wpvfh-options-table td {
+        padding: 8px 5px;
+    }
+
+    .wpvfh-label-input {
+        max-width: 150px;
+    }
+
+    .wpvfh-col-preview {
+        display: none;
+    }
+}
+
+/* Emoji Picker Styles (basic - can be enhanced) */
+.wpvfh-emoji-picker-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.wpvfh-emoji-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 10px;
+    z-index: 100;
+    display: none;
+    max-width: 280px;
+}
+
+.wpvfh-emoji-suggestions.active {
+    display: block;
+}
+
+.wpvfh-emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+}
+
+.wpvfh-emoji-option {
+    font-size: 20px;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.wpvfh-emoji-option:hover {
+    background: #f0f0f0;
+}
