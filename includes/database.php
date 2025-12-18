@@ -316,6 +316,119 @@ class WPVFH_Database {
         delete_option( self::DB_VERSION_OPTION );
     }
 
+    /**
+     * Truncate all tables (empty data but keep structure)
+     *
+     * @return bool True on success.
+     */
+    public static function truncate_all_tables() {
+        global $wpdb;
+
+        $tables = array(
+            self::TABLE_FEEDBACKS,
+            self::TABLE_REPLIES,
+            self::TABLE_METADATA_TYPES,
+            self::TABLE_METADATA_ITEMS,
+            self::TABLE_CUSTOM_GROUPS,
+            self::TABLE_GROUP_SETTINGS,
+        );
+
+        foreach ( $tables as $table ) {
+            $table_name = self::get_table_name( $table );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $wpdb->query( "TRUNCATE TABLE $table_name" );
+        }
+
+        return true;
+    }
+
+    /**
+     * Truncate only feedback-related tables (feedbacks and replies)
+     *
+     * @return bool True on success.
+     */
+    public static function truncate_feedback_tables() {
+        global $wpdb;
+
+        $tables = array(
+            self::TABLE_FEEDBACKS,
+            self::TABLE_REPLIES,
+        );
+
+        foreach ( $tables as $table ) {
+            $table_name = self::get_table_name( $table );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $wpdb->query( "TRUNCATE TABLE $table_name" );
+        }
+
+        return true;
+    }
+
+    /**
+     * Get table statistics
+     *
+     * @return array Array of table stats.
+     */
+    public static function get_table_stats() {
+        global $wpdb;
+
+        $stats = array();
+
+        $tables = array(
+            'feedbacks'      => self::TABLE_FEEDBACKS,
+            'replies'        => self::TABLE_REPLIES,
+            'metadata_types' => self::TABLE_METADATA_TYPES,
+            'metadata_items' => self::TABLE_METADATA_ITEMS,
+            'custom_groups'  => self::TABLE_CUSTOM_GROUPS,
+            'group_settings' => self::TABLE_GROUP_SETTINGS,
+        );
+
+        foreach ( $tables as $key => $table ) {
+            $table_name = self::get_table_name( $table );
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $count = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
+            $stats[ $key ] = array(
+                'table' => $table_name,
+                'count' => (int) $count,
+            );
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Check if tables exist
+     *
+     * @return bool True if all tables exist.
+     */
+    public static function tables_exist() {
+        global $wpdb;
+
+        $tables = array(
+            self::TABLE_FEEDBACKS,
+            self::TABLE_REPLIES,
+            self::TABLE_METADATA_TYPES,
+            self::TABLE_METADATA_ITEMS,
+            self::TABLE_CUSTOM_GROUPS,
+            self::TABLE_GROUP_SETTINGS,
+        );
+
+        foreach ( $tables as $table ) {
+            $table_name = self::get_table_name( $table );
+            $exists = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SHOW TABLES LIKE %s",
+                    $table_name
+                )
+            );
+            if ( ! $exists ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     // =========================================================================
     // FEEDBACK CRUD OPERATIONS
     // =========================================================================

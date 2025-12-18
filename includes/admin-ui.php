@@ -29,6 +29,7 @@ class WPVFH_Admin_UI {
     public static function init() {
         add_action( 'admin_menu', array( __CLASS__, 'add_menu_pages' ) );
         add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
+        add_action( 'admin_init', array( __CLASS__, 'handle_danger_zone_actions' ) );
         add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_styles' ) );
 
         // Actions AJAX admin
@@ -270,6 +271,120 @@ class WPVFH_Admin_UI {
             'wpvfh_settings',
             'wpvfh_notification_section'
         );
+    }
+
+    /**
+     * Gérer les actions de la zone de danger
+     *
+     * @since 1.7.0
+     * @return void
+     */
+    public static function handle_danger_zone_actions() {
+        // Vérifier si on est sur la bonne page et qu'il y a une action
+        if ( ! isset( $_GET['page'] ) || 'wpvfh-settings' !== $_GET['page'] || ! isset( $_GET['action'] ) ) {
+            return;
+        }
+
+        $action = sanitize_key( $_GET['action'] );
+        $redirect_url = admin_url( 'admin.php?page=wpvfh-settings' );
+
+        // Vérifier les permissions
+        if ( ! current_user_can( 'manage_feedback' ) ) {
+            wp_die( esc_html__( 'Vous n\'avez pas les permissions nécessaires.', 'blazing-feedback' ) );
+        }
+
+        switch ( $action ) {
+            case 'truncate_feedbacks':
+                // Vider les feedbacks et réponses
+                if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'wpvfh_truncate_feedbacks' ) ) {
+                    wp_die( esc_html__( 'Nonce invalide.', 'blazing-feedback' ) );
+                }
+
+                // Supprimer aussi les screenshots
+                $upload_dir = wp_upload_dir();
+                $feedback_dir = $upload_dir['basedir'] . '/visual-feedback';
+                if ( file_exists( $feedback_dir ) ) {
+                    self::delete_directory_contents( $feedback_dir );
+                }
+
+                WPVFH_Database::truncate_feedback_tables();
+                $redirect_url = add_query_arg( 'message', 'feedbacks_truncated', $redirect_url );
+                break;
+
+            case 'truncate_all':
+                // Vider toutes les tables
+                if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'wpvfh_truncate_all' ) ) {
+                    wp_die( esc_html__( 'Nonce invalide.', 'blazing-feedback' ) );
+                }
+
+                // Supprimer les screenshots
+                $upload_dir = wp_upload_dir();
+                $feedback_dir = $upload_dir['basedir'] . '/visual-feedback';
+                if ( file_exists( $feedback_dir ) ) {
+                    self::delete_directory_contents( $feedback_dir );
+                }
+
+                WPVFH_Database::truncate_all_tables();
+                $redirect_url = add_query_arg( 'message', 'all_truncated', $redirect_url );
+                break;
+
+            case 'drop_tables':
+                // Supprimer les tables
+                if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'wpvfh_drop_tables' ) ) {
+                    wp_die( esc_html__( 'Nonce invalide.', 'blazing-feedback' ) );
+                }
+
+                // Supprimer les screenshots
+                $upload_dir = wp_upload_dir();
+                $feedback_dir = $upload_dir['basedir'] . '/visual-feedback';
+                if ( file_exists( $feedback_dir ) ) {
+                    self::delete_directory_contents( $feedback_dir );
+                }
+
+                WPVFH_Database::uninstall();
+                $redirect_url = add_query_arg( 'message', 'tables_dropped', $redirect_url );
+                break;
+
+            case 'recreate_tables':
+                // Recréer les tables
+                if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'wpvfh_recreate_tables' ) ) {
+                    wp_die( esc_html__( 'Nonce invalide.', 'blazing-feedback' ) );
+                }
+
+                WPVFH_Database::install();
+                $redirect_url = add_query_arg( 'message', 'tables_recreated', $redirect_url );
+                break;
+
+            default:
+                return;
+        }
+
+        wp_safe_redirect( $redirect_url );
+        exit;
+    }
+
+    /**
+     * Supprimer le contenu d'un répertoire (mais pas le répertoire lui-même)
+     *
+     * @since 1.7.0
+     * @param string $dir Chemin du répertoire
+     * @return void
+     */
+    private static function delete_directory_contents( $dir ) {
+        if ( ! is_dir( $dir ) ) {
+            return;
+        }
+
+        $files = array_diff( scandir( $dir ), array( '.', '..' ) );
+        foreach ( $files as $file ) {
+            $path = $dir . '/' . $file;
+            if ( is_dir( $path ) ) {
+                self::delete_directory_contents( $path );
+                rmdir( $path );
+            } else {
+                unlink( $path );
+            }
+        }
     }
 
     /**
@@ -566,17 +681,97 @@ class WPVFH_Admin_UI {
                 ?>
             </form>
 
+            <?php
+            // Afficher les messages de succès
+            $message = isset( $_GET['message'] ) ? sanitize_key( $_GET['message'] ) : '';
+            if ( $message ) {
+                $messages = array(
+                    'feedbacks_truncated' => __( 'Tous les feedbacks ont été supprimés.', 'blazing-feedback' ),
+                    'all_truncated'       => __( 'Toutes les tables ont été vidées.', 'blazing-feedback' ),
+                    'tables_dropped'      => __( 'Toutes les tables ont été supprimées.', 'blazing-feedback' ),
+                    'tables_recreated'    => __( 'Les tables ont été recréées avec succès.', 'blazing-feedback' ),
+                );
+                if ( isset( $messages[ $message ] ) ) {
+                    echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $messages[ $message ] ) . '</p></div>';
+                }
+            }
+
+            // Vérifier si les tables existent
+            $tables_exist = WPVFH_Database::tables_exist();
+            $table_stats = $tables_exist ? WPVFH_Database::get_table_stats() : array();
+            ?>
+
             <!-- Section Danger -->
-            <div class="wpvfh-danger-zone" style="margin-top: 40px; padding: 20px; background: #fff; border: 1px solid #dc3545; border-radius: 4px;">
-                <h2 style="color: #dc3545; margin-top: 0;"><?php esc_html_e( 'Zone de danger', 'blazing-feedback' ); ?></h2>
-                <p><?php esc_html_e( 'Ces actions sont irréversibles. Utilisez-les avec précaution.', 'blazing-feedback' ); ?></p>
-                <p>
-                    <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wpvfh-settings&action=delete_all' ), 'wpvfh_delete_all' ) ); ?>"
-                       class="button button-link-delete"
-                       onclick="return confirm('<?php esc_attr_e( 'Êtes-vous sûr de vouloir supprimer TOUS les feedbacks ? Cette action est irréversible.', 'blazing-feedback' ); ?>');">
-                        <?php esc_html_e( 'Supprimer tous les feedbacks', 'blazing-feedback' ); ?>
+            <div class="wpvfh-danger-zone" style="margin-top: 40px; padding: 20px; background: #fff; border: 2px solid #dc3545; border-radius: 4px;">
+                <h2 style="color: #dc3545; margin-top: 0;">
+                    <span class="dashicons dashicons-warning" style="color: #dc3545;"></span>
+                    <?php esc_html_e( 'Zone de danger', 'blazing-feedback' ); ?>
+                </h2>
+                <p style="color: #666;"><?php esc_html_e( 'Ces actions sont irréversibles. Utilisez-les avec précaution.', 'blazing-feedback' ); ?></p>
+
+                <?php if ( $tables_exist ) : ?>
+                    <!-- Stats des tables -->
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                        <h4 style="margin-top: 0;"><?php esc_html_e( 'État des tables', 'blazing-feedback' ); ?></h4>
+                        <table class="widefat" style="margin-bottom: 0;">
+                            <thead>
+                                <tr>
+                                    <th><?php esc_html_e( 'Table', 'blazing-feedback' ); ?></th>
+                                    <th style="text-align: right;"><?php esc_html_e( 'Entrées', 'blazing-feedback' ); ?></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ( $table_stats as $key => $stat ) : ?>
+                                    <tr>
+                                        <td><code><?php echo esc_html( $stat['table'] ); ?></code></td>
+                                        <td style="text-align: right;"><?php echo esc_html( number_format_i18n( $stat['count'] ) ); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Actions -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wpvfh-settings&action=truncate_feedbacks' ), 'wpvfh_truncate_feedbacks' ) ); ?>"
+                           class="button"
+                           style="border-color: #f0ad4e; color: #856404;"
+                           onclick="return confirm('<?php esc_attr_e( 'Êtes-vous sûr de vouloir supprimer TOUS les feedbacks et réponses ? Cette action est irréversible.', 'blazing-feedback' ); ?>');">
+                            <span class="dashicons dashicons-trash" style="vertical-align: middle;"></span>
+                            <?php esc_html_e( 'Vider les feedbacks', 'blazing-feedback' ); ?>
+                        </a>
+
+                        <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wpvfh-settings&action=truncate_all' ), 'wpvfh_truncate_all' ) ); ?>"
+                           class="button"
+                           style="border-color: #dc3545; color: #dc3545;"
+                           onclick="return confirm('<?php esc_attr_e( 'Êtes-vous sûr de vouloir vider TOUTES les tables (feedbacks, métadonnées, groupes, paramètres) ? Cette action est irréversible.', 'blazing-feedback' ); ?>');">
+                            <span class="dashicons dashicons-database-remove" style="vertical-align: middle;"></span>
+                            <?php esc_html_e( 'Vider toutes les tables', 'blazing-feedback' ); ?>
+                        </a>
+
+                        <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wpvfh-settings&action=drop_tables' ), 'wpvfh_drop_tables' ) ); ?>"
+                           class="button button-link-delete"
+                           style="background: #dc3545; border-color: #dc3545; color: #fff;"
+                           onclick="return confirm('<?php esc_attr_e( 'ATTENTION : Êtes-vous sûr de vouloir SUPPRIMER toutes les tables de la base de données ? Vous devrez réactiver le plugin pour les recréer.', 'blazing-feedback' ); ?>');">
+                            <span class="dashicons dashicons-database-remove" style="vertical-align: middle;"></span>
+                            <?php esc_html_e( 'Supprimer les tables', 'blazing-feedback' ); ?>
+                        </a>
+                    </div>
+
+                <?php else : ?>
+                    <!-- Tables n'existent pas -->
+                    <div class="notice notice-warning inline" style="margin: 0 0 15px 0;">
+                        <p>
+                            <strong><?php esc_html_e( 'Les tables de base de données n\'existent pas.', 'blazing-feedback' ); ?></strong><br>
+                            <?php esc_html_e( 'Cliquez sur le bouton ci-dessous pour les créer.', 'blazing-feedback' ); ?>
+                        </p>
+                    </div>
+                    <a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=wpvfh-settings&action=recreate_tables' ), 'wpvfh_recreate_tables' ) ); ?>"
+                       class="button button-primary">
+                        <span class="dashicons dashicons-database-add" style="vertical-align: middle;"></span>
+                        <?php esc_html_e( 'Créer les tables', 'blazing-feedback' ); ?>
                     </a>
-                </p>
+                <?php endif; ?>
             </div>
         </div>
         <?php
