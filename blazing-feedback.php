@@ -829,6 +829,10 @@ final class WP_Visual_Feedback_Hub {
 
                         <!-- Listes par priorité -->
                         <div class="wpvfh-priority-sections">
+                            <div class="wpvfh-priority-section" data-priority="none">
+                                <h4 class="wpvfh-priority-title wpvfh-priority-none">⚪ <?php esc_html_e( 'Aucun niveau de priorité', 'blazing-feedback' ); ?></h4>
+                                <div class="wpvfh-priority-list" id="wpvfh-priority-none-list"></div>
+                            </div>
                             <div class="wpvfh-priority-section" data-priority="high">
                                 <h4 class="wpvfh-priority-title wpvfh-priority-high">🔴 <?php esc_html_e( 'Priorité haute', 'blazing-feedback' ); ?></h4>
                                 <div class="wpvfh-priority-list" id="wpvfh-priority-high-list"></div>
@@ -840,10 +844,6 @@ final class WP_Visual_Feedback_Hub {
                             <div class="wpvfh-priority-section" data-priority="low">
                                 <h4 class="wpvfh-priority-title wpvfh-priority-low">🟢 <?php esc_html_e( 'Priorité basse', 'blazing-feedback' ); ?></h4>
                                 <div class="wpvfh-priority-list" id="wpvfh-priority-low-list"></div>
-                            </div>
-                            <div class="wpvfh-priority-section" data-priority="none">
-                                <h4 class="wpvfh-priority-title wpvfh-priority-none">⚪ <?php esc_html_e( 'Aucun niveau de priorité', 'blazing-feedback' ); ?></h4>
-                                <div class="wpvfh-priority-list" id="wpvfh-priority-none-list"></div>
                             </div>
                         </div>
                     </div><!-- /wpvfh-tab-priority -->

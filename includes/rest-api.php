@@ -459,6 +459,12 @@ class WPVFH_REST_API {
             'sanitize_callback' => 'sanitize_key',
         );
 
+        $params['priority'] = array(
+            'type'              => 'string',
+            'enum'              => array( 'none', 'low', 'medium', 'high' ),
+            'sanitize_callback' => 'sanitize_key',
+        );
+
         return $params;
     }
 
@@ -906,6 +912,11 @@ class WPVFH_REST_API {
              * @param string $status      Nouveau statut
              */
             do_action( 'wpvfh_rest_status_changed', $feedback_id, $status );
+        }
+
+        // Mise à jour de la priorité
+        if ( $priority = $request->get_param( 'priority' ) ) {
+            update_post_meta( $feedback_id, '_wpvfh_priority', $priority );
         }
 
         /**

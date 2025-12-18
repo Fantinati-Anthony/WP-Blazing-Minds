@@ -1694,6 +1694,9 @@
                             this.elements.feedbackCount.hidden = true;
                         }
                     }
+
+                    // Masquer l'onglet Priorité si aucun feedback
+                    this.updatePriorityTabVisibility(response.length);
                 }
 
             } catch (error) {
@@ -2637,6 +2640,16 @@
         // ===========================================
 
         /**
+         * Mettre à jour la visibilité de l'onglet Priorité
+         */
+        updatePriorityTabVisibility: function(feedbackCount) {
+            const priorityTabBtn = document.querySelector('.wpvfh-tab[data-tab="priority"]');
+            if (priorityTabBtn) {
+                priorityTabBtn.style.display = feedbackCount > 0 ? '' : 'none';
+            }
+        },
+
+        /**
          * Rendre les listes de priorité
          */
         renderPriorityLists: function() {
@@ -2648,12 +2661,12 @@
                 if (list) list.innerHTML = '';
             });
 
-            // Grouper les feedbacks par priorité
+            // Grouper les feedbacks par priorité (ordre: none, high, medium, low)
             const feedbacksByPriority = {
+                none: [],
                 high: [],
                 medium: [],
-                low: [],
-                none: []
+                low: []
             };
 
             this.state.currentFeedbacks.forEach(feedback => {
@@ -2670,10 +2683,18 @@
                 feedbacksByPriority[priority].sort((a, b) => (a.priority_order || 0) - (b.priority_order || 0));
             });
 
-            // Rendre les feedbacks dans chaque liste
+            // Rendre les feedbacks dans chaque liste et gérer la visibilité des sections
             Object.keys(feedbacksByPriority).forEach(priority => {
                 const list = lists[priority];
                 if (!list) return;
+
+                const section = list.closest('.wpvfh-priority-section');
+                const hasFeedbacks = feedbacksByPriority[priority].length > 0;
+
+                // Masquer la section si vide
+                if (section) {
+                    section.style.display = hasFeedbacks ? '' : 'none';
+                }
 
                 feedbacksByPriority[priority].forEach(feedback => {
                     const item = this.createPriorityItem(feedback);
@@ -2839,7 +2860,7 @@
          */
         updateFeedbackPriority: async function(feedbackId, priority) {
             try {
-                await this.apiRequest('POST', `feedback/${feedbackId}`, {
+                await this.apiRequest('POST', `feedbacks/${feedbackId}`, {
                     priority: priority
                 });
 
@@ -2859,23 +2880,11 @@
         },
 
         /**
-         * Sauvegarder l'ordre dans une liste de priorité
+         * Sauvegarder l'ordre dans une liste de priorité (local uniquement)
          */
-        savePriorityOrder: async function(priority, list) {
-            const items = list.querySelectorAll('.wpvfh-pin-item');
-            const order = [...items].map((item, index) => ({
-                id: parseInt(item.dataset.feedbackId, 10),
-                order: index
-            }));
-
-            try {
-                await this.apiRequest('POST', 'feedback/reorder', {
-                    priority: priority,
-                    order: order
-                });
-            } catch (error) {
-                console.error('[Blazing Feedback] Erreur sauvegarde ordre:', error);
-            }
+        savePriorityOrder: function(priority, list) {
+            // L'ordre est géré localement pour le réarrangement visuel
+            // La priorité est sauvegardée via updateFeedbackPriority
         },
 
         /**
@@ -2883,6 +2892,7 @@
          */
         openSearchModal: function() {
             if (this.elements.searchModal) {
+                this.elements.searchModal.hidden = false;
                 this.elements.searchModal.classList.add('active');
             }
         },
@@ -2892,6 +2902,7 @@
          */
         closeSearchModal: function() {
             if (this.elements.searchModal) {
+                this.elements.searchModal.hidden = true;
                 this.elements.searchModal.classList.remove('active');
             }
         },
