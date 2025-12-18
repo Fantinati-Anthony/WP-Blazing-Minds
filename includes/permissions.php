@@ -108,7 +108,7 @@ class WPVFH_Permissions {
         // L'auteur peut toujours lire son propre feedback
         if ( (int) $feedback->post_author === $user_id ) {
             // L'auteur peut lire s'il a la capacité de créer des feedbacks
-            return user_can( $user_id, 'read_feedback' ) ||
+            return user_can( $user_id, 'read_feedback', $feedback_id ) ||
                    user_can( $user_id, 'publish_feedbacks' );
         }
 
@@ -138,7 +138,7 @@ class WPVFH_Permissions {
 
         // L'auteur peut modifier son propre feedback
         if ( (int) $feedback->post_author === $user_id ) {
-            return user_can( $user_id, 'edit_feedback' );
+            return user_can( $user_id, 'edit_feedback', $feedback_id );
         }
 
         // Sinon, vérifier la capacité de modifier les autres
@@ -170,7 +170,7 @@ class WPVFH_Permissions {
 
         // L'auteur peut supprimer son propre feedback s'il peut créer des feedbacks
         if ( (int) $feedback->post_author === $user_id ) {
-            return user_can( $user_id, 'delete_feedback' ) ||
+            return user_can( $user_id, 'delete_feedback', $feedback_id ) ||
                    user_can( $user_id, 'publish_feedbacks' ) ||
                    user_can( $user_id, 'delete_feedbacks' );
         }

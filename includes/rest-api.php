@@ -538,7 +538,8 @@ class WPVFH_REST_API {
         }
 
         // Les utilisateurs qui peuvent créer ou modérer peuvent aussi lire
-        return current_user_can( 'read_feedback' ) ||
+        // Use primitive capabilities (plural) to avoid map_meta_cap warning
+        return current_user_can( 'edit_feedbacks' ) ||
                current_user_can( 'publish_feedbacks' ) ||
                current_user_can( 'moderate_feedback' );
     }

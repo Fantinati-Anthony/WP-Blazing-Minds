@@ -277,7 +277,8 @@ class WPVFH_CPT_Feedback {
             'show_in_rest'      => true,
             'single'            => true,
             'auth_callback'     => function() {
-                return current_user_can( 'edit_feedback' );
+                // Use primitive capability (plural) to avoid map_meta_cap warning
+                return current_user_can( 'edit_feedbacks' );
             },
         );
 
