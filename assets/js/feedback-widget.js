@@ -2181,17 +2181,52 @@
                 }
             }
 
-            // Tags labels
+            // Tags labels avec boutons X pour supprimer
             if (this.elements.detailTagsLabels) {
                 const tags = feedback.tags;
+                this.elements.detailTagsLabels.innerHTML = '';
                 if (tags && tags.trim()) {
                     const tagList = tags.split(',').map(t => t.trim()).filter(t => t);
-                    this.elements.detailTagsLabels.innerHTML = tagList.map(tag =>
-                        `<span class="wpvfh-label-tag">${this.escapeHtml(tag)}</span>`
-                    ).join('');
-                } else {
-                    this.elements.detailTagsLabels.innerHTML = '';
+                    tagList.forEach(tag => {
+                        const badge = document.createElement('span');
+                        badge.className = 'wpvfh-tag-badge';
+                        badge.innerHTML = `${this.escapeHtml(tag)}<button type="button" class="wpvfh-tag-remove" title="Supprimer ce tag">×</button>`;
+
+                        // Gestionnaire pour le bouton X
+                        const removeBtn = badge.querySelector('.wpvfh-tag-remove');
+                        removeBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.removeTag(tag);
+                        });
+
+                        this.elements.detailTagsLabels.appendChild(badge);
+                    });
                 }
+            }
+        },
+
+        /**
+         * Supprimer un tag du feedback courant
+         * @param {string} tagToRemove - Tag à supprimer
+         */
+        removeTag: function(tagToRemove) {
+            if (!this.state.currentFeedbackId) return;
+
+            // Récupérer le feedback courant
+            const feedback = this.state.currentFeedbacks.find(f => f.id == this.state.currentFeedbackId);
+            if (!feedback) return;
+
+            // Retirer le tag de la liste
+            const tags = feedback.tags || '';
+            const tagList = tags.split(',').map(t => t.trim()).filter(t => t && t !== tagToRemove);
+            const newTags = tagList.join(', ');
+
+            // Mettre à jour via l'API
+            this.updateFeedbackMeta(this.state.currentFeedbackId, 'tags', newTags);
+
+            // Mettre à jour le champ input
+            if (this.elements.detailTags) {
+                this.elements.detailTags.value = newTags;
             }
         },
 
