@@ -27,12 +27,12 @@ function wpvfh_uninstall_cleanup() {
     // 1. Supprimer les tables SQL personnalisées
     // =========================================================================
     $tables = array(
-        'wpvfh_feedbacks',
-        'wpvfh_replies',
-        'wpvfh_metadata_types',
-        'wpvfh_metadata_items',
-        'wpvfh_custom_groups',
-        'wpvfh_group_settings',
+        'blazingfeedback_feedbacks',
+        'blazingfeedback_replies',
+        'blazingfeedback_metadata_types',
+        'blazingfeedback_metadata_items',
+        'blazingfeedback_custom_groups',
+        'blazingfeedback_group_settings',
     );
 
     foreach ( $tables as $table ) {

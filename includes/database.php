@@ -29,14 +29,15 @@ class WPVFH_Database {
     const DB_VERSION_OPTION = 'wpvfh_db_version';
 
     /**
-     * Table names (without prefix)
+     * Table names (without WordPress prefix)
+     * Final table names will be: {wp_prefix}blazingfeedback_{table}
      */
-    const TABLE_FEEDBACKS       = 'wpvfh_feedbacks';
-    const TABLE_REPLIES         = 'wpvfh_replies';
-    const TABLE_METADATA_TYPES  = 'wpvfh_metadata_types';
-    const TABLE_METADATA_ITEMS  = 'wpvfh_metadata_items';
-    const TABLE_CUSTOM_GROUPS   = 'wpvfh_custom_groups';
-    const TABLE_GROUP_SETTINGS  = 'wpvfh_group_settings';
+    const TABLE_FEEDBACKS       = 'blazingfeedback_feedbacks';
+    const TABLE_REPLIES         = 'blazingfeedback_replies';
+    const TABLE_METADATA_TYPES  = 'blazingfeedback_metadata_types';
+    const TABLE_METADATA_ITEMS  = 'blazingfeedback_metadata_items';
+    const TABLE_CUSTOM_GROUPS   = 'blazingfeedback_custom_groups';
+    const TABLE_GROUP_SETTINGS  = 'blazingfeedback_group_settings';
 
     /**
      * Get table name with WordPress base prefix
