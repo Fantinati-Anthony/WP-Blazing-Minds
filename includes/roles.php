@@ -114,8 +114,9 @@ class WPVFH_Roles {
      * @return void
      */
     public static function init() {
-        // Ajouter les capacités aux rôles WordPress existants
-        add_action( 'admin_init', array( __CLASS__, 'add_caps_to_admin' ) );
+        // Ajouter les capacités aux rôles WordPress existants immédiatement
+        // pour éviter les problèmes d'accès
+        self::add_caps_to_admin();
     }
 
     /**

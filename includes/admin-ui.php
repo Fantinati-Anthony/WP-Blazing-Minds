@@ -53,7 +53,7 @@ class WPVFH_Admin_UI {
         add_menu_page(
             __( 'Blazing Feedback', 'blazing-feedback' ),
             __( 'Feedbacks', 'blazing-feedback' ),
-            'read_feedback',
+            'edit_feedbacks',
             'wpvfh-dashboard',
             array( __CLASS__, 'render_dashboard_page' ),
             'dashicons-format-chat',
@@ -65,7 +65,7 @@ class WPVFH_Admin_UI {
             'wpvfh-dashboard',
             __( 'Tableau de bord', 'blazing-feedback' ),
             __( 'Tableau de bord', 'blazing-feedback' ),
-            'read_feedback',
+            'edit_feedbacks',
             'wpvfh-dashboard',
             array( __CLASS__, 'render_dashboard_page' )
         );
@@ -483,11 +483,13 @@ class WPVFH_Admin_UI {
                         <div class="wpvfh-feedback-status">
                             <?php
                             $status = get_post_meta( $feedback->ID, '_wpvfh_status', true ) ?: 'new';
-                            $statuses = WPVFH_CPT_Feedback::get_statuses();
-                            $status_data = $statuses[ $status ] ?? $statuses['new'];
+                            $status_data = WPVFH_Options_Manager::get_status_by_id( $status );
+                            if ( ! $status_data ) {
+                                $status_data = WPVFH_Options_Manager::get_status_by_id( 'new' );
+                            }
                             ?>
                             <span class="wpvfh-status-badge wpvfh-badge-<?php echo esc_attr( $status ); ?>">
-                                <?php echo esc_html( $status_data['icon'] . ' ' . $status_data['label'] ); ?>
+                                <?php echo esc_html( ( $status_data['emoji'] ?? '' ) . ' ' . ( $status_data['label'] ?? $status ) ); ?>
                             </span>
                         </div>
                     </li>
@@ -933,9 +935,10 @@ class WPVFH_Admin_UI {
         update_post_meta( $feedback_id, '_wpvfh_status', $status );
         wp_set_object_terms( $feedback_id, $status, 'feedback_status' );
 
+        $status_data = WPVFH_Options_Manager::get_status_by_id( $status );
         wp_send_json_success( array(
             'status' => $status,
-            'label'  => WPVFH_CPT_Feedback::get_statuses()[ $status ]['label'] ?? $status,
+            'label'  => $status_data ? $status_data['label'] : $status,
         ) );
     }
 

@@ -419,7 +419,8 @@ class WPVFH_Permissions {
 
         // Statut
         if ( isset( $data['status'] ) ) {
-            $allowed_statuses = array_keys( WPVFH_CPT_Feedback::get_statuses() );
+            $statuses = WPVFH_Options_Manager::get_statuses();
+            $allowed_statuses = array_map( function( $s ) { return $s['id']; }, $statuses );
             $sanitized['status'] = in_array( $data['status'], $allowed_statuses, true )
                 ? $data['status']
                 : 'new';
