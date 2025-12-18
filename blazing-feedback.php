@@ -605,8 +605,9 @@ final class WP_Visual_Feedback_Hub {
      * @return void
      */
     private function render_default_widget() {
+        $button_position = get_option( 'wpvfh_button_position', 'bottom-right' );
         ?>
-        <div id="wpvfh-container" class="wpvfh-container" role="complementary" aria-label="<?php esc_attr_e( 'Feedback visuel', 'blazing-feedback' ); ?>">
+        <div id="wpvfh-container" class="wpvfh-container" data-position="<?php echo esc_attr( $button_position ); ?>" role="complementary" aria-label="<?php esc_attr_e( 'Feedback visuel', 'blazing-feedback' ); ?>">
             <!-- Overlay pour la sidebar -->
             <div id="wpvfh-sidebar-overlay" class="wpvfh-sidebar-overlay"></div>
 
@@ -615,6 +616,7 @@ final class WP_Visual_Feedback_Hub {
                 type="button"
                 id="wpvfh-toggle-btn"
                 class="wpvfh-corner-btn"
+                data-position="<?php echo esc_attr( $button_position ); ?>"
                 aria-expanded="false"
                 aria-controls="wpvfh-panel"
                 title="<?php esc_attr_e( 'Voir les feedbacks', 'blazing-feedback' ); ?>"
