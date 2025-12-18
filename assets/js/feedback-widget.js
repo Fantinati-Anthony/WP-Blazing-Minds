@@ -73,6 +73,12 @@
          * @returns {void}
          */
         moveFixedElementsToBody: function() {
+            // Déplacer le bouton coin vers body
+            if (this.elements.toggleBtn && this.elements.toggleBtn.parentNode !== document.body) {
+                document.body.appendChild(this.elements.toggleBtn);
+                console.log('[Blazing Feedback] Bouton coin déplacé vers body');
+            }
+
             // Déplacer le panel vers body pour éviter les problèmes avec transform/filter des parents
             if (this.elements.panel && this.elements.panel.parentNode !== document.body) {
                 document.body.appendChild(this.elements.panel);

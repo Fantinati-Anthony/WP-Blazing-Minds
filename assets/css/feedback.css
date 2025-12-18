@@ -369,136 +369,184 @@ html body.elementor-default .wpvfh-hidden {
 }
 
 /* ==========================================================================
-   Groupe de boutons flottants
+   Bouton coin (quart de cercle)
    ========================================================================== */
 
-.wpvfh-floating-buttons {
+.wpvfh-corner-btn {
     position: fixed !important;
-    bottom: 24px !important;
-    right: 24px !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    width: 80px !important;
+    height: 80px !important;
+    background: var(--wpvfh-primary) !important;
+    border: none !important;
+    border-radius: 100% 0 0 0 !important;
+    cursor: pointer !important;
+    box-shadow: -2px -2px 12px rgba(0, 0, 0, 0.2) !important;
+    transition: all var(--wpvfh-transition) !important;
     z-index: var(--wpvfh-z-index) !important;
     display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-
-.wpvfh-toggle-btn {
-    display: flex !important;
+    flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 8px !important;
-    padding: 12px 20px !important;
-    background: var(--wpvfh-primary) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 50px !important;
-    cursor: pointer !important;
-    box-shadow: var(--wpvfh-shadow) !important;
-    transition: all var(--wpvfh-transition) !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    line-height: 1.5 !important;
-    text-decoration: none !important;
-    text-transform: none !important;
-    letter-spacing: normal !important;
-    min-height: auto !important;
+    padding: 0 !important;
+    padding-right: 8px !important;
+    padding-bottom: 8px !important;
 }
 
-.wpvfh-toggle-btn:hover {
+.wpvfh-corner-btn:hover {
     background: var(--wpvfh-primary-hover) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 24px rgba(231, 76, 60, 0.35) !important;
-    color: #fff !important;
-    text-decoration: none !important;
+    width: 90px !important;
+    height: 90px !important;
+    box-shadow: -4px -4px 20px rgba(231, 76, 60, 0.4) !important;
 }
 
-.wpvfh-toggle-btn:focus {
+.wpvfh-corner-btn:focus {
     outline: 2px solid var(--wpvfh-primary) !important;
     outline-offset: 2px !important;
 }
 
-.wpvfh-toggle-btn:active {
-    transform: translateY(0) !important;
+.wpvfh-corner-btn:active {
+    transform: scale(0.95) !important;
 }
 
-/* Bouton principal (Feedback) */
-.wpvfh-btn-main {
-    position: relative !important;
+.wpvfh-corner-icon {
+    font-size: 24px !important;
+    line-height: 1 !important;
+    margin-top: 12px !important;
+    margin-left: 12px !important;
 }
 
-.wpvfh-feedback-count {
-    position: absolute !important;
-    top: -6px !important;
-    right: -6px !important;
-    min-width: 20px !important;
-    height: 20px !important;
-    padding: 0 6px !important;
+.wpvfh-corner-count {
+    min-width: 18px !important;
+    height: 18px !important;
+    padding: 0 5px !important;
     background: #f39c12 !important;
     color: #fff !important;
-    font-size: 11px !important;
+    font-size: 10px !important;
     font-weight: 700 !important;
-    border-radius: 10px !important;
+    border-radius: 9px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     line-height: 1 !important;
+    margin-top: 4px !important;
+    margin-left: 12px !important;
 }
 
-/* Bouton ajouter (+) */
-.wpvfh-btn-add {
-    padding: 12px !important;
+/* Quand le panel est ouvert, masquer le bouton coin */
+body.wpvfh-panel-active .wpvfh-corner-btn {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: scale(0.8) !important;
+}
+
+/* Positions alternatives */
+.wpvfh-container[data-position="bottom-left"] .wpvfh-corner-btn {
+    right: auto !important;
+    left: 0 !important;
+    border-radius: 0 100% 0 0 !important;
+    padding-right: 0 !important;
+    padding-left: 8px !important;
+}
+
+.wpvfh-container[data-position="bottom-left"] .wpvfh-corner-icon,
+.wpvfh-container[data-position="bottom-left"] .wpvfh-corner-count {
+    margin-left: 0 !important;
+    margin-right: 12px !important;
+}
+
+.wpvfh-container[data-position="top-right"] .wpvfh-corner-btn {
+    bottom: auto !important;
+    top: 0 !important;
+    border-radius: 0 0 0 100% !important;
+    padding-bottom: 0 !important;
+    padding-top: 8px !important;
+}
+
+.wpvfh-container[data-position="top-right"] .wpvfh-corner-icon {
+    margin-top: 0 !important;
+    margin-bottom: 4px !important;
+}
+
+.wpvfh-container[data-position="top-left"] .wpvfh-corner-btn {
+    bottom: auto !important;
+    top: 0 !important;
+    right: auto !important;
+    left: 0 !important;
+    border-radius: 0 0 100% 0 !important;
+    padding-bottom: 0 !important;
+    padding-top: 8px !important;
+    padding-right: 0 !important;
+    padding-left: 8px !important;
+}
+
+/* ==========================================================================
+   Footer de la sidebar (boutons + et visibilité)
+   ========================================================================== */
+
+.wpvfh-panel-footer {
+    display: flex !important;
+    gap: 8px !important;
+    padding: 12px 16px !important;
+    background: #f8f9fa !important;
+    border-top: 1px solid #e9ecef !important;
+    flex-shrink: 0 !important;
+}
+
+.wpvfh-footer-btn {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 10px 16px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.wpvfh-footer-btn-add {
     background: #27ae60 !important;
+    color: #fff !important;
 }
 
-.wpvfh-btn-add:hover {
+.wpvfh-footer-btn-add:hover {
     background: #219a52 !important;
-    box-shadow: 0 6px 24px rgba(39, 174, 96, 0.35) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3) !important;
 }
 
-/* Bouton visibilité */
-.wpvfh-btn-visibility {
-    padding: 12px !important;
+.wpvfh-footer-btn-visibility {
     background: #3498db !important;
+    color: #fff !important;
 }
 
-.wpvfh-btn-visibility:hover {
+.wpvfh-footer-btn-visibility:hover {
     background: #2980b9 !important;
-    box-shadow: 0 6px 24px rgba(52, 152, 219, 0.35) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3) !important;
 }
 
-.wpvfh-btn-visibility[data-visible="false"] {
+.wpvfh-footer-btn-visibility[data-visible="false"] {
     background: #95a5a6 !important;
 }
 
-.wpvfh-btn-visibility[data-visible="false"]:hover {
+.wpvfh-footer-btn-visibility[data-visible="false"]:hover {
     background: #7f8c8d !important;
+    box-shadow: 0 4px 12px rgba(149, 165, 166, 0.3) !important;
 }
 
-.wpvfh-btn-icon {
-    font-size: 18px !important;
+.wpvfh-footer-btn-icon {
+    font-size: 16px !important;
     line-height: 1 !important;
 }
 
-.wpvfh-btn-text {
+.wpvfh-footer-btn-text {
     white-space: nowrap !important;
-}
-
-/* Positions alternatives du bouton */
-.wpvfh-container[data-position="bottom-left"] .wpvfh-toggle-btn {
-    right: auto;
-    left: 24px;
-}
-
-.wpvfh-container[data-position="top-right"] .wpvfh-toggle-btn {
-    bottom: auto;
-    top: 24px;
-}
-
-.wpvfh-container[data-position="top-left"] .wpvfh-toggle-btn {
-    bottom: auto;
-    top: 24px;
-    right: auto;
-    left: 24px;
 }
 
 /* ==========================================================================
@@ -538,22 +586,34 @@ body.wpvfh-panel-active .wpvfh-sidebar-overlay {
     display: none !important;
 }
 
-/* Ajuster les boutons flottants quand le panel est ouvert */
-body.wpvfh-panel-active .wpvfh-floating-buttons {
-    right: 424px !important;
-    transition: right 0.3s ease !important;
-}
-
 /* Responsive: sur mobile, pas de push mais overlay */
 @media screen and (max-width: 600px) {
     body.wpvfh-panel-active {
         margin-right: 0 !important;
     }
-    body.wpvfh-panel-active .wpvfh-floating-buttons {
-        right: 24px !important;
-    }
     body.wpvfh-panel-active .wpvfh-sidebar-overlay {
         display: block !important;
+    }
+
+    /* Bouton coin plus petit sur mobile */
+    .wpvfh-corner-btn {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    .wpvfh-corner-btn:hover {
+        width: 65px !important;
+        height: 65px !important;
+    }
+
+    .wpvfh-corner-icon {
+        font-size: 20px !important;
+        margin-top: 8px !important;
+        margin-left: 8px !important;
+    }
+
+    .wpvfh-corner-count {
+        margin-left: 8px !important;
     }
 }
 
