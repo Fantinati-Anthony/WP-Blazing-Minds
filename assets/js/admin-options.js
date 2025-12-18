@@ -136,6 +136,53 @@
                     self.saveItem($(this).closest('.wpvfh-option-card'));
                 }
             });
+
+            // Add new group button
+            $(document).on('click', '.wpvfh-add-group-btn', function(e) {
+                e.preventDefault();
+                self.openNewGroupModal();
+            });
+
+            // Close modal
+            $(document).on('click', '.wpvfh-modal-close, .wpvfh-modal-cancel', function() {
+                self.closeNewGroupModal();
+            });
+
+            // Close modal on backdrop click
+            $(document).on('click', '.wpvfh-modal', function(e) {
+                if ($(e.target).hasClass('wpvfh-modal')) {
+                    self.closeNewGroupModal();
+                }
+            });
+
+            // Create group button
+            $(document).on('click', '.wpvfh-create-group-btn', function() {
+                self.createCustomGroup();
+            });
+
+            // Enter key in new group name input
+            $(document).on('keypress', '#wpvfh-new-group-name', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    self.createCustomGroup();
+                }
+            });
+
+            // Delete group (tab delete button)
+            $(document).on('click', '.wpvfh-tab-delete', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var $tab = $(this).closest('.nav-tab');
+                var slug = $tab.data('tab');
+                self.deleteCustomGroup(slug);
+            });
+
+            // ESC key to close modal
+            $(document).on('keydown', function(e) {
+                if (e.which === 27) {
+                    self.closeNewGroupModal();
+                }
+            });
         },
 
         /**
@@ -526,6 +573,87 @@
 
             $card.find('.wpvfh-allowed-roles').val(roles.join(','));
             $card.find('.wpvfh-allowed-users').val(users.join(','));
+        },
+
+        /**
+         * Open new group modal
+         */
+        openNewGroupModal: function() {
+            var $modal = $('#wpvfh-new-group-modal');
+            $modal.addClass('active');
+            $modal.find('#wpvfh-new-group-name').val('').focus();
+        },
+
+        /**
+         * Close new group modal
+         */
+        closeNewGroupModal: function() {
+            var $modal = $('#wpvfh-new-group-modal');
+            $modal.removeClass('active');
+            $modal.find('#wpvfh-new-group-name').val('');
+        },
+
+        /**
+         * Create custom group via AJAX
+         */
+        createCustomGroup: function() {
+            var self = this;
+            var $modal = $('#wpvfh-new-group-modal');
+            var $input = $modal.find('#wpvfh-new-group-name');
+            var $btn = $modal.find('.wpvfh-create-group-btn');
+            var name = $input.val().trim();
+
+            if (!name) {
+                $input.focus();
+                return;
+            }
+
+            // Disable button and show loading
+            $btn.prop('disabled', true).text('Création...');
+
+            $.post(wpvfhOptionsAdmin.ajaxUrl, {
+                action: 'wpvfh_create_custom_group',
+                nonce: wpvfhOptionsAdmin.nonce,
+                name: name
+            }, function(response) {
+                $btn.prop('disabled', false).text('Créer');
+
+                if (response.success) {
+                    // Reload the page to show the new tab
+                    window.location.href = wpvfhOptionsAdmin.adminUrl + '?page=wpvfh-options&tab=' + response.data.slug;
+                } else {
+                    alert(response.data || wpvfhOptionsAdmin.i18n.error);
+                }
+            }).fail(function() {
+                $btn.prop('disabled', false).text('Créer');
+                alert(wpvfhOptionsAdmin.i18n.error);
+            });
+        },
+
+        /**
+         * Delete custom group via AJAX
+         */
+        deleteCustomGroup: function(slug) {
+            var self = this;
+
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce groupe d\'options ? Cette action supprimera également tous les éléments de ce groupe.')) {
+                return;
+            }
+
+            $.post(wpvfhOptionsAdmin.ajaxUrl, {
+                action: 'wpvfh_delete_custom_group',
+                nonce: wpvfhOptionsAdmin.nonce,
+                slug: slug
+            }, function(response) {
+                if (response.success) {
+                    // Redirect to statuses tab
+                    window.location.href = wpvfhOptionsAdmin.adminUrl + '?page=wpvfh-options&tab=statuses';
+                } else {
+                    alert(response.data || wpvfhOptionsAdmin.i18n.error);
+                }
+            }).fail(function() {
+                alert(wpvfhOptionsAdmin.i18n.error);
+            });
         }
     };
 

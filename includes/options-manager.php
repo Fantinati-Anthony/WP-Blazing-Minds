@@ -21,10 +21,16 @@ class WPVFH_Options_Manager {
     /**
      * Clés des options
      */
-    const OPTION_TYPES      = 'wpvfh_feedback_types';
-    const OPTION_PRIORITIES = 'wpvfh_feedback_priorities';
-    const OPTION_TAGS       = 'wpvfh_feedback_tags';
-    const OPTION_STATUSES   = 'wpvfh_feedback_statuses';
+    const OPTION_TYPES         = 'wpvfh_feedback_types';
+    const OPTION_PRIORITIES    = 'wpvfh_feedback_priorities';
+    const OPTION_TAGS          = 'wpvfh_feedback_tags';
+    const OPTION_STATUSES      = 'wpvfh_feedback_statuses';
+    const OPTION_CUSTOM_GROUPS = 'wpvfh_custom_option_groups';
+
+    /**
+     * Groupes par défaut (non supprimables)
+     */
+    private static $default_groups = array( 'statuses', 'types', 'priorities', 'tags' );
 
     /**
      * Initialiser le gestionnaire
@@ -40,6 +46,8 @@ class WPVFH_Options_Manager {
         add_action( 'wp_ajax_wpvfh_save_option_item', array( __CLASS__, 'ajax_save_item' ) );
         add_action( 'wp_ajax_wpvfh_delete_option_item', array( __CLASS__, 'ajax_delete_item' ) );
         add_action( 'wp_ajax_wpvfh_search_users_roles', array( __CLASS__, 'ajax_search_users_roles' ) );
+        add_action( 'wp_ajax_wpvfh_create_custom_group', array( __CLASS__, 'ajax_create_custom_group' ) );
+        add_action( 'wp_ajax_wpvfh_delete_custom_group', array( __CLASS__, 'ajax_delete_custom_group' ) );
     }
 
     /**
@@ -94,17 +102,23 @@ class WPVFH_Options_Manager {
         $roles = wp_roles()->get_names();
 
         wp_localize_script( 'wpvfh-options-admin', 'wpvfhOptionsAdmin', array(
-            'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
-            'nonce'     => wp_create_nonce( 'wpvfh_options_nonce' ),
-            'roles'     => $roles,
-            'i18n'      => array(
-                'confirmDelete'   => __( 'Êtes-vous sûr de vouloir supprimer cet élément ?', 'blazing-feedback' ),
-                'saving'          => __( 'Enregistrement...', 'blazing-feedback' ),
-                'saved'           => __( 'Enregistré !', 'blazing-feedback' ),
-                'error'           => __( 'Erreur lors de l\'enregistrement', 'blazing-feedback' ),
-                'searchPlaceholder' => __( 'Rechercher un utilisateur ou rôle...', 'blazing-feedback' ),
-                'noResults'       => __( 'Aucun résultat', 'blazing-feedback' ),
-                'allAllowed'      => __( 'Tous autorisés (vide)', 'blazing-feedback' ),
+            'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
+            'adminUrl'      => admin_url( 'admin.php' ),
+            'nonce'         => wp_create_nonce( 'wpvfh_options_nonce' ),
+            'roles'         => $roles,
+            'defaultGroups' => self::$default_groups,
+            'i18n'          => array(
+                'confirmDelete'      => __( 'Êtes-vous sûr de vouloir supprimer cet élément ?', 'blazing-feedback' ),
+                'confirmDeleteGroup' => __( 'Êtes-vous sûr de vouloir supprimer ce groupe et toutes ses options ?', 'blazing-feedback' ),
+                'saving'             => __( 'Enregistrement...', 'blazing-feedback' ),
+                'saved'              => __( 'Enregistré !', 'blazing-feedback' ),
+                'error'              => __( 'Erreur lors de l\'enregistrement', 'blazing-feedback' ),
+                'searchPlaceholder'  => __( 'Rechercher un utilisateur ou rôle...', 'blazing-feedback' ),
+                'noResults'          => __( 'Aucun résultat', 'blazing-feedback' ),
+                'allAllowed'         => __( 'Tous autorisés (vide)', 'blazing-feedback' ),
+                'newGroupName'       => __( 'Nom du nouveau groupe', 'blazing-feedback' ),
+                'groupCreated'       => __( 'Groupe créé avec succès', 'blazing-feedback' ),
+                'groupDeleted'       => __( 'Groupe supprimé', 'blazing-feedback' ),
             ),
         ) );
     }
@@ -414,6 +428,155 @@ class WPVFH_Options_Manager {
     }
 
     /**
+     * Obtenir les groupes personnalisés
+     *
+     * @since 1.3.0
+     * @return array
+     */
+    public static function get_custom_groups() {
+        $groups = get_option( self::OPTION_CUSTOM_GROUPS );
+        if ( false === $groups ) {
+            $groups = array();
+            update_option( self::OPTION_CUSTOM_GROUPS, $groups );
+        }
+        return $groups;
+    }
+
+    /**
+     * Sauvegarder les groupes personnalisés
+     *
+     * @since 1.3.0
+     * @param array $groups Groupes à sauvegarder
+     * @return bool
+     */
+    public static function save_custom_groups( $groups ) {
+        return update_option( self::OPTION_CUSTOM_GROUPS, $groups );
+    }
+
+    /**
+     * Créer un nouveau groupe personnalisé
+     *
+     * @since 1.3.0
+     * @param string $name Nom du groupe
+     * @return array|false Le groupe créé ou false si échec
+     */
+    public static function create_custom_group( $name ) {
+        $groups = self::get_custom_groups();
+
+        $slug = sanitize_title( $name );
+        $base_slug = $slug;
+        $counter = 1;
+
+        // S'assurer que le slug est unique
+        while ( isset( $groups[ $slug ] ) || in_array( $slug, self::$default_groups, true ) ) {
+            $slug = $base_slug . '_' . $counter;
+            $counter++;
+        }
+
+        $group = array(
+            'slug'    => $slug,
+            'name'    => $name,
+            'created' => time(),
+        );
+
+        $groups[ $slug ] = $group;
+        self::save_custom_groups( $groups );
+
+        // Créer l'option pour stocker les items du groupe
+        update_option( 'wpvfh_custom_group_' . $slug, array() );
+
+        return $group;
+    }
+
+    /**
+     * Supprimer un groupe personnalisé
+     *
+     * @since 1.3.0
+     * @param string $slug Slug du groupe
+     * @return bool
+     */
+    public static function delete_custom_group( $slug ) {
+        // Ne pas permettre la suppression des groupes par défaut
+        if ( in_array( $slug, self::$default_groups, true ) ) {
+            return false;
+        }
+
+        $groups = self::get_custom_groups();
+        if ( ! isset( $groups[ $slug ] ) ) {
+            return false;
+        }
+
+        unset( $groups[ $slug ] );
+        self::save_custom_groups( $groups );
+
+        // Supprimer l'option des items du groupe
+        delete_option( 'wpvfh_custom_group_' . $slug );
+
+        return true;
+    }
+
+    /**
+     * Obtenir les items d'un groupe personnalisé
+     *
+     * @since 1.3.0
+     * @param string $slug Slug du groupe
+     * @return array
+     */
+    public static function get_custom_group_items( $slug ) {
+        $items = get_option( 'wpvfh_custom_group_' . $slug );
+        if ( false === $items ) {
+            $items = array();
+        }
+        return array_map( array( __CLASS__, 'normalize_item' ), $items );
+    }
+
+    /**
+     * Sauvegarder les items d'un groupe personnalisé
+     *
+     * @since 1.3.0
+     * @param string $slug  Slug du groupe
+     * @param array  $items Items à sauvegarder
+     * @return bool
+     */
+    public static function save_custom_group_items( $slug, $items ) {
+        return update_option( 'wpvfh_custom_group_' . $slug, $items );
+    }
+
+    /**
+     * Vérifier si un groupe est un groupe par défaut
+     *
+     * @since 1.3.0
+     * @param string $slug Slug du groupe
+     * @return bool
+     */
+    public static function is_default_group( $slug ) {
+        return in_array( $slug, self::$default_groups, true );
+    }
+
+    /**
+     * Obtenir tous les onglets (par défaut + personnalisés)
+     *
+     * @since 1.3.0
+     * @return array
+     */
+    public static function get_all_tabs() {
+        $tabs = array(
+            'statuses'   => __( 'Statuts', 'blazing-feedback' ),
+            'types'      => __( 'Types de feedback', 'blazing-feedback' ),
+            'priorities' => __( 'Niveaux de priorité', 'blazing-feedback' ),
+            'tags'       => __( 'Tags prédéfinis', 'blazing-feedback' ),
+        );
+
+        // Ajouter les groupes personnalisés
+        $custom_groups = self::get_custom_groups();
+        foreach ( $custom_groups as $slug => $group ) {
+            $tabs[ $slug ] = $group['name'];
+        }
+
+        return $tabs;
+    }
+
+    /**
      * Obtenir un statut par ID
      *
      * @since 1.1.0
@@ -554,6 +717,12 @@ class WPVFH_Options_Manager {
                 case 'statuses':
                     delete_option( self::OPTION_STATUSES );
                     break;
+                default:
+                    // Groupe personnalisé - vider les items
+                    if ( ! self::is_default_group( $tab ) ) {
+                        self::save_custom_group_items( $tab, array() );
+                    }
+                    break;
             }
 
             wp_safe_redirect( admin_url( 'admin.php?page=wpvfh-options&tab=' . $tab . '&reset=1' ) );
@@ -631,21 +800,7 @@ class WPVFH_Options_Manager {
             wp_send_json_error( __( 'Données invalides.', 'blazing-feedback' ) );
         }
 
-        $items = array();
-        switch ( $type ) {
-            case 'types':
-                $items = self::get_types();
-                break;
-            case 'priorities':
-                $items = self::get_priorities();
-                break;
-            case 'tags':
-                $items = self::get_predefined_tags();
-                break;
-            case 'statuses':
-                $items = self::get_statuses();
-                break;
-        }
+        $items = self::get_items_by_type( $type );
 
         // Réorganiser selon l'ordre
         $sorted = array();
@@ -659,22 +814,56 @@ class WPVFH_Options_Manager {
         }
 
         // Sauvegarder
-        switch ( $type ) {
-            case 'types':
-                self::save_types( $sorted );
-                break;
-            case 'priorities':
-                self::save_priorities( $sorted );
-                break;
-            case 'tags':
-                self::save_tags( $sorted );
-                break;
-            case 'statuses':
-                self::save_statuses( $sorted );
-                break;
-        }
+        self::save_items_by_type( $type, $sorted );
 
         wp_send_json_success();
+    }
+
+    /**
+     * Obtenir les items par type (helper)
+     *
+     * @since 1.3.0
+     * @param string $type Type d'option
+     * @return array
+     */
+    private static function get_items_by_type( $type ) {
+        switch ( $type ) {
+            case 'types':
+                return self::get_types();
+            case 'priorities':
+                return self::get_priorities();
+            case 'tags':
+                return self::get_predefined_tags();
+            case 'statuses':
+                return self::get_statuses();
+            default:
+                // Groupe personnalisé
+                return self::get_custom_group_items( $type );
+        }
+    }
+
+    /**
+     * Sauvegarder les items par type (helper)
+     *
+     * @since 1.3.0
+     * @param string $type  Type d'option
+     * @param array  $items Items à sauvegarder
+     * @return bool
+     */
+    private static function save_items_by_type( $type, $items ) {
+        switch ( $type ) {
+            case 'types':
+                return self::save_types( $items );
+            case 'priorities':
+                return self::save_priorities( $items );
+            case 'tags':
+                return self::save_tags( $items );
+            case 'statuses':
+                return self::save_statuses( $items );
+            default:
+                // Groupe personnalisé
+                return self::save_custom_group_items( $type, $items );
+        }
     }
 
     /**
@@ -729,21 +918,7 @@ class WPVFH_Options_Manager {
         );
 
         // Obtenir les items existants
-        $items = array();
-        switch ( $option_type ) {
-            case 'types':
-                $items = self::get_types();
-                break;
-            case 'priorities':
-                $items = self::get_priorities();
-                break;
-            case 'tags':
-                $items = self::get_predefined_tags();
-                break;
-            case 'statuses':
-                $items = self::get_statuses();
-                break;
-        }
+        $items = self::get_items_by_type( $option_type );
 
         // Mettre à jour ou ajouter
         $found = false;
@@ -760,20 +935,7 @@ class WPVFH_Options_Manager {
         }
 
         // Sauvegarder
-        switch ( $option_type ) {
-            case 'types':
-                self::save_types( $items );
-                break;
-            case 'priorities':
-                self::save_priorities( $items );
-                break;
-            case 'tags':
-                self::save_tags( $items );
-                break;
-            case 'statuses':
-                self::save_statuses( $items );
-                break;
-        }
+        self::save_items_by_type( $option_type, $items );
 
         wp_send_json_success( array( 'item' => $new_item ) );
     }
@@ -799,21 +961,7 @@ class WPVFH_Options_Manager {
         }
 
         // Obtenir les items existants
-        $items = array();
-        switch ( $option_type ) {
-            case 'types':
-                $items = self::get_types();
-                break;
-            case 'priorities':
-                $items = self::get_priorities();
-                break;
-            case 'tags':
-                $items = self::get_predefined_tags();
-                break;
-            case 'statuses':
-                $items = self::get_statuses();
-                break;
-        }
+        $items = self::get_items_by_type( $option_type );
 
         // Supprimer l'élément
         $items = array_filter( $items, function( $item ) use ( $item_id ) {
@@ -822,22 +970,72 @@ class WPVFH_Options_Manager {
         $items = array_values( $items ); // Réindexer
 
         // Sauvegarder
-        switch ( $option_type ) {
-            case 'types':
-                self::save_types( $items );
-                break;
-            case 'priorities':
-                self::save_priorities( $items );
-                break;
-            case 'tags':
-                self::save_tags( $items );
-                break;
-            case 'statuses':
-                self::save_statuses( $items );
-                break;
-        }
+        self::save_items_by_type( $option_type, $items );
 
         wp_send_json_success();
+    }
+
+    /**
+     * AJAX: Créer un groupe personnalisé
+     *
+     * @since 1.3.0
+     * @return void
+     */
+    public static function ajax_create_custom_group() {
+        check_ajax_referer( 'wpvfh_options_nonce', 'nonce' );
+
+        if ( ! current_user_can( 'manage_feedback' ) ) {
+            wp_send_json_error( __( 'Permission refusée.', 'blazing-feedback' ) );
+        }
+
+        $name = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : '';
+
+        if ( empty( $name ) ) {
+            wp_send_json_error( __( 'Le nom du groupe est requis.', 'blazing-feedback' ) );
+        }
+
+        $group = self::create_custom_group( $name );
+
+        if ( ! $group ) {
+            wp_send_json_error( __( 'Erreur lors de la création du groupe.', 'blazing-feedback' ) );
+        }
+
+        wp_send_json_success( array(
+            'group'       => $group,
+            'redirect_url' => admin_url( 'admin.php?page=wpvfh-options&tab=' . $group['slug'] ),
+        ) );
+    }
+
+    /**
+     * AJAX: Supprimer un groupe personnalisé
+     *
+     * @since 1.3.0
+     * @return void
+     */
+    public static function ajax_delete_custom_group() {
+        check_ajax_referer( 'wpvfh_options_nonce', 'nonce' );
+
+        if ( ! current_user_can( 'manage_feedback' ) ) {
+            wp_send_json_error( __( 'Permission refusée.', 'blazing-feedback' ) );
+        }
+
+        $slug = isset( $_POST['slug'] ) ? sanitize_key( $_POST['slug'] ) : '';
+
+        if ( empty( $slug ) ) {
+            wp_send_json_error( __( 'Slug du groupe requis.', 'blazing-feedback' ) );
+        }
+
+        if ( self::is_default_group( $slug ) ) {
+            wp_send_json_error( __( 'Les groupes par défaut ne peuvent pas être supprimés.', 'blazing-feedback' ) );
+        }
+
+        if ( ! self::delete_custom_group( $slug ) ) {
+            wp_send_json_error( __( 'Erreur lors de la suppression du groupe.', 'blazing-feedback' ) );
+        }
+
+        wp_send_json_success( array(
+            'redirect_url' => admin_url( 'admin.php?page=wpvfh-options&tab=statuses' ),
+        ) );
     }
 
     /**
@@ -852,17 +1050,17 @@ class WPVFH_Options_Manager {
         }
 
         $current_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'statuses';
-        $tabs = array(
-            'statuses'   => __( 'Statuts', 'blazing-feedback' ),
-            'types'      => __( 'Types de feedback', 'blazing-feedback' ),
-            'priorities' => __( 'Niveaux de priorité', 'blazing-feedback' ),
-            'tags'       => __( 'Tags prédéfinis', 'blazing-feedback' ),
-        );
+        $tabs = self::get_all_tabs();
+        $custom_groups = self::get_custom_groups();
+        $is_custom_tab = isset( $custom_groups[ $current_tab ] );
 
         // Message de confirmation
         $message = '';
         if ( isset( $_GET['reset'] ) ) {
             $message = '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Options réinitialisées avec succès.', 'blazing-feedback' ) . '</p></div>';
+        }
+        if ( isset( $_GET['created'] ) ) {
+            $message = '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Groupe créé avec succès.', 'blazing-feedback' ) . '</p></div>';
         }
         ?>
         <div class="wrap wpvfh-options-page">
@@ -870,13 +1068,22 @@ class WPVFH_Options_Manager {
 
             <?php echo $message; ?>
 
-            <nav class="nav-tab-wrapper">
+            <nav class="nav-tab-wrapper wpvfh-nav-tabs">
                 <?php foreach ( $tabs as $tab_id => $tab_label ) : ?>
                     <a href="<?php echo esc_url( admin_url( 'admin.php?page=wpvfh-options&tab=' . $tab_id ) ); ?>"
-                       class="nav-tab <?php echo $current_tab === $tab_id ? 'nav-tab-active' : ''; ?>">
+                       class="nav-tab <?php echo $current_tab === $tab_id ? 'nav-tab-active' : ''; ?>"
+                       data-tab="<?php echo esc_attr( $tab_id ); ?>"
+                       data-deletable="<?php echo ! self::is_default_group( $tab_id ) ? 'true' : 'false'; ?>">
                         <?php echo esc_html( $tab_label ); ?>
+                        <?php if ( ! self::is_default_group( $tab_id ) ) : ?>
+                            <span class="wpvfh-tab-delete" title="<?php esc_attr_e( 'Supprimer ce groupe', 'blazing-feedback' ); ?>">&times;</span>
+                        <?php endif; ?>
                     </a>
                 <?php endforeach; ?>
+                <button type="button" class="nav-tab wpvfh-add-group-btn" title="<?php esc_attr_e( 'Ajouter un nouveau groupe', 'blazing-feedback' ); ?>">
+                    <span class="dashicons dashicons-plus-alt2"></span>
+                    <?php esc_html_e( 'Ajouter', 'blazing-feedback' ); ?>
+                </button>
             </nav>
 
             <div class="wpvfh-options-content">
@@ -894,11 +1101,51 @@ class WPVFH_Options_Manager {
                     case 'tags':
                         self::render_tags_tab();
                         break;
+                    default:
+                        // Groupe personnalisé
+                        if ( $is_custom_tab ) {
+                            self::render_custom_group_tab( $current_tab, $custom_groups[ $current_tab ] );
+                        }
+                        break;
                 }
                 ?>
             </div>
         </div>
+
+        <!-- Modal pour créer un nouveau groupe -->
+        <div id="wpvfh-new-group-modal" class="wpvfh-modal">
+            <div class="wpvfh-modal-content">
+                <div class="wpvfh-modal-header">
+                    <h2><?php esc_html_e( 'Nouveau groupe d\'options', 'blazing-feedback' ); ?></h2>
+                    <button type="button" class="wpvfh-modal-close">&times;</button>
+                </div>
+                <div class="wpvfh-modal-body">
+                    <p><?php esc_html_e( 'Créez un nouveau groupe d\'options personnalisé pour vos feedbacks.', 'blazing-feedback' ); ?></p>
+                    <div class="wpvfh-form-group">
+                        <label for="wpvfh-new-group-name"><?php esc_html_e( 'Nom du groupe', 'blazing-feedback' ); ?></label>
+                        <input type="text" id="wpvfh-new-group-name" class="regular-text" placeholder="<?php esc_attr_e( 'Ex: Catégories, Départements, etc.', 'blazing-feedback' ); ?>">
+                    </div>
+                </div>
+                <div class="wpvfh-modal-footer">
+                    <button type="button" class="button wpvfh-modal-cancel"><?php esc_html_e( 'Annuler', 'blazing-feedback' ); ?></button>
+                    <button type="button" class="button button-primary wpvfh-create-group-btn"><?php esc_html_e( 'Créer le groupe', 'blazing-feedback' ); ?></button>
+                </div>
+            </div>
+        </div>
         <?php
+    }
+
+    /**
+     * Rendu d'un onglet de groupe personnalisé
+     *
+     * @since 1.3.0
+     * @param string $slug  Slug du groupe
+     * @param array  $group Données du groupe
+     * @return void
+     */
+    private static function render_custom_group_tab( $slug, $group ) {
+        $items = self::get_custom_group_items( $slug );
+        self::render_items_table( $slug, $items, $group['name'] );
     }
 
     /**
@@ -949,11 +1196,12 @@ class WPVFH_Options_Manager {
      * Rendu du tableau d'éléments
      *
      * @since 1.1.0
-     * @param string $type  Type d'option (types, priorities, tags, statuses)
-     * @param array  $items Éléments à afficher
+     * @param string      $type       Type d'option (types, priorities, tags, statuses, ou slug personnalisé)
+     * @param array       $items      Éléments à afficher
+     * @param string|null $group_name Nom du groupe (pour groupes personnalisés)
      * @return void
      */
-    private static function render_items_table( $type, $items ) {
+    private static function render_items_table( $type, $items, $group_name = null ) {
         $reset_url = wp_nonce_url(
             admin_url( 'admin.php?page=wpvfh-options&tab=' . $type . '&action=reset' ),
             'wpvfh_reset_options'
@@ -974,6 +1222,12 @@ class WPVFH_Options_Manager {
                         break;
                     case 'tags':
                         esc_html_e( 'Définissez les tags prédéfinis. Les utilisateurs peuvent aussi créer leurs propres tags.', 'blazing-feedback' );
+                        break;
+                    default:
+                        if ( $group_name ) {
+                            /* translators: %s: group name */
+                            printf( esc_html__( 'Gérez les options du groupe "%s". Glissez-déposez pour réorganiser.', 'blazing-feedback' ), esc_html( $group_name ) );
+                        }
                         break;
                 }
                 ?>

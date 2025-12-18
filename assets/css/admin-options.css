@@ -547,3 +547,173 @@
     border-radius: 4px;
     padding: 5px 10px !important;
 }
+
+/* Navigation tabs with delete button */
+.wpvfh-nav-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.wpvfh-nav-tabs .nav-tab {
+    position: relative;
+    padding-right: 12px;
+}
+
+.wpvfh-nav-tabs .nav-tab[data-deletable="true"] {
+    padding-right: 28px;
+}
+
+.wpvfh-tab-delete {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    line-height: 16px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #999;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s, background 0.2s;
+}
+
+.wpvfh-nav-tabs .nav-tab:hover .wpvfh-tab-delete {
+    opacity: 1;
+}
+
+.wpvfh-tab-delete:hover {
+    color: #fff;
+    background: #d63638;
+}
+
+/* Add group button */
+.wpvfh-add-group-btn {
+    border-style: dashed !important;
+    color: #2271b1 !important;
+    background: transparent !important;
+}
+
+.wpvfh-add-group-btn:hover {
+    background: #f0f6fc !important;
+    border-color: #2271b1 !important;
+}
+
+.wpvfh-add-group-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    vertical-align: text-bottom;
+}
+
+/* Modal */
+.wpvfh-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 100000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.wpvfh-modal.active {
+    display: flex;
+}
+
+.wpvfh-modal-content {
+    background: #fff;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    animation: wpvfh-modal-appear 0.2s ease-out;
+}
+
+@keyframes wpvfh-modal-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.wpvfh-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.wpvfh-modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.wpvfh-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.wpvfh-modal-close:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.wpvfh-modal-body {
+    padding: 20px;
+}
+
+.wpvfh-modal-body p {
+    margin-top: 0;
+    color: #666;
+}
+
+.wpvfh-modal-body .wpvfh-form-group {
+    margin-top: 15px;
+}
+
+.wpvfh-modal-body .wpvfh-form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.wpvfh-modal-body .wpvfh-form-group input {
+    width: 100%;
+}
+
+.wpvfh-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px 20px;
+    border-top: 1px solid #e0e0e0;
+    background: #f9f9f9;
+    border-radius: 0 0 8px 8px;
+}
