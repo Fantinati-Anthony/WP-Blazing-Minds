@@ -158,6 +158,71 @@ class WPVFH_Admin_UI {
             )
         );
 
+        // Style du bouton (collé ou séparé)
+        register_setting(
+            'wpvfh_general_settings',
+            'wpvfh_button_style',
+            array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_key',
+                'default'           => 'detached',
+            )
+        );
+
+        // Forme pour bouton collé
+        register_setting(
+            'wpvfh_general_settings',
+            'wpvfh_button_attached_shape',
+            array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_key',
+                'default'           => 'quarter',
+            )
+        );
+
+        // Border radius pour bouton séparé
+        register_setting(
+            'wpvfh_general_settings',
+            'wpvfh_button_border_radius',
+            array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'absint',
+                'default'           => 50,
+            )
+        );
+
+        register_setting(
+            'wpvfh_general_settings',
+            'wpvfh_button_border_radius_unit',
+            array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_key',
+                'default'           => 'percent',
+            )
+        );
+
+        // Margin pour bouton séparé
+        register_setting(
+            'wpvfh_general_settings',
+            'wpvfh_button_margin',
+            array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'absint',
+                'default'           => 20,
+            )
+        );
+
+        // Taille du bouton
+        register_setting(
+            'wpvfh_general_settings',
+            'wpvfh_button_size',
+            array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'absint',
+                'default'           => 56,
+            )
+        );
+
         register_setting(
             'wpvfh_general_settings',
             'wpvfh_icon_mode',
@@ -865,9 +930,16 @@ class WPVFH_Admin_UI {
      */
     public static function render_tab_design() {
         $button_color = get_option( 'wpvfh_button_color', '#e74c3c' );
+        $button_color_hover = get_option( 'wpvfh_color_primary_hover', '#c0392b' );
         $icon_mode = get_option( 'wpvfh_icon_mode', 'emoji' );
         $icon_emoji = get_option( 'wpvfh_icon_emoji', '💬' );
         $icon_image = get_option( 'wpvfh_icon_image_url', '' );
+        $button_style = get_option( 'wpvfh_button_style', 'detached' );
+        $attached_shape = get_option( 'wpvfh_button_attached_shape', 'quarter' );
+        $border_radius = get_option( 'wpvfh_button_border_radius', 50 );
+        $border_radius_unit = get_option( 'wpvfh_button_border_radius_unit', 'percent' );
+        $button_margin = get_option( 'wpvfh_button_margin', 20 );
+        $button_size = get_option( 'wpvfh_button_size', 56 );
         ?>
         <div class="wpvfh-preview-container">
             <div class="wpvfh-preview-settings">
@@ -882,6 +954,90 @@ class WPVFH_Admin_UI {
                                 <?php self::render_color_field(); ?>
                             </td>
                         </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Taille du bouton', 'blazing-feedback' ); ?></th>
+                            <td>
+                                <input type="range" name="wpvfh_button_size" id="wpvfh_button_size" min="40" max="80" value="<?php echo esc_attr( $button_size ); ?>" style="width: 150px; vertical-align: middle;">
+                                <span id="wpvfh_button_size_value" style="margin-left: 10px; font-weight: 500;"><?php echo esc_html( $button_size ); ?>px</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Style du bouton', 'blazing-feedback' ); ?></th>
+                            <td>
+                                <fieldset>
+                                    <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; cursor: pointer;">
+                                        <input type="radio" name="wpvfh_button_style" value="detached" <?php checked( $button_style, 'detached' ); ?>>
+                                        <span style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="width: 32px; height: 32px; background: #e74c3c; border-radius: 50%; display: inline-block;"></span>
+                                            <span>
+                                                <strong><?php esc_html_e( 'Séparé', 'blazing-feedback' ); ?></strong><br>
+                                                <small style="color: #666;"><?php esc_html_e( 'Bouton flottant avec marge', 'blazing-feedback' ); ?></small>
+                                            </span>
+                                        </span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                        <input type="radio" name="wpvfh_button_style" value="attached" <?php checked( $button_style, 'attached' ); ?>>
+                                        <span style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="width: 32px; height: 32px; background: #e74c3c; border-radius: 0 0 0 16px; display: inline-block;"></span>
+                                            <span>
+                                                <strong><?php esc_html_e( 'Collé', 'blazing-feedback' ); ?></strong><br>
+                                                <small style="color: #666;"><?php esc_html_e( 'Attaché au bord de l\'écran', 'blazing-feedback' ); ?></small>
+                                            </span>
+                                        </span>
+                                    </label>
+                                </fieldset>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Options pour bouton séparé -->
+                    <div id="wpvfh-detached-options" style="<?php echo 'attached' === $button_style ? 'display: none;' : ''; ?> margin-left: 20px; padding: 15px; background: #f9f9f9; border-radius: 4px; margin-top: 10px;">
+                        <h4 style="margin-top: 0;"><?php esc_html_e( 'Options du bouton séparé', 'blazing-feedback' ); ?></h4>
+                        <table class="form-table" style="margin: 0;">
+                            <tr>
+                                <th scope="row" style="padding: 10px 0;"><?php esc_html_e( 'Border radius', 'blazing-feedback' ); ?></th>
+                                <td style="padding: 10px 0;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="number" name="wpvfh_button_border_radius" id="wpvfh_button_border_radius" value="<?php echo esc_attr( $border_radius ); ?>" min="0" max="100" style="width: 70px;">
+                                        <select name="wpvfh_button_border_radius_unit" id="wpvfh_button_border_radius_unit">
+                                            <option value="percent" <?php selected( $border_radius_unit, 'percent' ); ?>>%</option>
+                                            <option value="px" <?php selected( $border_radius_unit, 'px' ); ?>>px</option>
+                                        </select>
+                                        <input type="range" id="wpvfh_border_radius_slider" min="0" max="50" value="<?php echo esc_attr( $border_radius ); ?>" style="width: 100px;">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row" style="padding: 10px 0;"><?php esc_html_e( 'Marge', 'blazing-feedback' ); ?></th>
+                                <td style="padding: 10px 0;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="number" name="wpvfh_button_margin" id="wpvfh_button_margin" value="<?php echo esc_attr( $button_margin ); ?>" min="0" max="50" style="width: 70px;">
+                                        <span>px</span>
+                                        <input type="range" id="wpvfh_margin_slider" min="0" max="50" value="<?php echo esc_attr( $button_margin ); ?>" style="width: 100px;">
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Options pour bouton collé -->
+                    <div id="wpvfh-attached-options" style="<?php echo 'detached' === $button_style ? 'display: none;' : ''; ?> margin-left: 20px; padding: 15px; background: #f9f9f9; border-radius: 4px; margin-top: 10px;">
+                        <h4 style="margin-top: 0;"><?php esc_html_e( 'Forme du bouton collé', 'blazing-feedback' ); ?></h4>
+                        <fieldset style="display: flex; gap: 20px;">
+                            <label style="display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; padding: 10px; border: 2px solid <?php echo 'quarter' === $attached_shape ? '#2271b1' : '#ddd'; ?>; border-radius: 8px;" id="shape-quarter-label">
+                                <input type="radio" name="wpvfh_button_attached_shape" value="quarter" <?php checked( $attached_shape, 'quarter' ); ?> style="display: none;">
+                                <span style="width: 48px; height: 48px; background: #e74c3c; border-radius: 0 0 0 48px; display: block;"></span>
+                                <span><?php esc_html_e( 'Quart de cercle', 'blazing-feedback' ); ?></span>
+                            </label>
+                            <label style="display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; padding: 10px; border: 2px solid <?php echo 'half' === $attached_shape ? '#2271b1' : '#ddd'; ?>; border-radius: 8px;" id="shape-half-label">
+                                <input type="radio" name="wpvfh_button_attached_shape" value="half" <?php checked( $attached_shape, 'half' ); ?> style="display: none;">
+                                <span style="width: 24px; height: 48px; background: #e74c3c; border-radius: 0 0 0 48px; display: block;"></span>
+                                <span><?php esc_html_e( 'Demi-cercle', 'blazing-feedback' ); ?></span>
+                            </label>
+                        </fieldset>
+                    </div>
+
+                    <table class="form-table" style="margin-top: 20px;">
                         <tr>
                             <th scope="row"><?php esc_html_e( 'Icône du bouton', 'blazing-feedback' ); ?></th>
                             <td>
@@ -960,28 +1116,199 @@ class WPVFH_Admin_UI {
                 <h3 style="margin-top: 0;"><?php esc_html_e( 'Prévisualisation', 'blazing-feedback' ); ?></h3>
                 <div class="wpvfh-preview-box" id="wpvfh-preview-box">
                     <!-- Bouton de feedback preview -->
-                    <div id="wpvfh-preview-button" style="position: absolute; bottom: 20px; right: 20px; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.2s; background: <?php echo esc_attr( $button_color ); ?>;">
-                        <span style="font-size: 24px; color: #fff;" id="wpvfh-preview-icon">
-                            <?php if ( 'emoji' === $icon_mode ) : ?>
-                                <?php echo esc_html( $icon_emoji ); ?>
-                            <?php elseif ( 'image' === $icon_mode && $icon_image ) : ?>
-                                <img src="<?php echo esc_url( $icon_image ); ?>" alt="" style="width: 28px; height: 28px; object-fit: contain;">
-                            <?php else : ?>
-                                💬
-                            <?php endif; ?>
-                        </span>
+                    <div id="wpvfh-preview-button-wrapper" style="position: absolute; bottom: 0; right: 0;">
+                        <div id="wpvfh-preview-button" class="wpvfh-preview-btn">
+                            <span id="wpvfh-preview-icon">
+                                <?php if ( 'emoji' === $icon_mode ) : ?>
+                                    <?php echo esc_html( $icon_emoji ); ?>
+                                <?php elseif ( 'image' === $icon_mode && $icon_image ) : ?>
+                                    <img src="<?php echo esc_url( $icon_image ); ?>" alt="">
+                                <?php else : ?>
+                                    💬
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                        <!-- Compteur preview -->
+                        <div id="wpvfh-preview-badge">3</div>
                     </div>
-                    <!-- Compteur preview -->
-                    <div id="wpvfh-preview-badge" style="position: absolute; bottom: 62px; right: 16px; background: #dc3545; color: #fff; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center;">3</div>
                 </div>
                 <p class="description" style="margin-top: 10px; text-align: center;">
-                    <?php esc_html_e( 'Aperçu du bouton de feedback', 'blazing-feedback' ); ?>
+                    <?php esc_html_e( 'Cliquez sur le bouton pour voir l\'effet', 'blazing-feedback' ); ?>
                 </p>
             </div>
         </div>
 
+        <style>
+            .wpvfh-preview-box {
+                background: #f0f0f1;
+                border-radius: 8px;
+                min-height: 350px;
+                position: relative;
+                overflow: hidden;
+            }
+            .wpvfh-preview-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                background: <?php echo esc_attr( $button_color ); ?>;
+            }
+            .wpvfh-preview-btn:hover {
+                transform: scale(1.1);
+                background: <?php echo esc_attr( $button_color_hover ); ?> !important;
+            }
+            .wpvfh-preview-btn.active {
+                transform: scale(1.1) rotate(45deg);
+            }
+            .wpvfh-preview-btn #wpvfh-preview-icon {
+                font-size: 24px;
+                color: #fff;
+                transition: transform 0.2s ease;
+                line-height: 1;
+            }
+            .wpvfh-preview-btn.active #wpvfh-preview-icon {
+                transform: rotate(-45deg);
+            }
+            .wpvfh-preview-btn #wpvfh-preview-icon img {
+                width: 28px;
+                height: 28px;
+                object-fit: contain;
+                filter: brightness(0) invert(1);
+            }
+            #wpvfh-preview-badge {
+                position: absolute;
+                background: #dc3545;
+                color: #fff;
+                font-size: 11px;
+                font-weight: bold;
+                padding: 2px 6px;
+                border-radius: 10px;
+                min-width: 18px;
+                text-align: center;
+                transition: all 0.2s ease;
+            }
+        </style>
+
         <script>
         jQuery(document).ready(function($) {
+            var previewActive = false;
+
+            // Fonction de mise à jour du bouton preview
+            function updateButtonPreview() {
+                var style = $('input[name="wpvfh_button_style"]:checked').val();
+                var size = parseInt($('#wpvfh_button_size').val()) || 56;
+                var color = $('input[name="wpvfh_button_color"]').val();
+                var $btn = $('#wpvfh-preview-button');
+                var $wrapper = $('#wpvfh-preview-button-wrapper');
+                var $badge = $('#wpvfh-preview-badge');
+
+                if (style === 'attached') {
+                    var shape = $('input[name="wpvfh_button_attached_shape"]:checked').val();
+                    if (shape === 'quarter') {
+                        $btn.css({
+                            'width': size + 'px',
+                            'height': size + 'px',
+                            'border-radius': '100% 0 0 0',
+                            'background': color
+                        });
+                    } else {
+                        $btn.css({
+                            'width': (size / 2) + 'px',
+                            'height': size + 'px',
+                            'border-radius': size + 'px 0 0 ' + size + 'px',
+                            'background': color
+                        });
+                    }
+                    $wrapper.css({
+                        'bottom': '0',
+                        'right': '0'
+                    });
+                    $badge.css({
+                        'top': '-8px',
+                        'right': shape === 'quarter' ? (size - 20) + 'px' : (size / 2 - 15) + 'px'
+                    });
+                } else {
+                    var radius = $('#wpvfh_button_border_radius').val();
+                    var unit = $('#wpvfh_button_border_radius_unit').val();
+                    var margin = $('#wpvfh_button_margin').val();
+                    var radiusValue = radius + (unit === 'percent' ? '%' : 'px');
+
+                    $btn.css({
+                        'width': size + 'px',
+                        'height': size + 'px',
+                        'border-radius': radiusValue,
+                        'box-shadow': '0 4px 12px rgba(0,0,0,0.15)',
+                        'background': color
+                    });
+                    $wrapper.css({
+                        'bottom': margin + 'px',
+                        'right': margin + 'px'
+                    });
+                    $badge.css({
+                        'top': '-5px',
+                        'right': '-5px'
+                    });
+                }
+            }
+
+            // Toggle du bouton preview
+            $('#wpvfh-preview-button').on('click', function() {
+                previewActive = !previewActive;
+                $(this).toggleClass('active', previewActive);
+            });
+
+            // Style du bouton (collé/séparé)
+            $('input[name="wpvfh_button_style"]').on('change', function() {
+                var style = $(this).val();
+                if (style === 'attached') {
+                    $('#wpvfh-attached-options').slideDown();
+                    $('#wpvfh-detached-options').slideUp();
+                } else {
+                    $('#wpvfh-attached-options').slideUp();
+                    $('#wpvfh-detached-options').slideDown();
+                }
+                updateButtonPreview();
+            });
+
+            // Forme du bouton collé
+            $('input[name="wpvfh_button_attached_shape"]').on('change', function() {
+                var shape = $(this).val();
+                $('#shape-quarter-label, #shape-half-label').css('border-color', '#ddd');
+                $('#shape-' + shape + '-label').css('border-color', '#2271b1');
+                updateButtonPreview();
+            });
+
+            // Taille du bouton
+            $('#wpvfh_button_size').on('input', function() {
+                $('#wpvfh_button_size_value').text($(this).val() + 'px');
+                updateButtonPreview();
+            });
+
+            // Border radius
+            $('#wpvfh_button_border_radius, #wpvfh_border_radius_slider').on('input', function() {
+                var val = $(this).val();
+                $('#wpvfh_button_border_radius').val(val);
+                $('#wpvfh_border_radius_slider').val(val);
+                updateButtonPreview();
+            });
+            $('#wpvfh_button_border_radius_unit').on('change', function() {
+                updateButtonPreview();
+            });
+
+            // Margin
+            $('#wpvfh_button_margin, #wpvfh_margin_slider').on('input', function() {
+                var val = $(this).val();
+                $('#wpvfh_button_margin').val(val);
+                $('#wpvfh_margin_slider').val(val);
+                updateButtonPreview();
+            });
+
+            // Couleur du bouton
+            $('input[name="wpvfh_button_color"]').on('input change', function() {
+                updateButtonPreview();
+            });
+
             // Synchroniser les inputs couleur et texte
             $('input[type="color"]').on('input change', function() {
                 var optionName = $(this).attr('name');
@@ -1010,11 +1337,7 @@ class WPVFH_Admin_UI {
                 colorInput.val(defaultValue);
                 hexInput.val(defaultValue);
                 updatePreview();
-            });
-
-            // Mise à jour couleur du bouton
-            $('input[name="wpvfh_button_color"]').on('input change', function() {
-                $('#wpvfh-preview-button').css('background', $(this).val());
+                updateButtonPreview();
             });
 
             // Mise à jour icône
@@ -1035,18 +1358,19 @@ class WPVFH_Admin_UI {
                 } else if (mode === 'image') {
                     var imgUrl = $('input[name="wpvfh_icon_image_url"]').val();
                     if (imgUrl) {
-                        $('#wpvfh-preview-icon').html('<img src="' + imgUrl + '" style="width: 28px; height: 28px; object-fit: contain;">');
+                        $('#wpvfh-preview-icon').html('<img src="' + imgUrl + '">');
                     }
                 }
             }
 
             function updatePreview() {
-                // Mise à jour des couleurs CSS variables pour la preview
-                var primary = $('#wpvfh_color_primary').val();
-                var bg = $('#wpvfh_color_bg').val();
                 var bgLight = $('#wpvfh_color_bg_light').val();
                 $('#wpvfh-preview-box').css('background', bgLight);
+                updateButtonPreview();
             }
+
+            // Initialisation
+            updateButtonPreview();
         });
         </script>
         <?php
@@ -2010,10 +2334,11 @@ class WPVFH_Admin_UI {
      * @return void
      */
     public static function show_admin_notices() {
-        // Notice de bienvenue (première activation)
-        if ( get_option( 'wpvfh_show_welcome_notice', true ) && current_user_can( 'manage_feedback' ) ) {
+        // Notice de bienvenue (première activation) - ne s'affiche qu'une seule fois
+        $welcome_notice = get_option( 'wpvfh_welcome_notice_dismissed' );
+        if ( false === $welcome_notice && current_user_can( 'manage_feedback' ) ) {
             ?>
-            <div class="notice notice-info is-dismissible wpvfh-welcome-notice">
+            <div class="notice notice-info is-dismissible wpvfh-welcome-notice" data-notice="wpvfh-welcome">
                 <p>
                     <strong><?php esc_html_e( 'Blazing Feedback est activé !', 'blazing-feedback' ); ?></strong>
                     <?php esc_html_e( 'Le widget de feedback est maintenant disponible sur votre site.', 'blazing-feedback' ); ?>
@@ -2022,8 +2347,20 @@ class WPVFH_Admin_UI {
                     </a>
                 </p>
             </div>
+            <script>
+            jQuery(document).ready(function($) {
+                $('.wpvfh-welcome-notice').on('click', '.notice-dismiss', function() {
+                    $.post(ajaxurl, {
+                        action: 'wpvfh_dismiss_notice',
+                        notice_id: 'welcome',
+                        nonce: '<?php echo esc_js( wp_create_nonce( 'wpvfh_nonce' ) ); ?>'
+                    });
+                });
+            });
+            </script>
             <?php
-            update_option( 'wpvfh_show_welcome_notice', false );
+            // Marquer comme vu dès l'affichage
+            update_option( 'wpvfh_welcome_notice_dismissed', '1' );
         }
     }
 
