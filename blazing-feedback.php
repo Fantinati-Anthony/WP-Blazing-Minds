@@ -610,44 +610,18 @@ final class WP_Visual_Feedback_Hub {
             <!-- Overlay pour la sidebar -->
             <div id="wpvfh-sidebar-overlay" class="wpvfh-sidebar-overlay"></div>
 
-            <!-- Groupe de boutons flottants -->
-            <div class="wpvfh-floating-buttons">
-                <!-- Bouton principal Feedback (ouvre la liste) -->
-                <button
-                    type="button"
-                    id="wpvfh-toggle-btn"
-                    class="wpvfh-toggle-btn wpvfh-btn-main"
-                    aria-expanded="false"
-                    aria-controls="wpvfh-panel"
-                    title="<?php esc_attr_e( 'Voir les feedbacks', 'blazing-feedback' ); ?>"
-                >
-                    <span class="wpvfh-btn-icon" aria-hidden="true">💬</span>
-                    <span class="wpvfh-btn-text"><?php esc_html_e( 'Feedback', 'blazing-feedback' ); ?></span>
-                    <span class="wpvfh-feedback-count" id="wpvfh-feedback-count" hidden></span>
-                </button>
-
-                <!-- Bouton ajouter (nouveau feedback) -->
-                <button
-                    type="button"
-                    id="wpvfh-add-btn"
-                    class="wpvfh-toggle-btn wpvfh-btn-add"
-                    title="<?php esc_attr_e( 'Ajouter un feedback', 'blazing-feedback' ); ?>"
-                >
-                    <span class="wpvfh-btn-icon" aria-hidden="true">➕</span>
-                </button>
-
-                <!-- Bouton afficher/masquer les points -->
-                <button
-                    type="button"
-                    id="wpvfh-visibility-btn"
-                    class="wpvfh-toggle-btn wpvfh-btn-visibility"
-                    title="<?php esc_attr_e( 'Afficher/masquer les points', 'blazing-feedback' ); ?>"
-                    data-visible="true"
-                >
-                    <span class="wpvfh-btn-icon wpvfh-icon-visible" aria-hidden="true">👁️</span>
-                    <span class="wpvfh-btn-icon wpvfh-icon-hidden" aria-hidden="true" hidden>🙈</span>
-                </button>
-            </div>
+            <!-- Bouton principal Feedback - Quart de cercle dans le coin -->
+            <button
+                type="button"
+                id="wpvfh-toggle-btn"
+                class="wpvfh-corner-btn"
+                aria-expanded="false"
+                aria-controls="wpvfh-panel"
+                title="<?php esc_attr_e( 'Voir les feedbacks', 'blazing-feedback' ); ?>"
+            >
+                <span class="wpvfh-corner-icon" aria-hidden="true">💬</span>
+                <span class="wpvfh-corner-count" id="wpvfh-feedback-count" hidden></span>
+            </button>
 
             <!-- Sidebar de feedback -->
             <div id="wpvfh-panel" class="wpvfh-panel" hidden aria-hidden="true">
@@ -1236,6 +1210,30 @@ final class WP_Visual_Feedback_Hub {
                             </div>
                         </div>
                     </div><!-- /wpvfh-tab-details -->
+                </div>
+
+                <!-- Footer de la sidebar avec boutons d'action -->
+                <div class="wpvfh-panel-footer">
+                    <button
+                        type="button"
+                        id="wpvfh-add-btn"
+                        class="wpvfh-footer-btn wpvfh-footer-btn-add"
+                        title="<?php esc_attr_e( 'Ajouter un feedback', 'blazing-feedback' ); ?>"
+                    >
+                        <span class="wpvfh-footer-btn-icon" aria-hidden="true">➕</span>
+                        <span class="wpvfh-footer-btn-text"><?php esc_html_e( 'Nouveau', 'blazing-feedback' ); ?></span>
+                    </button>
+                    <button
+                        type="button"
+                        id="wpvfh-visibility-btn"
+                        class="wpvfh-footer-btn wpvfh-footer-btn-visibility"
+                        title="<?php esc_attr_e( 'Afficher/masquer les points', 'blazing-feedback' ); ?>"
+                        data-visible="true"
+                    >
+                        <span class="wpvfh-footer-btn-icon wpvfh-icon-visible" aria-hidden="true">👁️</span>
+                        <span class="wpvfh-footer-btn-icon wpvfh-icon-hidden" aria-hidden="true" hidden>🙈</span>
+                        <span class="wpvfh-footer-btn-text"><?php esc_html_e( 'Pins', 'blazing-feedback' ); ?></span>
+                    </button>
                 </div>
             </div>
 
