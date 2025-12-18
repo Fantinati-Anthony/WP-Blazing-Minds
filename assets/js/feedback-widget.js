@@ -61,11 +61,73 @@
 
             this.cacheElements();
             this.moveFixedElementsToBody();
+            this.applyThemeColors();
             this.bindEvents();
             this.loadExistingFeedbacks();
             this.checkOpenFeedbackParam();
 
             console.log('[Blazing Feedback] Widget initialisé');
+        },
+
+        /**
+         * Appliquer les couleurs du thème selon le mode choisi
+         * @returns {void}
+         */
+        applyThemeColors: function() {
+            const themeMode = this.config.themeMode || 'system';
+            let colors;
+            let logo;
+
+            // Déterminer le mode effectif
+            let effectiveMode = themeMode;
+            if (themeMode === 'system') {
+                // Utiliser la préférence système
+                effectiveMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            // Sélectionner les couleurs selon le mode
+            if (effectiveMode === 'dark') {
+                colors = this.config.colorsDark || {};
+                logo = this.config.panelLogos?.dark;
+            } else {
+                colors = this.config.colorsLight || {};
+                logo = this.config.panelLogos?.light;
+            }
+
+            // Appliquer les variables CSS
+            const root = document.documentElement;
+            root.style.setProperty('--wpvfh-primary', colors.primary || '#FE5100');
+            root.style.setProperty('--wpvfh-primary-hover', colors.primaryHover || '#E04800');
+            root.style.setProperty('--wpvfh-secondary', colors.secondary || '#263e4b');
+            root.style.setProperty('--wpvfh-success', colors.success || '#28a745');
+            root.style.setProperty('--wpvfh-warning', colors.warning || '#ffc107');
+            root.style.setProperty('--wpvfh-danger', colors.danger || '#dc3545');
+            root.style.setProperty('--wpvfh-text', colors.text || '#263e4b');
+            root.style.setProperty('--wpvfh-text-light', colors.textLight || '#5a7282');
+            root.style.setProperty('--wpvfh-bg', colors.bg || '#ffffff');
+            root.style.setProperty('--wpvfh-bg-light', colors.bgLight || '#f8f9fa');
+            root.style.setProperty('--wpvfh-border', colors.border || '#e0e4e8');
+
+            // Mettre à jour le logo du panneau
+            if (logo && this.elements.panel) {
+                const panelLogo = this.elements.panel.querySelector('.wpvfh-panel-logo');
+                if (panelLogo) {
+                    panelLogo.src = logo;
+                }
+            }
+
+            // Ajouter une classe pour le mode
+            document.body.classList.remove('wpvfh-theme-light', 'wpvfh-theme-dark');
+            document.body.classList.add('wpvfh-theme-' + effectiveMode);
+
+            // Écouter les changements de préférence système si en mode système
+            if (themeMode === 'system' && window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    this.applyThemeColors();
+                });
+            }
+
+            console.log('[Blazing Feedback] Thème appliqué:', effectiveMode);
         },
 
         /**

@@ -158,6 +158,16 @@ class WPVFH_Admin_UI {
             )
         );
 
+        register_setting(
+            'wpvfh_general_settings',
+            'wpvfh_button_color_hover',
+            array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_hex_color',
+                'default'           => '#E04800',
+            )
+        );
+
         // Style du bouton (collé ou séparé)
         register_setting(
             'wpvfh_general_settings',
@@ -1057,7 +1067,7 @@ class WPVFH_Admin_UI {
         $dark_icon_emoji = get_option( 'wpvfh_dark_icon_emoji', '💬' );
         $dark_icon_url = get_option( 'wpvfh_dark_icon_url', '' );
         $button_color = get_option( 'wpvfh_button_color', '#FE5100' );
-        $button_color_hover = get_option( 'wpvfh_color_primary_hover', '#E04800' );
+        $button_color_hover = get_option( 'wpvfh_button_color_hover', '#E04800' );
         $badge_bg_color = get_option( 'wpvfh_badge_bg_color', '#263e4b' );
         $badge_text_color = get_option( 'wpvfh_badge_text_color', '#ffffff' );
         $button_border_width = get_option( 'wpvfh_button_border_width', 0 );
@@ -1261,6 +1271,15 @@ class WPVFH_Admin_UI {
                                 <div style="display: flex; align-items: center; gap: 10px;">
                                     <input type="color" name="wpvfh_button_color" id="wpvfh_button_color" value="<?php echo esc_attr( $button_color ); ?>">
                                     <input type="text" value="<?php echo esc_attr( $button_color ); ?>" class="wpvfh-color-hex-input" data-color-input="wpvfh_button_color" style="width: 80px; font-family: monospace;" maxlength="7">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e( 'Couleur du bouton au survol', 'blazing-feedback' ); ?></th>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="color" name="wpvfh_button_color_hover" id="wpvfh_button_color_hover" value="<?php echo esc_attr( $button_color_hover ); ?>">
+                                    <input type="text" value="<?php echo esc_attr( $button_color_hover ); ?>" class="wpvfh-color-hex-input" data-color-input="wpvfh_button_color_hover" style="width: 80px; font-family: monospace;" maxlength="7">
                                 </div>
                             </td>
                         </tr>
