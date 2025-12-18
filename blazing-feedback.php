@@ -469,6 +469,9 @@ final class WP_Visual_Feedback_Hub {
         $corner_positions = array( 'bottom-right', 'bottom-left', 'top-right', 'top-left' );
         $auto_shape = in_array( $button_position, $corner_positions, true ) ? 'quarter' : 'half';
 
+        // Obtenir le mode de thème
+        $theme_mode = get_option( 'wpvfh_theme_mode', 'system' );
+
         return apply_filters( 'wpvfh_frontend_data', array(
             'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
             'restUrl'        => rest_url( 'blazing-feedback/v1/' ),
@@ -484,6 +487,8 @@ final class WP_Visual_Feedback_Hub {
             'canManage'      => current_user_can( 'manage_feedback' ),
             'pluginUrl'      => WPVFH_PLUGIN_URL,
             'screenshotEnabled' => $this->is_screenshot_enabled(),
+            // Mode de thème
+            'themeMode'      => $theme_mode,
             // Style du bouton
             'buttonStyle'    => array(
                 'style'       => get_option( 'wpvfh_button_style', 'detached' ),
@@ -492,8 +497,41 @@ final class WP_Visual_Feedback_Hub {
                 'borderRadius'=> absint( get_option( 'wpvfh_button_border_radius', 50 ) ),
                 'borderRadiusUnit' => get_option( 'wpvfh_button_border_radius_unit', 'percent' ),
                 'margin'      => absint( get_option( 'wpvfh_button_margin', 20 ) ),
-                'color'       => get_option( 'wpvfh_button_color', '#e74c3c' ),
-                'colorHover'  => get_option( 'wpvfh_color_primary_hover', '#c0392b' ),
+                'color'       => get_option( 'wpvfh_button_color', '#FE5100' ),
+                'colorHover'  => get_option( 'wpvfh_button_color_hover', '#E04800' ),
+            ),
+            // Couleurs mode clair
+            'colorsLight'    => array(
+                'primary'     => get_option( 'wpvfh_color_primary', '#FE5100' ),
+                'primaryHover'=> get_option( 'wpvfh_color_primary_hover', '#E04800' ),
+                'secondary'   => get_option( 'wpvfh_color_secondary', '#263e4b' ),
+                'success'     => get_option( 'wpvfh_color_success', '#28a745' ),
+                'warning'     => get_option( 'wpvfh_color_warning', '#ffc107' ),
+                'danger'      => get_option( 'wpvfh_color_danger', '#dc3545' ),
+                'text'        => get_option( 'wpvfh_color_text', '#263e4b' ),
+                'textLight'   => get_option( 'wpvfh_color_text_light', '#5a7282' ),
+                'bg'          => get_option( 'wpvfh_color_bg', '#ffffff' ),
+                'bgLight'     => get_option( 'wpvfh_color_bg_light', '#f8f9fa' ),
+                'border'      => get_option( 'wpvfh_color_border', '#e0e4e8' ),
+            ),
+            // Couleurs mode sombre
+            'colorsDark'     => array(
+                'primary'     => get_option( 'wpvfh_color_primary', '#FE5100' ),
+                'primaryHover'=> get_option( 'wpvfh_color_primary_hover', '#E04800' ),
+                'secondary'   => get_option( 'wpvfh_color_secondary_dark', '#4a6572' ),
+                'success'     => get_option( 'wpvfh_color_success', '#28a745' ),
+                'warning'     => get_option( 'wpvfh_color_warning', '#ffc107' ),
+                'danger'      => get_option( 'wpvfh_color_danger', '#dc3545' ),
+                'text'        => get_option( 'wpvfh_color_text_dark', '#ffffff' ),
+                'textLight'   => get_option( 'wpvfh_color_text_light_dark', '#b0bcc4' ),
+                'bg'          => get_option( 'wpvfh_color_bg_dark', '#263e4b' ),
+                'bgLight'     => get_option( 'wpvfh_color_bg_light_dark', '#334a5a' ),
+                'border'      => get_option( 'wpvfh_color_border_dark', '#3d5564' ),
+            ),
+            // Logos du panneau
+            'panelLogos'     => array(
+                'light'       => get_option( 'wpvfh_panel_logo_light_url', '' ) ?: WPVFH_PLUGIN_URL . 'assets/logo/light-mode-feedback.png',
+                'dark'        => get_option( 'wpvfh_panel_logo_dark_url', '' ) ?: WPVFH_PLUGIN_URL . 'assets/logo/dark-mode-feedback.png',
             ),
             // Métadonnées standards
             'statuses'       => WPVFH_CPT_Feedback::get_statuses(),
