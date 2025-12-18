@@ -920,8 +920,8 @@ class WPVFH_REST_API {
     public static function update_feedback( $request ) {
         $feedback_id = $request->get_param( 'id' );
 
-        $post = get_post( $feedback_id );
-        if ( ! $post || WPVFH_CPT_Feedback::POST_TYPE !== $post->post_type ) {
+        $feedback = WPVFH_Database::get_feedback( $feedback_id );
+        if ( ! $feedback ) {
             return new WP_Error(
                 'feedback_not_found',
                 __( 'Feedback non trouvé.', 'blazing-feedback' ),
@@ -932,12 +932,9 @@ class WPVFH_REST_API {
         $update_data = array();
 
         // Mise à jour du commentaire
-        if ( $comment = $request->get_param( 'comment' ) ) {
-            wp_update_post( array(
-                'ID'           => $feedback_id,
-                'post_title'   => wp_trim_words( $comment, 10, '...' ),
-                'post_content' => $comment,
-            ) );
+        $comment = $request->get_param( 'comment' );
+        if ( null !== $comment ) {
+            $update_data['comment'] = $comment;
         }
 
         // Mise à jour des métadonnées
@@ -951,14 +948,14 @@ class WPVFH_REST_API {
         foreach ( $meta_fields as $field ) {
             $value = $request->get_param( $field );
             if ( null !== $value ) {
-                update_post_meta( $feedback_id, '_wpvfh_' . $field, $value );
+                $update_data[ $field ] = $value;
             }
         }
 
         // Mise à jour du statut
-        if ( $status = $request->get_param( 'status' ) ) {
-            update_post_meta( $feedback_id, '_wpvfh_status', $status );
-            wp_set_object_terms( $feedback_id, $status, WPVFH_CPT_Feedback::TAX_STATUS );
+        $status = $request->get_param( 'status' );
+        if ( null !== $status ) {
+            $update_data['status'] = sanitize_key( $status );
 
             /**
              * Action après changement de statut via l'API
@@ -971,20 +968,26 @@ class WPVFH_REST_API {
         }
 
         // Mise à jour de la priorité
-        if ( $priority = $request->get_param( 'priority' ) ) {
-            update_post_meta( $feedback_id, '_wpvfh_priority', $priority );
+        $priority = $request->get_param( 'priority' );
+        if ( null !== $priority ) {
+            $update_data['priority'] = sanitize_key( $priority );
         }
 
         // Mise à jour du type de feedback
         $feedback_type = $request->get_param( 'feedback_type' );
         if ( null !== $feedback_type ) {
-            update_post_meta( $feedback_id, '_wpvfh_feedback_type', $feedback_type );
+            $update_data['feedback_type'] = sanitize_key( $feedback_type );
         }
 
         // Mise à jour des tags
         $tags = $request->get_param( 'tags' );
         if ( null !== $tags ) {
-            update_post_meta( $feedback_id, '_wpvfh_tags', $tags );
+            $update_data['tags'] = sanitize_text_field( $tags );
+        }
+
+        // Appliquer les mises à jour
+        if ( ! empty( $update_data ) ) {
+            WPVFH_Database::update_feedback( $feedback_id, $update_data );
         }
 
         /**
@@ -1009,8 +1012,8 @@ class WPVFH_REST_API {
     public static function delete_feedback( $request ) {
         $feedback_id = $request->get_param( 'id' );
 
-        $post = get_post( $feedback_id );
-        if ( ! $post || WPVFH_CPT_Feedback::POST_TYPE !== $post->post_type ) {
+        $feedback = WPVFH_Database::get_feedback( $feedback_id );
+        if ( ! $feedback ) {
             return new WP_Error(
                 'feedback_not_found',
                 __( 'Feedback non trouvé.', 'blazing-feedback' ),
@@ -1019,13 +1022,12 @@ class WPVFH_REST_API {
         }
 
         // Supprimer le screenshot associé
-        $screenshot_id = get_post_meta( $feedback_id, '_wpvfh_screenshot_id', true );
-        if ( $screenshot_id ) {
-            wp_delete_attachment( $screenshot_id, true );
+        if ( ! empty( $feedback->screenshot_id ) ) {
+            wp_delete_attachment( $feedback->screenshot_id, true );
         }
 
         // Supprimer le feedback
-        $deleted = wp_delete_post( $feedback_id, true );
+        $deleted = WPVFH_Database::delete_feedback( $feedback_id );
 
         if ( ! $deleted ) {
             return new WP_Error(
@@ -1061,8 +1063,8 @@ class WPVFH_REST_API {
         $feedback_id = $request->get_param( 'id' );
         $content = $request->get_param( 'content' );
 
-        $post = get_post( $feedback_id );
-        if ( ! $post || WPVFH_CPT_Feedback::POST_TYPE !== $post->post_type ) {
+        $feedback = WPVFH_Database::get_feedback( $feedback_id );
+        if ( ! $feedback ) {
             return new WP_Error(
                 'feedback_not_found',
                 __( 'Feedback non trouvé.', 'blazing-feedback' ),
@@ -1072,19 +1074,15 @@ class WPVFH_REST_API {
 
         $current_user = wp_get_current_user();
 
-        $comment_data = array(
-            'comment_post_ID'      => $feedback_id,
-            'comment_content'      => $content,
-            'comment_type'         => 'comment',
-            'comment_author'       => $current_user->display_name,
-            'comment_author_email' => $current_user->user_email,
-            'user_id'              => $current_user->ID,
-            'comment_approved'     => 1,
-        );
+        $reply_id = WPVFH_Database::insert_reply( array(
+            'feedback_id'  => $feedback_id,
+            'user_id'      => $current_user->ID ?: null,
+            'author_name'  => $current_user->display_name ?: __( 'Anonyme', 'blazing-feedback' ),
+            'author_email' => $current_user->user_email ?: '',
+            'content'      => $content,
+        ) );
 
-        $comment_id = wp_insert_comment( $comment_data );
-
-        if ( ! $comment_id ) {
+        if ( ! $reply_id ) {
             return new WP_Error(
                 'reply_failed',
                 __( 'Échec de l\'ajout de la réponse.', 'blazing-feedback' ),
@@ -1092,26 +1090,24 @@ class WPVFH_REST_API {
             );
         }
 
-        $comment = get_comment( $comment_id );
-
         /**
          * Action après ajout d'une réponse via l'API
          *
          * @since 1.0.0
-         * @param int             $comment_id  ID du commentaire
+         * @param int             $reply_id    ID de la réponse
          * @param int             $feedback_id ID du feedback
          * @param WP_REST_Request $request     Requête REST
          */
-        do_action( 'wpvfh_rest_reply_added', $comment_id, $feedback_id, $request );
+        do_action( 'wpvfh_rest_reply_added', $reply_id, $feedback_id, $request );
 
         return new WP_REST_Response( array(
-            'id'      => $comment_id,
-            'content' => $comment->comment_content,
-            'date'    => $comment->comment_date,
+            'id'      => $reply_id,
+            'content' => $content,
+            'date'    => current_time( 'mysql' ),
             'author'  => array(
-                'id'     => $comment->user_id,
-                'name'   => $comment->comment_author,
-                'avatar' => get_avatar_url( $comment->comment_author_email, array( 'size' => 32 ) ),
+                'id'     => $current_user->ID,
+                'name'   => $current_user->display_name ?: __( 'Anonyme', 'blazing-feedback' ),
+                'avatar' => get_avatar_url( $current_user->user_email ?: $current_user->ID, array( 'size' => 32 ) ),
             ),
         ), 201 );
     }
@@ -1127,8 +1123,8 @@ class WPVFH_REST_API {
         $feedback_id = $request->get_param( 'id' );
         $status = $request->get_param( 'status' );
 
-        $post = get_post( $feedback_id );
-        if ( ! $post || WPVFH_CPT_Feedback::POST_TYPE !== $post->post_type ) {
+        $feedback = WPVFH_Database::get_feedback( $feedback_id );
+        if ( ! $feedback ) {
             return new WP_Error(
                 'feedback_not_found',
                 __( 'Feedback non trouvé.', 'blazing-feedback' ),
@@ -1136,10 +1132,9 @@ class WPVFH_REST_API {
             );
         }
 
-        $old_status = get_post_meta( $feedback_id, '_wpvfh_status', true );
+        $old_status = $feedback->status;
 
-        update_post_meta( $feedback_id, '_wpvfh_status', $status );
-        wp_set_object_terms( $feedback_id, $status, WPVFH_CPT_Feedback::TAX_STATUS );
+        WPVFH_Database::update_feedback( $feedback_id, array( 'status' => sanitize_key( $status ) ) );
 
         /**
          * Action après changement de statut via l'API
@@ -1172,8 +1167,8 @@ class WPVFH_REST_API {
         $feedback_id = $request->get_param( 'id' );
         $priority = $request->get_param( 'priority' );
 
-        $post = get_post( $feedback_id );
-        if ( ! $post || WPVFH_CPT_Feedback::POST_TYPE !== $post->post_type ) {
+        $feedback = WPVFH_Database::get_feedback( $feedback_id );
+        if ( ! $feedback ) {
             return new WP_Error(
                 'feedback_not_found',
                 __( 'Feedback non trouvé.', 'blazing-feedback' ),
@@ -1181,9 +1176,9 @@ class WPVFH_REST_API {
             );
         }
 
-        $old_priority = get_post_meta( $feedback_id, '_wpvfh_priority', true );
+        $old_priority = $feedback->priority;
 
-        update_post_meta( $feedback_id, '_wpvfh_priority', $priority );
+        WPVFH_Database::update_feedback( $feedback_id, array( 'priority' => sanitize_key( $priority ) ) );
 
         /**
          * Action après changement de priorité via l'API
@@ -1238,7 +1233,7 @@ class WPVFH_REST_API {
         }
 
         // Mettre à jour le feedback
-        update_post_meta( $feedback_id, '_wpvfh_screenshot_id', $screenshot_id );
+        WPVFH_Database::update_feedback( $feedback_id, array( 'screenshot_id' => $screenshot_id ) );
 
         return new WP_REST_Response( array(
             'id'  => $screenshot_id,

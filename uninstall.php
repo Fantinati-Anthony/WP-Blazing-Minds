@@ -24,7 +24,42 @@ function wpvfh_uninstall_cleanup() {
     global $wpdb;
 
     // =========================================================================
-    // 1. Supprimer tous les feedbacks (posts)
+    // 1. Supprimer les tables SQL personnalisées
+    // =========================================================================
+    $tables = array(
+        'wpvfh_feedbacks',
+        'wpvfh_replies',
+        'wpvfh_metadata_types',
+        'wpvfh_metadata_items',
+        'wpvfh_custom_groups',
+        'wpvfh_group_settings',
+    );
+
+    foreach ( $tables as $table ) {
+        $table_name = $wpdb->base_prefix . $table;
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $wpdb->query( "DROP TABLE IF EXISTS $table_name" );
+    }
+
+    // =========================================================================
+    // 2. Supprimer les screenshots (attachments dans media library)
+    // =========================================================================
+    $upload_dir = wp_upload_dir();
+    $feedback_dir = $upload_dir['basedir'] . '/visual-feedback';
+
+    // Supprimer les attachments qui sont dans ce dossier
+    $attachments = $wpdb->get_results( "
+        SELECT ID FROM {$wpdb->posts}
+        WHERE post_type = 'attachment'
+        AND guid LIKE '%/visual-feedback/%'
+    " );
+
+    foreach ( $attachments as $attachment ) {
+        wp_delete_attachment( $attachment->ID, true );
+    }
+
+    // =========================================================================
+    // 3. Supprimer les anciens posts CPT (rétrocompatibilité)
     // =========================================================================
     $feedbacks = get_posts( array(
         'post_type'      => 'visual_feedback',
@@ -34,18 +69,11 @@ function wpvfh_uninstall_cleanup() {
     ) );
 
     foreach ( $feedbacks as $feedback_id ) {
-        // Supprimer les screenshots attachés
-        $screenshot_id = get_post_meta( $feedback_id, '_wpvfh_screenshot_id', true );
-        if ( $screenshot_id ) {
-            wp_delete_attachment( $screenshot_id, true );
-        }
-
-        // Supprimer le post et ses métadonnées
         wp_delete_post( $feedback_id, true );
     }
 
     // =========================================================================
-    // 2. Supprimer les termes de taxonomie
+    // 4. Supprimer les termes de taxonomie
     // =========================================================================
     $taxonomies = array( 'feedback_status', 'feedback_page' );
 
@@ -64,10 +92,12 @@ function wpvfh_uninstall_cleanup() {
     }
 
     // =========================================================================
-    // 3. Supprimer les options
+    // 5. Supprimer les options
     // =========================================================================
     $options = array(
         'wpvfh_version',
+        'wpvfh_db_version',
+        'wpvfh_migration_complete',
         'wpvfh_screenshot_enabled',
         'wpvfh_guest_feedback',
         'wpvfh_button_position',
@@ -76,19 +106,31 @@ function wpvfh_uninstall_cleanup() {
         'wpvfh_email_notifications',
         'wpvfh_notification_email',
         'wpvfh_show_welcome_notice',
+        'wpvfh_logo_mode',
+        'wpvfh_logo_custom_url',
+        // Anciennes options (rétrocompatibilité)
+        'wpvfh_feedback_types',
+        'wpvfh_feedback_priorities',
+        'wpvfh_feedback_tags',
+        'wpvfh_feedback_statuses',
+        'wpvfh_custom_option_groups',
+        'wpvfh_group_settings',
     );
 
     foreach ( $options as $option ) {
         delete_option( $option );
     }
 
+    // Supprimer les anciennes options de groupes personnalisés (rétrocompatibilité)
+    $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'wpvfh_custom_group_%'" );
+
     // =========================================================================
-    // 4. Supprimer les métadonnées utilisateur
+    // 6. Supprimer les métadonnées utilisateur
     // =========================================================================
     $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE 'wpvfh_%'" );
 
     // =========================================================================
-    // 5. Supprimer les rôles personnalisés
+    // 7. Supprimer les rôles personnalisés
     // =========================================================================
     $roles_to_remove = array( 'feedback_client', 'feedback_member', 'feedback_admin' );
 
@@ -122,23 +164,20 @@ function wpvfh_uninstall_cleanup() {
     }
 
     // =========================================================================
-    // 6. Supprimer le dossier d'uploads
+    // 8. Supprimer le dossier d'uploads
     // =========================================================================
-    $upload_dir = wp_upload_dir();
-    $feedback_dir = $upload_dir['basedir'] . '/visual-feedback';
-
     if ( file_exists( $feedback_dir ) ) {
         wpvfh_delete_directory( $feedback_dir );
     }
 
     // =========================================================================
-    // 7. Nettoyer les transients
+    // 9. Nettoyer les transients
     // =========================================================================
     $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wpvfh_%'" );
     $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_wpvfh_%'" );
 
     // =========================================================================
-    // 8. Flush des règles de réécriture
+    // 10. Flush des règles de réécriture
     // =========================================================================
     flush_rewrite_rules();
 }

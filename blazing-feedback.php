@@ -98,6 +98,9 @@ final class WP_Visual_Feedback_Hub {
      * @return void
      */
     private function load_dependencies() {
+        // Database management (doit être chargé en premier)
+        require_once WPVFH_PLUGIN_DIR . 'includes/database.php';
+
         // Fichiers du core
         require_once WPVFH_PLUGIN_DIR . 'includes/permissions.php';
         require_once WPVFH_PLUGIN_DIR . 'includes/roles.php';
@@ -155,7 +158,15 @@ final class WP_Visual_Feedback_Hub {
         // Créer les rôles personnalisés
         WPVFH_Roles::create_roles();
 
-        // Enregistrer le CPT pour flush les rewrite rules
+        // Installer les tables SQL personnalisées
+        WPVFH_Database::install();
+
+        // Migration des données si nécessaire (depuis posts/postmeta vers tables custom)
+        if ( WPVFH_Database::needs_migration() ) {
+            WPVFH_Database::run_migration();
+        }
+
+        // Enregistrer le CPT pour flush les rewrite rules (gardé pour rétrocompatibilité)
         WPVFH_CPT_Feedback::register_post_type();
         WPVFH_CPT_Feedback::register_taxonomies();
 

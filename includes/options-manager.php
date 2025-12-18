@@ -326,19 +326,70 @@ class WPVFH_Options_Manager {
     }
 
     /**
+     * Convertir un objet de base de données en tableau d'item
+     *
+     * @since 1.7.0
+     * @param object $db_item Objet de la base de données
+     * @return array
+     */
+    private static function db_item_to_array( $db_item ) {
+        return array(
+            'id'            => $db_item->slug,
+            'label'         => $db_item->label,
+            'emoji'         => $db_item->emoji ?: '📌',
+            'color'         => $db_item->color ?: '#666666',
+            'display_mode'  => $db_item->display_mode ?: 'emoji',
+            'enabled'       => (bool) $db_item->enabled,
+            'ai_prompt'     => $db_item->ai_prompt ?: '',
+            'allowed_roles' => is_array( $db_item->allowed_roles ) ? $db_item->allowed_roles : array(),
+            'allowed_users' => is_array( $db_item->allowed_users ) ? $db_item->allowed_users : array(),
+            'db_id'         => (int) $db_item->id,
+            'sort_order'    => (int) $db_item->sort_order,
+        );
+    }
+
+    /**
+     * Convertir un tableau d'item en données pour la base de données
+     *
+     * @since 1.7.0
+     * @param array  $item       Tableau d'item
+     * @param string $type_group Groupe de type
+     * @param int    $sort_order Ordre de tri
+     * @return array
+     */
+    private static function array_to_db_item( $item, $type_group, $sort_order = 0 ) {
+        return array(
+            'type_group'    => $type_group,
+            'slug'          => isset( $item['id'] ) ? $item['id'] : sanitize_title( $item['label'] ),
+            'label'         => isset( $item['label'] ) ? $item['label'] : '',
+            'emoji'         => isset( $item['emoji'] ) ? $item['emoji'] : '📌',
+            'color'         => isset( $item['color'] ) ? $item['color'] : '#666666',
+            'display_mode'  => isset( $item['display_mode'] ) ? $item['display_mode'] : 'emoji',
+            'sort_order'    => $sort_order,
+            'enabled'       => isset( $item['enabled'] ) ? (int) $item['enabled'] : 1,
+            'ai_prompt'     => isset( $item['ai_prompt'] ) ? $item['ai_prompt'] : '',
+            'allowed_roles' => isset( $item['allowed_roles'] ) ? $item['allowed_roles'] : array(),
+            'allowed_users' => isset( $item['allowed_users'] ) ? $item['allowed_users'] : array(),
+        );
+    }
+
+    /**
      * Obtenir les types de feedback
      *
      * @since 1.1.0
      * @return array
      */
     public static function get_types() {
-        $types = get_option( self::OPTION_TYPES );
-        if ( false === $types || empty( $types ) ) {
-            $types = self::get_default_types();
-            update_option( self::OPTION_TYPES, $types );
+        $db_items = WPVFH_Database::get_metadata_by_type( 'types' );
+
+        if ( empty( $db_items ) ) {
+            // Insérer les valeurs par défaut dans la base de données
+            $defaults = self::get_default_types();
+            self::save_types( $defaults );
+            return $defaults;
         }
-        // Normaliser chaque élément
-        return array_map( array( __CLASS__, 'normalize_item' ), $types );
+
+        return array_map( array( __CLASS__, 'db_item_to_array' ), $db_items );
     }
 
     /**
@@ -348,12 +399,15 @@ class WPVFH_Options_Manager {
      * @return array
      */
     public static function get_priorities() {
-        $priorities = get_option( self::OPTION_PRIORITIES );
-        if ( false === $priorities || empty( $priorities ) ) {
-            $priorities = self::get_default_priorities();
-            update_option( self::OPTION_PRIORITIES, $priorities );
+        $db_items = WPVFH_Database::get_metadata_by_type( 'priorities' );
+
+        if ( empty( $db_items ) ) {
+            $defaults = self::get_default_priorities();
+            self::save_priorities( $defaults );
+            return $defaults;
         }
-        return array_map( array( __CLASS__, 'normalize_item' ), $priorities );
+
+        return array_map( array( __CLASS__, 'db_item_to_array' ), $db_items );
     }
 
     /**
@@ -363,12 +417,60 @@ class WPVFH_Options_Manager {
      * @return array
      */
     public static function get_predefined_tags() {
-        $tags = get_option( self::OPTION_TAGS );
-        if ( false === $tags ) {
-            $tags = self::get_default_tags();
-            update_option( self::OPTION_TAGS, $tags );
+        $db_items = WPVFH_Database::get_metadata_by_type( 'tags' );
+
+        if ( empty( $db_items ) ) {
+            $defaults = self::get_default_tags();
+            self::save_tags( $defaults );
+            return $defaults;
         }
-        return array_map( array( __CLASS__, 'normalize_item' ), $tags );
+
+        return array_map( array( __CLASS__, 'db_item_to_array' ), $db_items );
+    }
+
+    /**
+     * Sauvegarder les métadonnées d'un type
+     *
+     * @since 1.7.0
+     * @param string $type_group Groupe de type
+     * @param array  $items      Items à sauvegarder
+     * @return bool
+     */
+    private static function save_metadata_items( $type_group, $items ) {
+        // Récupérer les items existants pour déterminer les mises à jour/insertions/suppressions
+        $existing = WPVFH_Database::get_metadata_by_type( $type_group );
+        $existing_by_slug = array();
+        foreach ( $existing as $item ) {
+            $existing_by_slug[ $item->slug ] = $item;
+        }
+
+        $processed_slugs = array();
+        $sort_order = 0;
+
+        foreach ( $items as $item ) {
+            $slug = isset( $item['id'] ) ? $item['id'] : sanitize_title( $item['label'] );
+            $processed_slugs[] = $slug;
+            $db_data = self::array_to_db_item( $item, $type_group, $sort_order );
+
+            if ( isset( $existing_by_slug[ $slug ] ) ) {
+                // Mise à jour
+                WPVFH_Database::update_metadata_item( $existing_by_slug[ $slug ]->id, $db_data );
+            } else {
+                // Insertion
+                WPVFH_Database::insert_metadata_item( $db_data );
+            }
+
+            $sort_order++;
+        }
+
+        // Supprimer les items qui ne sont plus dans la liste
+        foreach ( $existing_by_slug as $slug => $item ) {
+            if ( ! in_array( $slug, $processed_slugs, true ) ) {
+                WPVFH_Database::delete_metadata_item( $item->id );
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -379,7 +481,7 @@ class WPVFH_Options_Manager {
      * @return bool
      */
     public static function save_types( $types ) {
-        return update_option( self::OPTION_TYPES, $types );
+        return self::save_metadata_items( 'types', $types );
     }
 
     /**
@@ -390,7 +492,7 @@ class WPVFH_Options_Manager {
      * @return bool
      */
     public static function save_priorities( $priorities ) {
-        return update_option( self::OPTION_PRIORITIES, $priorities );
+        return self::save_metadata_items( 'priorities', $priorities );
     }
 
     /**
@@ -401,7 +503,7 @@ class WPVFH_Options_Manager {
      * @return bool
      */
     public static function save_tags( $tags ) {
-        return update_option( self::OPTION_TAGS, $tags );
+        return self::save_metadata_items( 'tags', $tags );
     }
 
     /**
@@ -411,12 +513,15 @@ class WPVFH_Options_Manager {
      * @return array
      */
     public static function get_statuses() {
-        $statuses = get_option( self::OPTION_STATUSES );
-        if ( false === $statuses || empty( $statuses ) ) {
-            $statuses = self::get_default_statuses();
-            update_option( self::OPTION_STATUSES, $statuses );
+        $db_items = WPVFH_Database::get_metadata_by_type( 'statuses' );
+
+        if ( empty( $db_items ) ) {
+            $defaults = self::get_default_statuses();
+            self::save_statuses( $defaults );
+            return $defaults;
         }
-        return array_map( array( __CLASS__, 'normalize_item' ), $statuses );
+
+        return array_map( array( __CLASS__, 'db_item_to_array' ), $db_items );
     }
 
     /**
@@ -427,7 +532,7 @@ class WPVFH_Options_Manager {
      * @return bool
      */
     public static function save_statuses( $statuses ) {
-        return update_option( self::OPTION_STATUSES, $statuses );
+        return self::save_metadata_items( 'statuses', $statuses );
     }
 
     /**
@@ -437,11 +542,18 @@ class WPVFH_Options_Manager {
      * @return array
      */
     public static function get_custom_groups() {
-        $groups = get_option( self::OPTION_CUSTOM_GROUPS );
-        if ( false === $groups ) {
-            $groups = array();
-            update_option( self::OPTION_CUSTOM_GROUPS, $groups );
+        $db_groups = WPVFH_Database::get_custom_groups();
+
+        $groups = array();
+        foreach ( $db_groups as $group ) {
+            $groups[ $group->slug ] = array(
+                'slug'    => $group->slug,
+                'name'    => $group->name,
+                'created' => strtotime( $group->created_at ),
+                'db_id'   => (int) $group->id,
+            );
         }
+
         return $groups;
     }
 
@@ -453,7 +565,9 @@ class WPVFH_Options_Manager {
      * @return bool
      */
     public static function save_custom_groups( $groups ) {
-        return update_option( self::OPTION_CUSTOM_GROUPS, $groups );
+        // Cette méthode est maintenant principalement utilisée pour la compatibilité
+        // Les vraies sauvegardes se font via create_custom_group et delete_custom_group
+        return true;
     }
 
     /**
@@ -476,19 +590,26 @@ class WPVFH_Options_Manager {
             $counter++;
         }
 
-        $group = array(
+        // Calculer l'ordre de tri
+        $sort_order = count( $groups );
+
+        // Insérer dans la base de données
+        $group_id = WPVFH_Database::insert_custom_group( array(
+            'slug'       => $slug,
+            'name'       => $name,
+            'sort_order' => $sort_order,
+        ) );
+
+        if ( ! $group_id ) {
+            return false;
+        }
+
+        return array(
             'slug'    => $slug,
             'name'    => $name,
             'created' => time(),
+            'db_id'   => $group_id,
         );
-
-        $groups[ $slug ] = $group;
-        self::save_custom_groups( $groups );
-
-        // Créer l'option pour stocker les items du groupe
-        update_option( 'wpvfh_custom_group_' . $slug, array() );
-
-        return $group;
     }
 
     /**
@@ -504,18 +625,7 @@ class WPVFH_Options_Manager {
             return false;
         }
 
-        $groups = self::get_custom_groups();
-        if ( ! isset( $groups[ $slug ] ) ) {
-            return false;
-        }
-
-        unset( $groups[ $slug ] );
-        self::save_custom_groups( $groups );
-
-        // Supprimer l'option des items du groupe
-        delete_option( 'wpvfh_custom_group_' . $slug );
-
-        return true;
+        return WPVFH_Database::delete_custom_group( $slug );
     }
 
     /**
@@ -526,11 +636,28 @@ class WPVFH_Options_Manager {
      * @return array
      */
     public static function get_custom_group_items( $slug ) {
-        $items = get_option( 'wpvfh_custom_group_' . $slug );
-        if ( false === $items ) {
-            $items = array();
+        $group = WPVFH_Database::get_custom_group( $slug );
+        if ( ! $group ) {
+            return array();
         }
-        return array_map( array( __CLASS__, 'normalize_item' ), $items );
+
+        $db_items = WPVFH_Database::get_custom_group_items( $group->id );
+
+        return array_map( function( $item ) {
+            return array(
+                'id'            => $item->slug,
+                'label'         => $item->label,
+                'emoji'         => $item->emoji ?: '📌',
+                'color'         => $item->color ?: '#666666',
+                'display_mode'  => $item->display_mode ?: 'emoji',
+                'enabled'       => (bool) $item->enabled,
+                'ai_prompt'     => $item->ai_prompt ?: '',
+                'allowed_roles' => is_array( $item->allowed_roles ) ? $item->allowed_roles : array(),
+                'allowed_users' => is_array( $item->allowed_users ) ? $item->allowed_users : array(),
+                'db_id'         => (int) $item->id,
+                'sort_order'    => (int) $item->sort_order,
+            );
+        }, $db_items );
     }
 
     /**
@@ -542,7 +669,56 @@ class WPVFH_Options_Manager {
      * @return bool
      */
     public static function save_custom_group_items( $slug, $items ) {
-        return update_option( 'wpvfh_custom_group_' . $slug, $items );
+        $group = WPVFH_Database::get_custom_group( $slug );
+        if ( ! $group ) {
+            return false;
+        }
+
+        // Récupérer les items existants
+        $existing = WPVFH_Database::get_custom_group_items( $group->id );
+        $existing_by_slug = array();
+        foreach ( $existing as $item ) {
+            $existing_by_slug[ $item->slug ] = $item;
+        }
+
+        $processed_slugs = array();
+        $sort_order = 0;
+
+        foreach ( $items as $item ) {
+            $item_slug = isset( $item['id'] ) ? $item['id'] : sanitize_title( $item['label'] );
+            $processed_slugs[] = $item_slug;
+
+            $db_data = array(
+                'group_id'      => $group->id,
+                'slug'          => $item_slug,
+                'label'         => isset( $item['label'] ) ? $item['label'] : '',
+                'emoji'         => isset( $item['emoji'] ) ? $item['emoji'] : '📌',
+                'color'         => isset( $item['color'] ) ? $item['color'] : '#666666',
+                'display_mode'  => isset( $item['display_mode'] ) ? $item['display_mode'] : 'emoji',
+                'sort_order'    => $sort_order,
+                'enabled'       => isset( $item['enabled'] ) ? (int) $item['enabled'] : 1,
+                'ai_prompt'     => isset( $item['ai_prompt'] ) ? $item['ai_prompt'] : '',
+                'allowed_roles' => isset( $item['allowed_roles'] ) ? $item['allowed_roles'] : array(),
+                'allowed_users' => isset( $item['allowed_users'] ) ? $item['allowed_users'] : array(),
+            );
+
+            if ( isset( $existing_by_slug[ $item_slug ] ) ) {
+                WPVFH_Database::update_custom_group_item( $existing_by_slug[ $item_slug ]->id, $db_data );
+            } else {
+                WPVFH_Database::insert_custom_group_item( $db_data );
+            }
+
+            $sort_order++;
+        }
+
+        // Supprimer les items qui ne sont plus dans la liste
+        foreach ( $existing_by_slug as $item_slug => $item ) {
+            if ( ! in_array( $item_slug, $processed_slugs, true ) ) {
+                WPVFH_Database::delete_custom_group_item( $item->id );
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -564,21 +740,7 @@ class WPVFH_Options_Manager {
      * @return array
      */
     public static function get_group_settings( $slug ) {
-        $all_settings = get_option( self::OPTION_GROUP_SETTINGS, array() );
-
-        $defaults = array(
-            'enabled'       => true,
-            'required'      => false,
-            'allowed_roles' => array(),
-            'allowed_users' => array(),
-            'ai_prompt'     => '',
-        );
-
-        if ( isset( $all_settings[ $slug ] ) ) {
-            return array_merge( $defaults, $all_settings[ $slug ] );
-        }
-
-        return $defaults;
+        return WPVFH_Database::get_group_settings( $slug );
     }
 
     /**
@@ -590,9 +752,7 @@ class WPVFH_Options_Manager {
      * @return bool
      */
     public static function save_group_settings( $slug, $settings ) {
-        $all_settings = get_option( self::OPTION_GROUP_SETTINGS, array() );
-        $all_settings[ $slug ] = $settings;
-        return update_option( self::OPTION_GROUP_SETTINGS, $all_settings );
+        return WPVFH_Database::save_group_settings( $slug, $settings );
     }
 
     /**
@@ -608,13 +768,7 @@ class WPVFH_Options_Manager {
             return false;
         }
 
-        $groups = self::get_custom_groups();
-        if ( ! isset( $groups[ $slug ] ) ) {
-            return false;
-        }
-
-        $groups[ $slug ]['name'] = $new_name;
-        return self::save_custom_groups( $groups );
+        return WPVFH_Database::update_custom_group( $slug, array( 'name' => $new_name ) );
     }
 
     /**

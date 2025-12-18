@@ -741,123 +741,73 @@ class WPVFH_CPT_Feedback {
             return new WP_Error( 'empty_comment', __( 'Le commentaire est obligatoire.', 'blazing-feedback' ) );
         }
 
-        // Créer le post
-        $post_data = array(
-            'post_type'    => self::POST_TYPE,
-            'post_status'  => 'publish',
-            'post_title'   => wp_trim_words( $data['comment'], 10, '...' ),
-            'post_content' => $data['comment'],
-            'post_author'  => get_current_user_id(),
+        // Préparer les données pour la table SQL
+        $url = isset( $data['url'] ) ? $data['url'] : '';
+        $page_path = $url ? ( wp_parse_url( $url, PHP_URL_PATH ) ?: '/' ) : '/';
+
+        $feedback_data = array(
+            'user_id'             => get_current_user_id() ?: null,
+            'comment'             => $data['comment'],
+            'url'                 => $url,
+            'page_path'           => $page_path,
+            'position_x'          => isset( $data['position_x'] ) ? floatval( $data['position_x'] ) : 0,
+            'position_y'          => isset( $data['position_y'] ) ? floatval( $data['position_y'] ) : 0,
+            'selector'            => isset( $data['selector'] ) ? $data['selector'] : null,
+            'element_offset_x'    => isset( $data['element_offset_x'] ) ? floatval( $data['element_offset_x'] ) : null,
+            'element_offset_y'    => isset( $data['element_offset_y'] ) ? floatval( $data['element_offset_y'] ) : null,
+            'scroll_x'            => isset( $data['scroll_x'] ) ? absint( $data['scroll_x'] ) : 0,
+            'scroll_y'            => isset( $data['scroll_y'] ) ? absint( $data['scroll_y'] ) : 0,
+            'screenshot_id'       => isset( $data['screenshot_id'] ) ? absint( $data['screenshot_id'] ) : null,
+            'screen_width'        => isset( $data['screen_width'] ) ? absint( $data['screen_width'] ) : null,
+            'screen_height'       => isset( $data['screen_height'] ) ? absint( $data['screen_height'] ) : null,
+            'viewport_width'      => isset( $data['viewport_width'] ) ? absint( $data['viewport_width'] ) : null,
+            'viewport_height'     => isset( $data['viewport_height'] ) ? absint( $data['viewport_height'] ) : null,
+            'device_pixel_ratio'  => isset( $data['device_pixel_ratio'] ) ? $data['device_pixel_ratio'] : null,
+            'color_depth'         => isset( $data['color_depth'] ) ? $data['color_depth'] : null,
+            'orientation'         => isset( $data['orientation'] ) ? $data['orientation'] : null,
+            'browser'             => isset( $data['browser'] ) ? $data['browser'] : null,
+            'browser_version'     => isset( $data['browser_version'] ) ? $data['browser_version'] : null,
+            'os'                  => isset( $data['os'] ) ? $data['os'] : null,
+            'os_version'          => isset( $data['os_version'] ) ? $data['os_version'] : null,
+            'device'              => isset( $data['device'] ) ? $data['device'] : null,
+            'platform'            => isset( $data['platform'] ) ? $data['platform'] : null,
+            'user_agent'          => isset( $data['user_agent'] ) ? $data['user_agent'] : null,
+            'language'            => isset( $data['language'] ) ? $data['language'] : null,
+            'languages'           => isset( $data['languages'] ) ? $data['languages'] : null,
+            'timezone'            => isset( $data['timezone'] ) ? $data['timezone'] : null,
+            'timezone_offset'     => isset( $data['timezone_offset'] ) ? $data['timezone_offset'] : null,
+            'local_time'          => isset( $data['local_time'] ) ? $data['local_time'] : null,
+            'cookies_enabled'     => isset( $data['cookies_enabled'] ) ? (int) $data['cookies_enabled'] : 1,
+            'online'              => isset( $data['online'] ) ? (int) $data['online'] : 1,
+            'touch_support'       => isset( $data['touch_support'] ) ? (int) $data['touch_support'] : 0,
+            'max_touch_points'    => isset( $data['max_touch_points'] ) ? absint( $data['max_touch_points'] ) : 0,
+            'device_memory'       => isset( $data['device_memory'] ) ? $data['device_memory'] : null,
+            'hardware_concurrency' => isset( $data['hardware_concurrency'] ) ? $data['hardware_concurrency'] : null,
+            'connection_type'     => isset( $data['connection_type'] ) ? $data['connection_type'] : null,
+            'referrer'            => isset( $data['referrer'] ) ? $data['referrer'] : null,
+            'status'              => isset( $data['status'] ) ? sanitize_key( $data['status'] ) : 'new',
+            'priority'            => isset( $data['priority'] ) ? sanitize_key( $data['priority'] ) : 'none',
+            'feedback_type'       => isset( $data['feedback_type'] ) ? sanitize_key( $data['feedback_type'] ) : 'bug',
+            'tags'                => isset( $data['tags'] ) ? sanitize_text_field( $data['tags'] ) : null,
         );
 
-        $post_id = wp_insert_post( $post_data, true );
+        // Insérer dans la table SQL
+        $feedback_id = WPVFH_Database::insert_feedback( $feedback_data );
 
-        if ( is_wp_error( $post_id ) ) {
-            return $post_id;
-        }
-
-        // Ajouter les métadonnées
-        if ( isset( $data['url'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_url', $data['url'] );
-
-            // Créer ou assigner le terme de page
-            $page_path = wp_parse_url( $data['url'], PHP_URL_PATH ) ?: '/';
-            wp_set_object_terms( $post_id, sanitize_title( $page_path ), self::TAX_PAGE );
-        }
-
-        if ( isset( $data['position_x'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_position_x', $data['position_x'] );
-        }
-        if ( isset( $data['position_y'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_position_y', $data['position_y'] );
-        }
-        if ( isset( $data['screen_width'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_screen_width', $data['screen_width'] );
-        }
-        if ( isset( $data['screen_height'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_screen_height', $data['screen_height'] );
-        }
-        if ( isset( $data['viewport_width'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_viewport_width', $data['viewport_width'] );
-        }
-        if ( isset( $data['viewport_height'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_viewport_height', $data['viewport_height'] );
-        }
-        if ( isset( $data['browser'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_browser', $data['browser'] );
-        }
-        if ( isset( $data['os'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_os', $data['os'] );
-        }
-        if ( isset( $data['device'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_device', $data['device'] );
-        }
-        if ( isset( $data['user_agent'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_user_agent', $data['user_agent'] );
-        }
-        if ( isset( $data['selector'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_selector', $data['selector'] );
-        }
-        if ( isset( $data['element_offset_x'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_element_offset_x', $data['element_offset_x'] );
-        }
-        if ( isset( $data['element_offset_y'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_element_offset_y', $data['element_offset_y'] );
-        }
-        if ( isset( $data['scroll_x'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_scroll_x', $data['scroll_x'] );
-        }
-        if ( isset( $data['scroll_y'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_scroll_y', $data['scroll_y'] );
-        }
-
-        // Nouvelles métadonnées système étendues
-        $extended_meta_fields = array(
-            'device_pixel_ratio', 'color_depth', 'orientation',
-            'browser_version', 'os_version', 'platform',
-            'language', 'languages', 'timezone', 'timezone_offset', 'local_time',
-            'cookies_enabled', 'online', 'touch_support', 'max_touch_points',
-            'device_memory', 'hardware_concurrency', 'connection_type', 'referrer',
-        );
-
-        foreach ( $extended_meta_fields as $field ) {
-            if ( isset( $data[ $field ] ) && ! empty( $data[ $field ] ) ) {
-                update_post_meta( $post_id, '_wpvfh_' . $field, $data[ $field ] );
-            }
-        }
-
-        // Statut par défaut
-        $status = isset( $data['status'] ) ? $data['status'] : 'new';
-        update_post_meta( $post_id, '_wpvfh_status', $status );
-        wp_set_object_terms( $post_id, $status, self::TAX_STATUS );
-
-        // Priorité
-        if ( isset( $data['priority'] ) && ! empty( $data['priority'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_priority', sanitize_key( $data['priority'] ) );
-        } else {
-            update_post_meta( $post_id, '_wpvfh_priority', 'none' );
-        }
-
-        // Type de feedback
-        if ( isset( $data['feedback_type'] ) && ! empty( $data['feedback_type'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_feedback_type', sanitize_key( $data['feedback_type'] ) );
-        }
-
-        // Tags
-        if ( isset( $data['tags'] ) && ! empty( $data['tags'] ) ) {
-            update_post_meta( $post_id, '_wpvfh_tags', sanitize_text_field( $data['tags'] ) );
+        if ( ! $feedback_id ) {
+            return new WP_Error( 'db_error', __( 'Erreur lors de la création du feedback.', 'blazing-feedback' ) );
         }
 
         /**
          * Action déclenchée après la création d'un feedback
          *
          * @since 1.0.0
-         * @param int   $post_id ID du feedback
-         * @param array $data    Données du feedback
+         * @param int   $feedback_id ID du feedback
+         * @param array $data        Données du feedback
          */
-        do_action( 'wpvfh_feedback_created', $post_id, $data );
+        do_action( 'wpvfh_feedback_created', $feedback_id, $data );
 
-        return $post_id;
+        return $feedback_id;
     }
 
     /**
@@ -869,107 +819,113 @@ class WPVFH_CPT_Feedback {
      * @return array
      */
     public static function get_feedbacks_by_url( $url, $args = array() ) {
-        $defaults = array(
-            'post_type'      => self::POST_TYPE,
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'meta_query'     => array(
-                array(
-                    'key'   => '_wpvfh_url',
-                    'value' => $url,
-                ),
-            ),
-        );
-
-        $query_args = wp_parse_args( $args, $defaults );
+        $feedbacks = WPVFH_Database::get_feedbacks_by_url( $url );
 
         /**
-         * Filtre les arguments de requête des feedbacks par URL
+         * Filtre les feedbacks récupérés par URL
          *
          * @since 1.0.0
-         * @param array  $query_args Arguments de la requête
-         * @param string $url        URL de la page
+         * @param array  $feedbacks Feedbacks trouvés
+         * @param string $url       URL de la page
          */
-        $query_args = apply_filters( 'wpvfh_feedbacks_by_url_args', $query_args, $url );
-
-        $query = new WP_Query( $query_args );
-
-        return $query->posts;
+        return apply_filters( 'wpvfh_feedbacks_by_url', $feedbacks, $url );
     }
 
     /**
      * Obtenir un feedback formaté pour l'API
      *
      * @since 1.0.0
-     * @param int|WP_Post $feedback Feedback ou ID
+     * @param int|object $feedback Feedback ID ou objet de la base de données
      * @return array|false
      */
     public static function get_feedback_data( $feedback ) {
-        $post = get_post( $feedback );
+        // Si c'est un ID, récupérer depuis la base de données
+        if ( is_numeric( $feedback ) ) {
+            $feedback = WPVFH_Database::get_feedback( $feedback );
+        }
 
-        if ( ! $post || self::POST_TYPE !== $post->post_type ) {
+        if ( ! $feedback ) {
             return false;
         }
 
-        $screenshot_id = get_post_meta( $post->ID, '_wpvfh_screenshot_id', true );
-        $screenshot_url = $screenshot_id ? wp_get_attachment_url( $screenshot_id ) : '';
+        // Récupérer l'auteur
+        $author = null;
+        $author_name = __( 'Anonyme', 'blazing-feedback' );
+        $author_id = 0;
 
-        $author = get_userdata( $post->post_author );
+        if ( ! empty( $feedback->user_id ) ) {
+            $author = get_userdata( $feedback->user_id );
+            if ( $author ) {
+                $author_name = $author->display_name;
+                $author_id = $author->ID;
+            }
+        } elseif ( ! empty( $feedback->guest_name ) ) {
+            $author_name = $feedback->guest_name;
+        }
+
+        // Screenshot URL
+        $screenshot_url = '';
+        if ( ! empty( $feedback->screenshot_id ) ) {
+            $screenshot_url = wp_get_attachment_url( $feedback->screenshot_id );
+        }
 
         $data = array(
-            'id'              => $post->ID,
-            'comment'         => $post->post_content,
-            'title'           => $post->post_title,
-            'date'            => $post->post_date,
-            'date_gmt'        => $post->post_date_gmt,
-            'modified'        => $post->post_modified,
+            'id'              => (int) $feedback->id,
+            'comment'         => $feedback->comment,
+            'title'           => wp_trim_words( $feedback->comment, 10, '...' ),
+            'date'            => $feedback->created_at,
+            'date_gmt'        => get_gmt_from_date( $feedback->created_at ),
+            'modified'        => $feedback->updated_at,
             'author'          => array(
-                'id'           => $post->post_author,
-                'name'         => $author ? $author->display_name : __( 'Anonyme', 'blazing-feedback' ),
-                'avatar'       => get_avatar_url( $post->post_author, array( 'size' => 48 ) ),
+                'id'           => $author_id,
+                'name'         => $author_name,
+                'avatar'       => get_avatar_url( $author_id ?: $feedback->guest_email, array( 'size' => 48 ) ),
             ),
-            'url'             => get_post_meta( $post->ID, '_wpvfh_url', true ),
-            'position_x'      => (float) get_post_meta( $post->ID, '_wpvfh_position_x', true ),
-            'position_y'      => (float) get_post_meta( $post->ID, '_wpvfh_position_y', true ),
-            'status'          => get_post_meta( $post->ID, '_wpvfh_status', true ) ?: 'new',
-            'priority'        => get_post_meta( $post->ID, '_wpvfh_priority', true ) ?: 'none',
-            'feedback_type'   => get_post_meta( $post->ID, '_wpvfh_feedback_type', true ) ?: '',
-            'tags'            => get_post_meta( $post->ID, '_wpvfh_tags', true ) ?: '',
-            'screenshot_id'   => $screenshot_id,
+            'url'             => $feedback->url,
+            'page_path'       => $feedback->page_path,
+            'position_x'      => (float) $feedback->position_x,
+            'position_y'      => (float) $feedback->position_y,
+            'status'          => $feedback->status ?: 'new',
+            'priority'        => $feedback->priority ?: 'none',
+            'feedback_type'   => $feedback->feedback_type ?: '',
+            'tags'            => $feedback->tags ?: '',
+            'screenshot_id'   => (int) $feedback->screenshot_id,
             'screenshot_url'  => $screenshot_url,
-            'screen_width'    => (int) get_post_meta( $post->ID, '_wpvfh_screen_width', true ),
-            'screen_height'   => (int) get_post_meta( $post->ID, '_wpvfh_screen_height', true ),
-            'viewport_width'  => (int) get_post_meta( $post->ID, '_wpvfh_viewport_width', true ),
-            'viewport_height' => (int) get_post_meta( $post->ID, '_wpvfh_viewport_height', true ),
-            'browser'         => get_post_meta( $post->ID, '_wpvfh_browser', true ),
-            'os'              => get_post_meta( $post->ID, '_wpvfh_os', true ),
-            'device'          => get_post_meta( $post->ID, '_wpvfh_device', true ),
-            'selector'          => get_post_meta( $post->ID, '_wpvfh_selector', true ),
-            'element_offset_x'  => (float) get_post_meta( $post->ID, '_wpvfh_element_offset_x', true ),
-            'element_offset_y'  => (float) get_post_meta( $post->ID, '_wpvfh_element_offset_y', true ),
-            'replies'           => self::get_feedback_replies( $post->ID ),
+            'screen_width'    => (int) $feedback->screen_width,
+            'screen_height'   => (int) $feedback->screen_height,
+            'viewport_width'  => (int) $feedback->viewport_width,
+            'viewport_height' => (int) $feedback->viewport_height,
+            'browser'         => $feedback->browser,
+            'os'              => $feedback->os,
+            'device'          => $feedback->device,
+            'selector'        => $feedback->selector,
+            'element_offset_x' => (float) $feedback->element_offset_x,
+            'element_offset_y' => (float) $feedback->element_offset_y,
+            'scroll_x'        => (int) $feedback->scroll_x,
+            'scroll_y'        => (int) $feedback->scroll_y,
+            'replies'         => self::get_feedback_replies( $feedback->id ),
             // Informations système complètes
-            'system_info'       => array(
-                'device_pixel_ratio'    => get_post_meta( $post->ID, '_wpvfh_device_pixel_ratio', true ),
-                'color_depth'           => get_post_meta( $post->ID, '_wpvfh_color_depth', true ),
-                'orientation'           => get_post_meta( $post->ID, '_wpvfh_orientation', true ),
-                'browser_version'       => get_post_meta( $post->ID, '_wpvfh_browser_version', true ),
-                'os_version'            => get_post_meta( $post->ID, '_wpvfh_os_version', true ),
-                'platform'              => get_post_meta( $post->ID, '_wpvfh_platform', true ),
-                'language'              => get_post_meta( $post->ID, '_wpvfh_language', true ),
-                'languages'             => get_post_meta( $post->ID, '_wpvfh_languages', true ),
-                'timezone'              => get_post_meta( $post->ID, '_wpvfh_timezone', true ),
-                'timezone_offset'       => get_post_meta( $post->ID, '_wpvfh_timezone_offset', true ),
-                'local_time'            => get_post_meta( $post->ID, '_wpvfh_local_time', true ),
-                'cookies_enabled'       => get_post_meta( $post->ID, '_wpvfh_cookies_enabled', true ),
-                'online'                => get_post_meta( $post->ID, '_wpvfh_online', true ),
-                'touch_support'         => get_post_meta( $post->ID, '_wpvfh_touch_support', true ),
-                'max_touch_points'      => get_post_meta( $post->ID, '_wpvfh_max_touch_points', true ),
-                'device_memory'         => get_post_meta( $post->ID, '_wpvfh_device_memory', true ),
-                'hardware_concurrency'  => get_post_meta( $post->ID, '_wpvfh_hardware_concurrency', true ),
-                'connection_type'       => get_post_meta( $post->ID, '_wpvfh_connection_type', true ),
-                'referrer'              => get_post_meta( $post->ID, '_wpvfh_referrer', true ),
-                'user_agent'            => get_post_meta( $post->ID, '_wpvfh_user_agent', true ),
+            'system_info'     => array(
+                'device_pixel_ratio'    => $feedback->device_pixel_ratio,
+                'color_depth'           => $feedback->color_depth,
+                'orientation'           => $feedback->orientation,
+                'browser_version'       => $feedback->browser_version,
+                'os_version'            => $feedback->os_version,
+                'platform'              => $feedback->platform,
+                'language'              => $feedback->language,
+                'languages'             => $feedback->languages,
+                'timezone'              => $feedback->timezone,
+                'timezone_offset'       => $feedback->timezone_offset,
+                'local_time'            => $feedback->local_time,
+                'cookies_enabled'       => (bool) $feedback->cookies_enabled,
+                'online'                => (bool) $feedback->online,
+                'touch_support'         => (bool) $feedback->touch_support,
+                'max_touch_points'      => (int) $feedback->max_touch_points,
+                'device_memory'         => $feedback->device_memory,
+                'hardware_concurrency'  => $feedback->hardware_concurrency,
+                'connection_type'       => $feedback->connection_type,
+                'referrer'              => $feedback->referrer,
+                'user_agent'            => $feedback->user_agent,
             ),
         );
 
@@ -977,10 +933,10 @@ class WPVFH_CPT_Feedback {
          * Filtre les données du feedback pour l'API
          *
          * @since 1.0.0
-         * @param array   $data    Données du feedback
-         * @param WP_Post $post    Post du feedback
+         * @param array  $data     Données du feedback
+         * @param object $feedback Feedback de la base de données
          */
-        return apply_filters( 'wpvfh_feedback_data', $data, $post );
+        return apply_filters( 'wpvfh_feedback_data', $data, $feedback );
     }
 
     /**
@@ -991,29 +947,89 @@ class WPVFH_CPT_Feedback {
      * @return array
      */
     public static function get_feedback_replies( $feedback_id ) {
-        $comments = get_comments( array(
-            'post_id' => $feedback_id,
-            'status'  => 'approve',
-            'orderby' => 'comment_date',
-            'order'   => 'ASC',
-        ) );
+        $db_replies = WPVFH_Database::get_replies( $feedback_id );
 
         $replies = array();
-        foreach ( $comments as $comment ) {
+        foreach ( $db_replies as $reply ) {
+            $author_name = $reply->author_name;
+            $author_email = $reply->author_email;
+
+            if ( ! empty( $reply->user_id ) ) {
+                $user = get_userdata( $reply->user_id );
+                if ( $user ) {
+                    $author_name = $user->display_name;
+                    $author_email = $user->user_email;
+                }
+            }
+
             $replies[] = array(
-                'id'        => $comment->comment_ID,
-                'content'   => $comment->comment_content,
-                'date'      => $comment->comment_date,
+                'id'        => (int) $reply->id,
+                'content'   => $reply->content,
+                'date'      => $reply->created_at,
                 'author'    => array(
-                    'id'     => $comment->user_id,
-                    'name'   => $comment->comment_author,
-                    'email'  => $comment->comment_author_email,
-                    'avatar' => get_avatar_url( $comment->comment_author_email, array( 'size' => 32 ) ),
+                    'id'     => (int) $reply->user_id,
+                    'name'   => $author_name,
+                    'email'  => $author_email,
+                    'avatar' => get_avatar_url( $author_email ?: $reply->user_id, array( 'size' => 32 ) ),
                 ),
             );
         }
 
         return $replies;
+    }
+
+    /**
+     * Ajouter une réponse à un feedback
+     *
+     * @since 1.7.0
+     * @param int    $feedback_id ID du feedback
+     * @param string $content     Contenu de la réponse
+     * @param int    $user_id     ID de l'utilisateur (optionnel)
+     * @return int|false ID de la réponse ou false
+     */
+    public static function add_reply( $feedback_id, $content, $user_id = null ) {
+        if ( null === $user_id ) {
+            $user_id = get_current_user_id();
+        }
+
+        $user = get_userdata( $user_id );
+
+        return WPVFH_Database::insert_reply( array(
+            'feedback_id'  => $feedback_id,
+            'user_id'      => $user_id ?: null,
+            'author_name'  => $user ? $user->display_name : __( 'Anonyme', 'blazing-feedback' ),
+            'author_email' => $user ? $user->user_email : '',
+            'content'      => $content,
+        ) );
+    }
+
+    /**
+     * Mettre à jour un feedback
+     *
+     * @since 1.7.0
+     * @param int   $feedback_id ID du feedback
+     * @param array $data        Données à mettre à jour
+     * @return bool
+     */
+    public static function update_feedback( $feedback_id, $data ) {
+        return WPVFH_Database::update_feedback( $feedback_id, $data );
+    }
+
+    /**
+     * Supprimer un feedback
+     *
+     * @since 1.7.0
+     * @param int $feedback_id ID du feedback
+     * @return bool
+     */
+    public static function delete_feedback( $feedback_id ) {
+        // Récupérer le screenshot pour le supprimer aussi
+        $feedback = WPVFH_Database::get_feedback( $feedback_id );
+        if ( $feedback && ! empty( $feedback->screenshot_id ) ) {
+            wp_delete_attachment( $feedback->screenshot_id, true );
+        }
+
+        return WPVFH_Database::delete_feedback( $feedback_id );
     }
 }
 
