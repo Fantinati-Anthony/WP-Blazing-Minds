@@ -369,20 +369,13 @@ html body.elementor-default .wpvfh-hidden {
 }
 
 /* ==========================================================================
-   Bouton coin (quart de cercle)
+   Bouton de feedback (styles communs)
    ========================================================================== */
 
 .wpvfh-corner-btn {
     position: fixed !important;
-    bottom: 0 !important;
-    right: 0 !important;
-    width: 80px !important;
-    height: 80px !important;
-    background: var(--wpvfh-primary) !important;
     border: none !important;
-    border-radius: 100% 0 0 0 !important;
     cursor: pointer !important;
-    box-shadow: -2px -2px 12px rgba(0, 0, 0, 0.2) !important;
     transition: all var(--wpvfh-transition) !important;
     z-index: var(--wpvfh-z-index) !important;
     display: flex !important;
@@ -390,15 +383,6 @@ html body.elementor-default .wpvfh-hidden {
     align-items: center !important;
     justify-content: center !important;
     padding: 0 !important;
-    padding-right: 8px !important;
-    padding-bottom: 8px !important;
-}
-
-.wpvfh-corner-btn:hover {
-    background: var(--wpvfh-primary-hover) !important;
-    width: 90px !important;
-    height: 90px !important;
-    box-shadow: -4px -4px 20px rgba(231, 76, 60, 0.4) !important;
 }
 
 .wpvfh-corner-btn:focus {
@@ -408,6 +392,64 @@ html body.elementor-default .wpvfh-hidden {
 
 .wpvfh-corner-btn:active {
     transform: scale(0.95) !important;
+}
+
+/* ==========================================================================
+   Bouton séparé (flottant avec marge)
+   ========================================================================== */
+
+.wpvfh-btn-detached:hover {
+    background: var(--wpvfh-primary-hover) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+.wpvfh-btn-detached .wpvfh-corner-icon-wrapper {
+    margin: 0 !important;
+}
+
+/* ==========================================================================
+   Bouton collé (attaché au bord)
+   ========================================================================== */
+
+.wpvfh-btn-attached {
+    box-shadow: -2px -2px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.wpvfh-btn-attached:hover {
+    background: var(--wpvfh-primary-hover) !important;
+}
+
+/* Quart de cercle */
+.wpvfh-btn-attached.wpvfh-btn-quarter {
+    padding-right: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+.wpvfh-btn-attached.wpvfh-btn-quarter:hover {
+    width: calc(var(--wpvfh-btn-size, 56px) + 10px) !important;
+    height: calc(var(--wpvfh-btn-size, 56px) + 10px) !important;
+    box-shadow: -4px -4px 20px rgba(231, 76, 60, 0.4) !important;
+}
+
+.wpvfh-btn-attached.wpvfh-btn-quarter .wpvfh-corner-icon-wrapper {
+    margin-top: 10px !important;
+    margin-left: 10px !important;
+}
+
+/* Demi-cercle */
+.wpvfh-btn-attached.wpvfh-btn-half {
+    padding-left: 4px !important;
+}
+
+.wpvfh-btn-attached.wpvfh-btn-half:hover {
+    width: calc(var(--wpvfh-btn-size, 56px) / 2 + 5px) !important;
+    box-shadow: -4px 0 20px rgba(231, 76, 60, 0.4) !important;
+}
+
+.wpvfh-btn-attached.wpvfh-btn-half .wpvfh-corner-icon-wrapper {
+    margin: 0 !important;
+    margin-left: 4px !important;
 }
 
 .wpvfh-corner-icon-wrapper {

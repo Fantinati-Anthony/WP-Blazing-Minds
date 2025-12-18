@@ -479,6 +479,17 @@ final class WP_Visual_Feedback_Hub {
             'canManage'      => current_user_can( 'manage_feedback' ),
             'pluginUrl'      => WPVFH_PLUGIN_URL,
             'screenshotEnabled' => $this->is_screenshot_enabled(),
+            // Style du bouton
+            'buttonStyle'    => array(
+                'style'       => get_option( 'wpvfh_button_style', 'detached' ),
+                'shape'       => get_option( 'wpvfh_button_attached_shape', 'quarter' ),
+                'size'        => absint( get_option( 'wpvfh_button_size', 56 ) ),
+                'borderRadius'=> absint( get_option( 'wpvfh_button_border_radius', 50 ) ),
+                'borderRadiusUnit' => get_option( 'wpvfh_button_border_radius_unit', 'percent' ),
+                'margin'      => absint( get_option( 'wpvfh_button_margin', 20 ) ),
+                'color'       => get_option( 'wpvfh_button_color', '#e74c3c' ),
+                'colorHover'  => get_option( 'wpvfh_color_primary_hover', '#c0392b' ),
+            ),
             // Métadonnées standards
             'statuses'       => WPVFH_CPT_Feedback::get_statuses(),
             'feedbackTypes'  => WPVFH_Options_Manager::get_types(),
@@ -688,20 +699,65 @@ final class WP_Visual_Feedback_Hub {
             <!-- Overlay pour la sidebar -->
             <div id="wpvfh-sidebar-overlay" class="wpvfh-sidebar-overlay"></div>
 
-            <!-- Bouton principal Feedback - Quart de cercle dans le coin -->
+            <!-- Bouton principal Feedback -->
             <?php
             $icon_mode = get_option( 'wpvfh_icon_mode', 'emoji' );
             $icon_emoji = get_option( 'wpvfh_icon_emoji', '💬' );
             $icon_image_url = get_option( 'wpvfh_icon_image_url', '' );
+            $button_style = get_option( 'wpvfh_button_style', 'detached' );
+            $button_shape = get_option( 'wpvfh_button_attached_shape', 'quarter' );
+            $button_size = absint( get_option( 'wpvfh_button_size', 56 ) );
+            $button_border_radius = absint( get_option( 'wpvfh_button_border_radius', 50 ) );
+            $button_border_radius_unit = get_option( 'wpvfh_button_border_radius_unit', 'percent' );
+            $button_margin = absint( get_option( 'wpvfh_button_margin', 20 ) );
+            $button_color = get_option( 'wpvfh_button_color', '#e74c3c' );
+
+            // Calculer les styles inline
+            $btn_styles = array();
+            $btn_styles[] = 'background-color: ' . esc_attr( $button_color );
+            $btn_styles[] = '--wpvfh-btn-size: ' . $button_size . 'px';
+
+            if ( 'attached' === $button_style ) {
+                // Bouton collé au bord
+                if ( 'quarter' === $button_shape ) {
+                    $btn_styles[] = 'width: ' . $button_size . 'px';
+                    $btn_styles[] = 'height: ' . $button_size . 'px';
+                    $btn_styles[] = 'border-radius: 100% 0 0 0';
+                } else {
+                    // Demi-cercle
+                    $btn_styles[] = 'width: ' . ( $button_size / 2 ) . 'px';
+                    $btn_styles[] = 'height: ' . $button_size . 'px';
+                    $btn_styles[] = 'border-radius: ' . $button_size . 'px 0 0 ' . $button_size . 'px';
+                }
+                $btn_styles[] = 'bottom: 0';
+                $btn_styles[] = 'right: 0';
+            } else {
+                // Bouton séparé
+                $radius_unit = ( 'percent' === $button_border_radius_unit ) ? '%' : 'px';
+                $btn_styles[] = 'width: ' . $button_size . 'px';
+                $btn_styles[] = 'height: ' . $button_size . 'px';
+                $btn_styles[] = 'border-radius: ' . $button_border_radius . $radius_unit;
+                $btn_styles[] = 'bottom: ' . $button_margin . 'px';
+                $btn_styles[] = 'right: ' . $button_margin . 'px';
+                $btn_styles[] = 'box-shadow: 0 4px 12px rgba(0,0,0,0.15)';
+            }
+
+            $btn_class = 'wpvfh-corner-btn';
+            $btn_class .= ' wpvfh-btn-' . esc_attr( $button_style );
+            if ( 'attached' === $button_style ) {
+                $btn_class .= ' wpvfh-btn-' . esc_attr( $button_shape );
+            }
             ?>
             <button
                 type="button"
                 id="wpvfh-toggle-btn"
-                class="wpvfh-corner-btn"
+                class="<?php echo esc_attr( $btn_class ); ?>"
                 data-position="<?php echo esc_attr( $button_position ); ?>"
+                data-style="<?php echo esc_attr( $button_style ); ?>"
                 aria-expanded="false"
                 aria-controls="wpvfh-panel"
                 title="<?php esc_attr_e( 'Voir les feedbacks', 'blazing-feedback' ); ?>"
+                style="<?php echo esc_attr( implode( '; ', $btn_styles ) ); ?>"
             >
                 <span class="wpvfh-corner-icon-wrapper">
                     <span class="wpvfh-corner-icon" aria-hidden="true">
