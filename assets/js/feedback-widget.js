@@ -227,15 +227,17 @@
                 feedbackType: document.getElementById('wpvfh-feedback-type'),
                 feedbackPriority: document.getElementById('wpvfh-feedback-priority'),
                 feedbackTags: document.getElementById('wpvfh-feedback-tags'),
+                feedbackTagsContainer: document.getElementById('wpvfh-feedback-tags-container'),
+                feedbackTagsInput: document.getElementById('wpvfh-feedback-tags-input'),
                 // Champs Type, Priorité, Tags (vue détails)
                 detailType: document.getElementById('wpvfh-detail-type'),
                 detailPrioritySelect: document.getElementById('wpvfh-detail-priority-select'),
-                detailTags: document.getElementById('wpvfh-detail-tags'),
+                detailTagsContainer: document.getElementById('wpvfh-detail-tags-container'),
+                detailTagsInput: document.getElementById('wpvfh-detail-tags-input'),
                 // Labels dans la vue détails
                 detailLabels: document.getElementById('wpvfh-detail-labels'),
                 detailTypeLabel: document.getElementById('wpvfh-detail-type-label'),
                 detailPriorityLabel: document.getElementById('wpvfh-detail-priority-label'),
-                detailTagsLabels: document.getElementById('wpvfh-detail-tags-labels'),
             };
         },
 
@@ -413,16 +415,64 @@
                 });
             }
 
-            // Ajout de tags avec la touche Entrée (vue détails)
-            if (this.elements.detailTags) {
-                this.elements.detailTags.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
+            // Tags dans le formulaire de création (virgule ou Entrée)
+            if (this.elements.feedbackTagsInput) {
+                this.elements.feedbackTagsInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ',') {
                         e.preventDefault();
-                        const newTag = e.target.value.trim();
+                        const newTag = e.target.value.replace(/,/g, '').trim();
+                        if (newTag) {
+                            this.addFormTag(newTag);
+                            e.target.value = '';
+                        }
+                    }
+                    // Supprimer le dernier tag avec Backspace si le champ est vide
+                    if (e.key === 'Backspace' && e.target.value === '') {
+                        this.removeLastFormTag();
+                    }
+                });
+                // Gérer aussi la virgule tapée (pour les cas où keydown ne capture pas)
+                this.elements.feedbackTagsInput.addEventListener('input', (e) => {
+                    if (e.target.value.includes(',')) {
+                        const parts = e.target.value.split(',');
+                        parts.forEach((part, index) => {
+                            const tag = part.trim();
+                            if (tag && index < parts.length - 1) {
+                                this.addFormTag(tag);
+                            }
+                        });
+                        e.target.value = parts[parts.length - 1].trim();
+                    }
+                });
+            }
+
+            // Tags dans la vue détails (virgule ou Entrée)
+            if (this.elements.detailTagsInput) {
+                this.elements.detailTagsInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ',') {
+                        e.preventDefault();
+                        const newTag = e.target.value.replace(/,/g, '').trim();
                         if (newTag && this.state.currentFeedbackId) {
                             this.addTag(newTag);
-                            e.target.value = ''; // Vider le champ
+                            e.target.value = '';
                         }
+                    }
+                    // Supprimer le dernier tag avec Backspace si le champ est vide
+                    if (e.key === 'Backspace' && e.target.value === '') {
+                        this.removeLastTag();
+                    }
+                });
+                // Gérer aussi la virgule tapée
+                this.elements.detailTagsInput.addEventListener('input', (e) => {
+                    if (e.target.value.includes(',')) {
+                        const parts = e.target.value.split(',');
+                        parts.forEach((part, index) => {
+                            const tag = part.trim();
+                            if (tag && index < parts.length - 1 && this.state.currentFeedbackId) {
+                                this.addTag(tag);
+                            }
+                        });
+                        e.target.value = parts[parts.length - 1].trim();
                     }
                 });
             }
@@ -1696,8 +1746,10 @@
             if (this.elements.feedbackPriority) {
                 this.elements.feedbackPriority.value = 'none';
             }
-            if (this.elements.feedbackTags) {
-                this.elements.feedbackTags.value = '';
+            // Réinitialiser les tags visuels
+            this.clearFormTags();
+            if (this.elements.feedbackTagsInput) {
+                this.elements.feedbackTagsInput.value = '';
             }
         },
 
@@ -1834,8 +1886,8 @@
                 this.elements.detailPrioritySelect.value = feedback.priority || 'none';
             }
             // Vider le champ d'ajout de tags (les tags existants sont affichés comme badges)
-            if (this.elements.detailTags) {
-                this.elements.detailTags.value = '';
+            if (this.elements.detailTagsInput) {
+                this.elements.detailTagsInput.value = '';
             }
 
             // Screenshot
@@ -2183,32 +2235,44 @@
                 }
             }
 
-            // Tags labels avec boutons X pour supprimer
-            if (this.elements.detailTagsLabels) {
-                const tags = feedback.tags;
-                this.elements.detailTagsLabels.innerHTML = '';
-                if (tags && tags.trim()) {
-                    const tagList = tags.split(',').map(t => t.trim()).filter(t => t);
-                    tagList.forEach(tag => {
-                        const badge = document.createElement('span');
-                        badge.className = 'wpvfh-tag-badge';
-                        badge.innerHTML = `${this.escapeHtml(tag)}<button type="button" class="wpvfh-tag-remove" title="Supprimer ce tag">×</button>`;
+            // Rendre les tags dans le container
+            this.renderDetailTags(feedback.tags);
+        },
 
-                        // Gestionnaire pour le bouton X
-                        const removeBtn = badge.querySelector('.wpvfh-tag-remove');
-                        removeBtn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            this.removeTag(tag);
-                        });
+        /**
+         * Rendre les tags dans le container de la vue détails
+         * @param {string} tagsString - Tags séparés par des virgules
+         */
+        renderDetailTags: function(tagsString) {
+            if (!this.elements.detailTagsContainer) return;
 
-                        this.elements.detailTagsLabels.appendChild(badge);
+            // Supprimer les anciens badges (garder l'input)
+            const existingBadges = this.elements.detailTagsContainer.querySelectorAll('.wpvfh-tag-badge');
+            existingBadges.forEach(badge => badge.remove());
+
+            // Ajouter les nouveaux badges avant l'input
+            const input = this.elements.detailTagsInput;
+            if (tagsString && tagsString.trim()) {
+                const tagList = tagsString.split(',').map(t => t.trim()).filter(t => t);
+                tagList.forEach(tag => {
+                    const badge = document.createElement('span');
+                    badge.className = 'wpvfh-tag-badge';
+                    badge.innerHTML = `${this.escapeHtml(tag)}<button type="button" class="wpvfh-tag-remove" title="Supprimer">×</button>`;
+
+                    // Gestionnaire pour le bouton X
+                    const removeBtn = badge.querySelector('.wpvfh-tag-remove');
+                    removeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.removeTag(tag);
                     });
-                }
+
+                    this.elements.detailTagsContainer.insertBefore(badge, input);
+                });
             }
         },
 
         /**
-         * Ajouter un tag au feedback courant
+         * Ajouter un tag au feedback courant (vue détails)
          * @param {string} newTag - Tag à ajouter
          */
         addTag: function(newTag) {
@@ -2232,12 +2296,18 @@
             tagList.push(newTag);
             const newTags = tagList.join(', ');
 
+            // Mettre à jour localement
+            feedback.tags = newTags;
+
+            // Rendre les tags
+            this.renderDetailTags(newTags);
+
             // Mettre à jour via l'API
             this.updateFeedbackMeta(this.state.currentFeedbackId, 'tags', newTags);
         },
 
         /**
-         * Supprimer un tag du feedback courant
+         * Supprimer un tag du feedback courant (vue détails)
          * @param {string} tagToRemove - Tag à supprimer
          */
         removeTag: function(tagToRemove) {
@@ -2252,8 +2322,123 @@
             const tagList = tags.split(',').map(t => t.trim()).filter(t => t && t !== tagToRemove);
             const newTags = tagList.join(', ');
 
+            // Mettre à jour localement
+            feedback.tags = newTags;
+
+            // Rendre les tags
+            this.renderDetailTags(newTags);
+
             // Mettre à jour via l'API
             this.updateFeedbackMeta(this.state.currentFeedbackId, 'tags', newTags);
+        },
+
+        /**
+         * Supprimer le dernier tag (vue détails - Backspace)
+         */
+        removeLastTag: function() {
+            if (!this.state.currentFeedbackId) return;
+
+            const feedback = this.state.currentFeedbacks.find(f => f.id == this.state.currentFeedbackId);
+            if (!feedback || !feedback.tags) return;
+
+            const tagList = feedback.tags.split(',').map(t => t.trim()).filter(t => t);
+            if (tagList.length === 0) return;
+
+            const lastTag = tagList.pop();
+            this.removeTag(lastTag);
+        },
+
+        // =========================================
+        // GESTION DES TAGS - FORMULAIRE CRÉATION
+        // =========================================
+
+        /**
+         * État des tags du formulaire
+         */
+        formTags: [],
+
+        /**
+         * Ajouter un tag au formulaire de création
+         * @param {string} newTag - Tag à ajouter
+         */
+        addFormTag: function(newTag) {
+            const tagLower = newTag.toLowerCase();
+
+            // Vérifier si le tag existe déjà
+            if (this.formTags.some(t => t.toLowerCase() === tagLower)) {
+                this.showNotification('Ce tag existe déjà', 'warning');
+                return;
+            }
+
+            this.formTags.push(newTag);
+            this.renderFormTags();
+            this.updateFormTagsHidden();
+        },
+
+        /**
+         * Supprimer un tag du formulaire de création
+         * @param {string} tagToRemove - Tag à supprimer
+         */
+        removeFormTag: function(tagToRemove) {
+            this.formTags = this.formTags.filter(t => t !== tagToRemove);
+            this.renderFormTags();
+            this.updateFormTagsHidden();
+        },
+
+        /**
+         * Supprimer le dernier tag du formulaire (Backspace)
+         */
+        removeLastFormTag: function() {
+            if (this.formTags.length === 0) return;
+            this.formTags.pop();
+            this.renderFormTags();
+            this.updateFormTagsHidden();
+        },
+
+        /**
+         * Rendre les tags dans le container du formulaire
+         */
+        renderFormTags: function() {
+            if (!this.elements.feedbackTagsContainer) return;
+
+            // Supprimer les anciens badges (garder l'input)
+            const existingBadges = this.elements.feedbackTagsContainer.querySelectorAll('.wpvfh-tag-badge');
+            existingBadges.forEach(badge => badge.remove());
+
+            // Ajouter les nouveaux badges avant l'input
+            const input = this.elements.feedbackTagsInput;
+            this.formTags.forEach(tag => {
+                const badge = document.createElement('span');
+                badge.className = 'wpvfh-tag-badge';
+                badge.innerHTML = `${this.escapeHtml(tag)}<button type="button" class="wpvfh-tag-remove" title="Supprimer">×</button>`;
+
+                // Gestionnaire pour le bouton X
+                const removeBtn = badge.querySelector('.wpvfh-tag-remove');
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.removeFormTag(tag);
+                });
+
+                this.elements.feedbackTagsContainer.insertBefore(badge, input);
+            });
+        },
+
+        /**
+         * Mettre à jour le champ hidden avec les tags
+         */
+        updateFormTagsHidden: function() {
+            if (this.elements.feedbackTags) {
+                this.elements.feedbackTags.value = this.formTags.join(', ');
+            }
+        },
+
+        /**
+         * Réinitialiser les tags du formulaire
+         */
+        clearFormTags: function() {
+            this.formTags = [];
+            this.renderFormTags();
+            this.updateFormTagsHidden();
         },
 
         /**

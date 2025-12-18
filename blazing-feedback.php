@@ -639,11 +639,14 @@ final class WP_Visual_Feedback_Hub {
 
                             <!-- Tags -->
                             <div class="wpvfh-dropdown-group wpvfh-tags-group">
-                                <label for="wpvfh-feedback-tags">
+                                <label for="wpvfh-feedback-tags-input">
                                     <span class="wpvfh-dropdown-icon">🔖</span>
                                     <?php esc_html_e( 'Tags', 'blazing-feedback' ); ?>
                                 </label>
-                                <input type="text" id="wpvfh-feedback-tags" name="feedback_tags" class="wpvfh-tags-input" placeholder="<?php esc_attr_e( 'Ex: urgent, homepage...', 'blazing-feedback' ); ?>">
+                                <div class="wpvfh-tags-container" id="wpvfh-feedback-tags-container">
+                                    <input type="text" id="wpvfh-feedback-tags-input" class="wpvfh-tags-input-inline" placeholder="<?php esc_attr_e( 'Ajouter...', 'blazing-feedback' ); ?>">
+                                </div>
+                                <input type="hidden" id="wpvfh-feedback-tags" name="feedback_tags">
                             </div>
                         </div>
 
@@ -969,9 +972,8 @@ final class WP_Visual_Feedback_Hub {
                                     <span class="wpvfh-dropdown-icon">🔖</span>
                                     <?php esc_html_e( 'Tags', 'blazing-feedback' ); ?>
                                 </h4>
-                                <div class="wpvfh-label-tags" id="wpvfh-detail-tags-labels"></div>
-                                <div class="wpvfh-tags-add-wrapper">
-                                    <input type="text" id="wpvfh-detail-tags" class="wpvfh-tags-input" placeholder="<?php esc_attr_e( 'Ajouter un tag (Entrée pour valider)', 'blazing-feedback' ); ?>">
+                                <div class="wpvfh-tags-container" id="wpvfh-detail-tags-container">
+                                    <input type="text" id="wpvfh-detail-tags-input" class="wpvfh-tags-input-inline" placeholder="<?php esc_attr_e( 'Ajouter un tag...', 'blazing-feedback' ); ?>">
                                 </div>
                             </div>
 
