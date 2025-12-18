@@ -911,7 +911,7 @@ final class WP_Visual_Feedback_Hub {
                                 <div class="wpvfh-detail-date" id="wpvfh-detail-date"></div>
                             </div>
 
-                            <!-- Étiquettes (Type, Priorité, Tags) -->
+                            <!-- Étiquettes (Type, Priorité) -->
                             <div class="wpvfh-detail-labels" id="wpvfh-detail-labels">
                                 <div class="wpvfh-label-item wpvfh-label-type" id="wpvfh-detail-type-label" hidden>
                                     <span class="wpvfh-label-icon"></span>
@@ -921,10 +921,9 @@ final class WP_Visual_Feedback_Hub {
                                     <span class="wpvfh-label-icon"></span>
                                     <span class="wpvfh-label-text"></span>
                                 </div>
-                                <div class="wpvfh-label-tags" id="wpvfh-detail-tags-labels"></div>
                             </div>
 
-                            <!-- Champs éditables (Type, Priorité, Tags) -->
+                            <!-- Champs éditables (Type, Priorité) -->
                             <div class="wpvfh-detail-dropdowns" id="wpvfh-detail-dropdowns">
                                 <div class="wpvfh-dropdown-group">
                                     <label for="wpvfh-detail-type">
@@ -953,13 +952,6 @@ final class WP_Visual_Feedback_Hub {
                                         <option value="high">🔴 <?php esc_html_e( 'Haute', 'blazing-feedback' ); ?></option>
                                     </select>
                                 </div>
-                                <div class="wpvfh-dropdown-group wpvfh-tags-group">
-                                    <label for="wpvfh-detail-tags">
-                                        <span class="wpvfh-dropdown-icon">🔖</span>
-                                        <?php esc_html_e( 'Tags', 'blazing-feedback' ); ?>
-                                    </label>
-                                    <input type="text" id="wpvfh-detail-tags" class="wpvfh-tags-input" placeholder="<?php esc_attr_e( 'Ex: urgent, homepage...', 'blazing-feedback' ); ?>">
-                                </div>
                             </div>
 
                             <!-- Commentaire -->
@@ -969,6 +961,18 @@ final class WP_Visual_Feedback_Hub {
                             <div class="wpvfh-detail-attachments" id="wpvfh-detail-attachments" hidden>
                                 <h4><?php esc_html_e( 'Pièces jointes', 'blazing-feedback' ); ?></h4>
                                 <div class="wpvfh-attachments-list" id="wpvfh-attachments-list"></div>
+                            </div>
+
+                            <!-- Tags -->
+                            <div class="wpvfh-detail-tags-section" id="wpvfh-detail-tags-section">
+                                <h4>
+                                    <span class="wpvfh-dropdown-icon">🔖</span>
+                                    <?php esc_html_e( 'Tags', 'blazing-feedback' ); ?>
+                                </h4>
+                                <div class="wpvfh-label-tags" id="wpvfh-detail-tags-labels"></div>
+                                <div class="wpvfh-tags-add-wrapper">
+                                    <input type="text" id="wpvfh-detail-tags" class="wpvfh-tags-input" placeholder="<?php esc_attr_e( 'Ajouter un tag (Entrée pour valider)', 'blazing-feedback' ); ?>">
+                                </div>
                             </div>
 
                             <!-- Screenshot -->

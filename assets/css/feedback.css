@@ -1264,6 +1264,38 @@ html body .wpvfh-pin-action.wpvfh-pin-delete:hover,
     font-size: 12px !important;
 }
 
+/* Section Tags dans les détails */
+.wpvfh-detail-tags-section {
+    margin: 16px 0 !important;
+    padding: 12px !important;
+    background: var(--wpvfh-bg-light) !important;
+    border-radius: var(--wpvfh-radius) !important;
+    border: 1px solid var(--wpvfh-border) !important;
+}
+
+.wpvfh-detail-tags-section h4 {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0 0 10px 0 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--wpvfh-text) !important;
+}
+
+.wpvfh-detail-tags-section .wpvfh-label-tags {
+    margin-bottom: 10px !important;
+}
+
+.wpvfh-tags-add-wrapper {
+    display: flex !important;
+    gap: 8px !important;
+}
+
+.wpvfh-tags-add-wrapper .wpvfh-tags-input {
+    flex: 1 !important;
+}
+
 /* Labels dans les éléments de liste (wpvfh-pin-item) */
 .wpvfh-pin-item-labels {
     display: flex !important;

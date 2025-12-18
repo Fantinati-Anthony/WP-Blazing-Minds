@@ -413,16 +413,17 @@
                 });
             }
 
-            // Changement de tags (vue détails) - avec debounce
+            // Ajout de tags avec la touche Entrée (vue détails)
             if (this.elements.detailTags) {
-                let tagsTimeout;
-                this.elements.detailTags.addEventListener('input', (e) => {
-                    clearTimeout(tagsTimeout);
-                    tagsTimeout = setTimeout(() => {
-                        if (this.state.currentFeedbackId) {
-                            this.updateFeedbackMeta(this.state.currentFeedbackId, 'tags', e.target.value);
+                this.elements.detailTags.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const newTag = e.target.value.trim();
+                        if (newTag && this.state.currentFeedbackId) {
+                            this.addTag(newTag);
+                            e.target.value = ''; // Vider le champ
                         }
-                    }, 500);
+                    }
                 });
             }
 
@@ -1832,8 +1833,9 @@
             if (this.elements.detailPrioritySelect) {
                 this.elements.detailPrioritySelect.value = feedback.priority || 'none';
             }
+            // Vider le champ d'ajout de tags (les tags existants sont affichés comme badges)
             if (this.elements.detailTags) {
-                this.elements.detailTags.value = feedback.tags || '';
+                this.elements.detailTags.value = '';
             }
 
             // Screenshot
@@ -2206,6 +2208,35 @@
         },
 
         /**
+         * Ajouter un tag au feedback courant
+         * @param {string} newTag - Tag à ajouter
+         */
+        addTag: function(newTag) {
+            if (!this.state.currentFeedbackId) return;
+
+            // Récupérer le feedback courant
+            const feedback = this.state.currentFeedbacks.find(f => f.id == this.state.currentFeedbackId);
+            if (!feedback) return;
+
+            // Ajouter le tag à la liste (éviter les doublons)
+            const tags = feedback.tags || '';
+            const tagList = tags.split(',').map(t => t.trim()).filter(t => t);
+            const tagLower = newTag.toLowerCase();
+
+            // Vérifier si le tag existe déjà (insensible à la casse)
+            if (tagList.some(t => t.toLowerCase() === tagLower)) {
+                this.showNotification('Ce tag existe déjà', 'warning');
+                return;
+            }
+
+            tagList.push(newTag);
+            const newTags = tagList.join(', ');
+
+            // Mettre à jour via l'API
+            this.updateFeedbackMeta(this.state.currentFeedbackId, 'tags', newTags);
+        },
+
+        /**
          * Supprimer un tag du feedback courant
          * @param {string} tagToRemove - Tag à supprimer
          */
@@ -2223,11 +2254,6 @@
 
             // Mettre à jour via l'API
             this.updateFeedbackMeta(this.state.currentFeedbackId, 'tags', newTags);
-
-            // Mettre à jour le champ input
-            if (this.elements.detailTags) {
-                this.elements.detailTags.value = newTags;
-            }
         },
 
         /**
