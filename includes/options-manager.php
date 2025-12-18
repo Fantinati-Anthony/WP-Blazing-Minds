@@ -1088,7 +1088,7 @@ class WPVFH_Options_Manager {
      * @param string $type Type d'option
      * @return array
      */
-    private static function get_items_by_type( $type ) {
+    public static function get_items_by_type( $type ) {
         switch ( $type ) {
             case 'types':
                 return self::get_types();
