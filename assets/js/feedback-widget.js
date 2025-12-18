@@ -2836,8 +2836,6 @@
                     const priority = zone.dataset.priority;
                     if (draggedFeedbackId && priority) {
                         this.updateFeedbackPriority(draggedFeedbackId, priority);
-                        // Re-rendre les listes après le changement
-                        setTimeout(() => this.renderPriorityLists(), 300);
                     }
                 });
             });
@@ -2873,8 +2871,6 @@
                     list.classList.remove('drag-over');
                     if (draggedFeedbackId) {
                         this.updateFeedbackPriority(draggedFeedbackId, priority);
-                        // Re-rendre les listes après le changement
-                        setTimeout(() => this.renderPriorityLists(), 300);
                     }
                 });
             });
@@ -2902,22 +2898,26 @@
          */
         updateFeedbackPriority: async function(feedbackId, priority) {
             try {
-                await this.apiRequest('POST', `feedbacks/${feedbackId}/priority`, {
-                    priority: priority
-                });
-
-                // Mettre à jour localement
+                // Mettre à jour localement d'abord pour un feedback immédiat
                 const feedback = this.state.currentFeedbacks.find(f => f.id == feedbackId);
                 if (feedback) {
                     feedback.priority = priority;
                 }
 
+                // Re-rendre immédiatement les listes
+                this.renderPriorityLists();
+
+                // Puis sauvegarder sur le serveur
+                await this.apiRequest('POST', `feedbacks/${feedbackId}/priority`, {
+                    priority: priority
+                });
+
                 this.showNotification('Priorité mise à jour', 'success');
             } catch (error) {
                 console.error('[Blazing Feedback] Erreur mise à jour priorité:', error);
                 this.showNotification('Erreur lors de la mise à jour', 'error');
-                // Re-rendre les listes en cas d'erreur
-                this.renderPriorityLists();
+                // Re-charger les feedbacks en cas d'erreur pour revenir à l'état serveur
+                this.loadExistingFeedbacks();
             }
         },
 
