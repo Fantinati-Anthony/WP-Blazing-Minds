@@ -717,3 +717,123 @@
     background: #f9f9f9;
     border-radius: 0 0 8px 8px;
 }
+
+/* Emoji Input Wrapper */
+.wpvfh-emoji-input-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wpvfh-emoji-input-wrapper .wpvfh-emoji-input {
+    width: 60px;
+    text-align: center;
+    font-size: 24px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.wpvfh-emoji-picker-btn {
+    padding: 0 8px !important;
+    height: 36px !important;
+}
+
+.wpvfh-emoji-picker-btn .dashicons {
+    line-height: 1.5;
+}
+
+/* Emoji Picker Popup */
+.wpvfh-emoji-picker {
+    display: none;
+    position: absolute;
+    z-index: 100001;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    width: 320px;
+    max-height: 350px;
+    overflow: hidden;
+}
+
+.wpvfh-emoji-picker.active {
+    display: block;
+}
+
+.wpvfh-emoji-picker-header {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    background: #f9f9f9;
+}
+
+.wpvfh-emoji-tabs {
+    display: flex;
+    gap: 4px;
+}
+
+.wpvfh-emoji-tab {
+    flex: 1;
+    padding: 8px 4px;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.15s;
+}
+
+.wpvfh-emoji-tab:hover {
+    background: #e0e0e0;
+}
+
+.wpvfh-emoji-tab.active {
+    background: #2271b1;
+}
+
+.wpvfh-emoji-picker-content {
+    padding: 8px;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.wpvfh-emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+}
+
+.wpvfh-emoji-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.15s, transform 0.1s;
+}
+
+.wpvfh-emoji-item:hover {
+    background: #f0f6fc;
+    transform: scale(1.2);
+}
+
+/* Scrollbar for emoji picker */
+.wpvfh-emoji-picker-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.wpvfh-emoji-picker-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.wpvfh-emoji-picker-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.wpvfh-emoji-picker-content::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}

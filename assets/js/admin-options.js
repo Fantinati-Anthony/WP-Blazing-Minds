@@ -177,10 +177,39 @@
                 self.deleteCustomGroup(slug);
             });
 
-            // ESC key to close modal
+            // ESC key to close modal and emoji picker
             $(document).on('keydown', function(e) {
                 if (e.which === 27) {
                     self.closeNewGroupModal();
+                    self.closeEmojiPicker();
+                }
+            });
+
+            // Emoji picker button click
+            $(document).on('click', '.wpvfh-emoji-picker-btn, .wpvfh-emoji-input', function(e) {
+                e.stopPropagation();
+                var $btn = $(this).closest('.wpvfh-emoji-input-wrapper').find('.wpvfh-emoji-picker-btn');
+                self.toggleEmojiPicker($btn);
+            });
+
+            // Emoji tab click
+            $(document).on('click', '.wpvfh-emoji-tab', function(e) {
+                e.stopPropagation();
+                var category = $(this).data('category');
+                self.switchEmojiCategory(category);
+            });
+
+            // Emoji item click
+            $(document).on('click', '.wpvfh-emoji-item', function(e) {
+                e.stopPropagation();
+                var emoji = $(this).text();
+                self.selectEmoji(emoji);
+            });
+
+            // Close emoji picker on click outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.wpvfh-emoji-picker, .wpvfh-emoji-picker-btn, .wpvfh-emoji-input').length) {
+                    self.closeEmojiPicker();
                 }
             });
         },
@@ -636,7 +665,7 @@
         deleteCustomGroup: function(slug) {
             var self = this;
 
-            if (!confirm('Êtes-vous sûr de vouloir supprimer ce groupe d\'options ? Cette action supprimera également tous les éléments de ce groupe.')) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce groupe de métadatas ? Cette action supprimera également toutes les métadatas de ce groupe.')) {
                 return;
             }
 
@@ -654,6 +683,93 @@
             }).fail(function() {
                 alert(wpvfhOptionsAdmin.i18n.error);
             });
+        },
+
+        /**
+         * Current emoji picker target input
+         */
+        currentEmojiTarget: null,
+
+        /**
+         * Toggle emoji picker
+         */
+        toggleEmojiPicker: function($btn) {
+            var $picker = $('#wpvfh-emoji-picker');
+            var $input = $btn.closest('.wpvfh-emoji-input-wrapper').find('.wpvfh-emoji-input');
+
+            if ($picker.hasClass('active') && this.currentEmojiTarget && this.currentEmojiTarget[0] === $input[0]) {
+                this.closeEmojiPicker();
+                return;
+            }
+
+            this.currentEmojiTarget = $input;
+
+            // Position the picker near the button
+            var btnOffset = $btn.offset();
+            var btnHeight = $btn.outerHeight();
+
+            $picker.css({
+                top: btnOffset.top + btnHeight + 5,
+                left: btnOffset.left - 260 // Position to the left of the button
+            });
+
+            // Make sure it doesn't go off screen
+            var windowWidth = $(window).width();
+            var pickerWidth = $picker.outerWidth();
+            var pickerLeft = parseInt($picker.css('left'));
+
+            if (pickerLeft < 10) {
+                $picker.css('left', 10);
+            }
+            if (pickerLeft + pickerWidth > windowWidth - 10) {
+                $picker.css('left', windowWidth - pickerWidth - 10);
+            }
+
+            $picker.addClass('active');
+
+            // Reset to first category
+            this.switchEmojiCategory('smileys');
+        },
+
+        /**
+         * Close emoji picker
+         */
+        closeEmojiPicker: function() {
+            $('#wpvfh-emoji-picker').removeClass('active');
+            this.currentEmojiTarget = null;
+        },
+
+        /**
+         * Switch emoji category
+         */
+        switchEmojiCategory: function(category) {
+            var $picker = $('#wpvfh-emoji-picker');
+
+            // Update active tab
+            $picker.find('.wpvfh-emoji-tab').removeClass('active');
+            $picker.find('.wpvfh-emoji-tab[data-category="' + category + '"]').addClass('active');
+
+            // Show the correct grid
+            $picker.find('.wpvfh-emoji-grid').hide();
+            $picker.find('.wpvfh-emoji-grid[data-category="' + category + '"]').show();
+        },
+
+        /**
+         * Select emoji
+         */
+        selectEmoji: function(emoji) {
+            if (this.currentEmojiTarget) {
+                this.currentEmojiTarget.val(emoji);
+
+                // Update preview
+                var $card = this.currentEmojiTarget.closest('.wpvfh-option-card');
+                this.updatePreview($card);
+
+                // Update the radio icon too
+                $card.find('.wpvfh-radio-icon').text(emoji);
+            }
+
+            this.closeEmojiPicker();
         }
     };
 
