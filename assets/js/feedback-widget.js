@@ -212,6 +212,11 @@
                     low: document.getElementById('wpvfh-priority-low-list'),
                     none: document.getElementById('wpvfh-priority-none-list'),
                 },
+                // Métadatas
+                tabMetadata: document.getElementById('wpvfh-tab-metadata'),
+                metadataSubtabs: document.querySelectorAll('.wpvfh-subtab'),
+                metadataSubtabContents: document.querySelectorAll('.wpvfh-metadata-subtab-content'),
+                metadataDropzones: document.querySelectorAll('.wpvfh-dropzone-metadata'),
                 // Recherche
                 searchBtn: document.getElementById('wpvfh-search-btn'),
                 searchModal: document.getElementById('wpvfh-search-modal'),
@@ -376,6 +381,13 @@
             if (this.elements.tabs) {
                 this.elements.tabs.forEach(tab => {
                     tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
+                });
+            }
+
+            // Sous-onglets métadatas
+            if (this.elements.metadataSubtabs) {
+                this.elements.metadataSubtabs.forEach(subtab => {
+                    subtab.addEventListener('click', () => this.switchMetadataSubtab(subtab.dataset.subtab));
                 });
             }
 
@@ -1178,6 +1190,9 @@
             if (this.elements.tabPriority) {
                 this.elements.tabPriority.classList.toggle('active', tabName === 'priority');
             }
+            if (this.elements.tabMetadata) {
+                this.elements.tabMetadata.classList.toggle('active', tabName === 'metadata');
+            }
 
             // Si on va sur la liste, charger les feedbacks
             if (tabName === 'list') {
@@ -1196,6 +1211,11 @@
             // Si on va sur la priorité, charger les feedbacks par priorité
             if (tabName === 'priority') {
                 this.renderPriorityLists();
+            }
+
+            // Si on va sur les métadatas, charger les listes
+            if (tabName === 'metadata') {
+                this.renderMetadataLists();
             }
         },
 
@@ -3462,6 +3482,268 @@
         savePriorityOrder: function(priority, list) {
             // L'ordre est géré localement pour le réarrangement visuel
             // La priorité est sauvegardée via updateFeedbackPriority
+        },
+
+        // ===========================================
+        // MÉTADATAS TAB METHODS
+        // ===========================================
+
+        /**
+         * Changer de sous-onglet métadatas
+         */
+        switchMetadataSubtab: function(subtabName) {
+            // Mettre à jour les boutons de sous-onglet
+            if (this.elements.metadataSubtabs) {
+                this.elements.metadataSubtabs.forEach(subtab => {
+                    subtab.classList.toggle('active', subtab.dataset.subtab === subtabName);
+                });
+            }
+
+            // Mettre à jour les contenus
+            if (this.elements.metadataSubtabContents) {
+                this.elements.metadataSubtabContents.forEach(content => {
+                    content.classList.toggle('active', content.dataset.group === subtabName);
+                });
+            }
+
+            // Re-rendre les listes pour ce groupe
+            this.renderMetadataListsForGroup(subtabName);
+        },
+
+        /**
+         * Rendre les listes de métadatas pour tous les groupes actifs
+         */
+        renderMetadataLists: function() {
+            // Trouver le sous-onglet actif
+            const activeSubtab = document.querySelector('.wpvfh-subtab.active');
+            if (activeSubtab) {
+                this.renderMetadataListsForGroup(activeSubtab.dataset.subtab);
+            }
+        },
+
+        /**
+         * Rendre les listes de métadatas pour un groupe spécifique
+         */
+        renderMetadataListsForGroup: function(groupSlug) {
+            const container = document.getElementById(`wpvfh-metadata-${groupSlug}`);
+            if (!container) return;
+
+            const sections = container.querySelectorAll('.wpvfh-metadata-section');
+            const feedbacks = this.state.currentFeedbacks || [];
+
+            // Déterminer le champ à utiliser selon le groupe
+            const fieldMap = {
+                'statuses': 'status',
+                'types': 'feedback_type',
+                'priorities': 'priority',
+                'tags': 'tags'
+            };
+            const field = fieldMap[groupSlug] || groupSlug;
+
+            // Vider toutes les listes
+            sections.forEach(section => {
+                const list = section.querySelector('.wpvfh-metadata-list');
+                if (list) list.innerHTML = '';
+            });
+
+            // Grouper les feedbacks par valeur de métadata
+            feedbacks.forEach(feedback => {
+                let value = feedback[field];
+
+                // Gestion spéciale pour les tags (multiple)
+                if (groupSlug === 'tags') {
+                    // Les tags sont souvent une chaîne séparée par virgules ou un tableau
+                    const tags = Array.isArray(value) ? value : (value ? String(value).split(',').map(t => t.trim()) : []);
+                    if (tags.length === 0) {
+                        this.addFeedbackToMetadataList(groupSlug, 'none', feedback);
+                    } else {
+                        tags.forEach(tag => {
+                            this.addFeedbackToMetadataList(groupSlug, tag, feedback);
+                        });
+                    }
+                } else {
+                    // Pour les autres groupes, une seule valeur
+                    if (!value || value === '' || value === 'none') {
+                        this.addFeedbackToMetadataList(groupSlug, 'none', feedback);
+                    } else {
+                        this.addFeedbackToMetadataList(groupSlug, value, feedback);
+                    }
+                }
+            });
+
+            // Initialiser le drag-drop
+            this.initMetadataDragDrop(groupSlug);
+        },
+
+        /**
+         * Ajouter un feedback à une liste de métadatas
+         */
+        addFeedbackToMetadataList: function(groupSlug, value, feedback) {
+            const listId = `wpvfh-metadata-${groupSlug}-${value}-list`;
+            const list = document.getElementById(listId);
+            if (!list) return;
+
+            const item = this.createMetadataItem(feedback);
+            list.appendChild(item);
+        },
+
+        /**
+         * Créer un élément de feedback pour la liste de métadatas
+         */
+        createMetadataItem: function(feedback) {
+            const item = document.createElement('div');
+            item.className = 'wpvfh-pin-item';
+            item.draggable = true;
+            item.dataset.feedbackId = feedback.id;
+
+            const status = feedback.status || 'new';
+            const statusLabel = BlazingFeedback.getStatusLabel(status);
+            const statusColor = BlazingFeedback.getStatusColor(status);
+
+            item.innerHTML = `
+                <div class="wpvfh-pin-header">
+                    <span class="wpvfh-pin-id">#${feedback.id}</span>
+                    <span class="wpvfh-pin-status" style="background: ${statusColor}15; color: ${statusColor};">${statusLabel}</span>
+                </div>
+                <div class="wpvfh-pin-content">
+                    <p class="wpvfh-pin-comment">${this.truncateText(feedback.comment || '', 80)}</p>
+                </div>
+            `;
+
+            // Clic pour voir les détails
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.wpvfh-drag-handle')) return;
+                this.showFeedbackDetails(feedback);
+            });
+
+            return item;
+        },
+
+        /**
+         * Initialiser le drag-drop pour les métadatas
+         */
+        initMetadataDragDrop: function(groupSlug) {
+            const container = document.getElementById(`wpvfh-metadata-${groupSlug}`);
+            if (!container) return;
+
+            const lists = container.querySelectorAll('.wpvfh-metadata-list');
+            const dropzones = container.querySelectorAll('.wpvfh-dropzone-metadata');
+            let draggedItem = null;
+            let draggedFeedbackId = null;
+
+            // Gestionnaires pour les items
+            lists.forEach(list => {
+                list.querySelectorAll('.wpvfh-pin-item').forEach(item => {
+                    item.addEventListener('dragstart', (e) => {
+                        draggedItem = item;
+                        draggedFeedbackId = item.dataset.feedbackId;
+                        item.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.dataTransfer.setData('text/plain', draggedFeedbackId);
+                    });
+
+                    item.addEventListener('dragend', () => {
+                        if (draggedItem) {
+                            draggedItem.classList.remove('dragging');
+                        }
+                        draggedItem = null;
+                        draggedFeedbackId = null;
+                        dropzones.forEach(dz => dz.classList.remove('drag-over'));
+                        lists.forEach(l => l.classList.remove('drag-over'));
+                    });
+                });
+
+                // Drop sur les listes
+                list.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    list.classList.add('drag-over');
+                });
+
+                list.addEventListener('dragleave', () => {
+                    list.classList.remove('drag-over');
+                });
+
+                list.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    list.classList.remove('drag-over');
+
+                    if (draggedItem && draggedFeedbackId) {
+                        const section = list.closest('.wpvfh-metadata-section');
+                        if (section) {
+                            const newValue = section.dataset.value;
+                            this.updateFeedbackMetadataValue(draggedFeedbackId, groupSlug, newValue);
+                        }
+                    }
+                });
+            });
+
+            // Gestionnaires pour les dropzones sticky
+            dropzones.forEach(dropzone => {
+                dropzone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    dropzone.classList.add('drag-over');
+                });
+
+                dropzone.addEventListener('dragleave', () => {
+                    dropzone.classList.remove('drag-over');
+                });
+
+                dropzone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropzone.classList.remove('drag-over');
+
+                    if (draggedItem && draggedFeedbackId) {
+                        const newValue = dropzone.dataset.value;
+                        this.updateFeedbackMetadataValue(draggedFeedbackId, groupSlug, newValue);
+                    }
+                });
+            });
+        },
+
+        /**
+         * Mettre à jour la valeur de métadata d'un feedback
+         */
+        updateFeedbackMetadataValue: async function(feedbackId, groupSlug, newValue) {
+            try {
+                // Mapper le groupe au champ approprié
+                const fieldMap = {
+                    'statuses': 'status',
+                    'types': 'feedback_type',
+                    'priorities': 'priority',
+                    'tags': 'tags'
+                };
+                const field = fieldMap[groupSlug] || groupSlug;
+
+                // Mettre à jour localement
+                const feedback = this.state.currentFeedbacks.find(f => f.id == feedbackId);
+                if (feedback) {
+                    feedback[field] = newValue === 'none' ? '' : newValue;
+                }
+
+                // Re-rendre immédiatement
+                this.renderMetadataListsForGroup(groupSlug);
+
+                // Sauvegarder sur le serveur
+                const data = {};
+                data[field] = newValue === 'none' ? '' : newValue;
+
+                // Utiliser l'endpoint approprié selon le type
+                if (field === 'status') {
+                    await this.apiRequest('POST', `feedbacks/${feedbackId}/status`, { status: newValue === 'none' ? 'new' : newValue });
+                } else if (field === 'priority') {
+                    await this.apiRequest('POST', `feedbacks/${feedbackId}/priority`, { priority: newValue === 'none' ? '' : newValue });
+                } else {
+                    await this.apiRequest('POST', `feedbacks/${feedbackId}`, data);
+                }
+
+                this.showNotification('Métadata mise à jour', 'success');
+            } catch (error) {
+                console.error('[Blazing Feedback] Erreur mise à jour métadata:', error);
+                this.showNotification('Erreur lors de la mise à jour', 'error');
+                this.loadExistingFeedbacks();
+            }
         },
 
         /**

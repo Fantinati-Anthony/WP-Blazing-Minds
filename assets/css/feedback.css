@@ -4552,6 +4552,184 @@ button#wpvfh-validate-page-btn {
     opacity: 1;
 }
 
+/* ==========================================================================
+   Onglet Métadatas - Sous-onglets
+   ========================================================================== */
+
+.wpvfh-subtabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px;
+    background: var(--wpvfh-bg-light);
+    border-bottom: 1px solid var(--wpvfh-border);
+    overflow-x: auto;
+    flex-wrap: nowrap;
+}
+
+.wpvfh-subtab {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 6px 12px !important;
+    background: transparent !important;
+    border: 1px solid var(--wpvfh-border) !important;
+    border-radius: 16px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: var(--wpvfh-text-light) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+.wpvfh-subtab:hover {
+    background: var(--wpvfh-border) !important;
+    color: var(--wpvfh-text) !important;
+}
+
+.wpvfh-subtab.active {
+    background: var(--wpvfh-primary) !important;
+    border-color: var(--wpvfh-primary) !important;
+    color: #fff !important;
+}
+
+.wpvfh-subtab-icon {
+    font-size: 12px;
+}
+
+.wpvfh-subtab-text {
+    font-size: 11px;
+}
+
+/* Contenu des sous-onglets */
+.wpvfh-metadata-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.wpvfh-metadata-subtab-content {
+    display: none;
+}
+
+.wpvfh-metadata-subtab-content.active {
+    display: block;
+}
+
+/* Dropzones des métadonnées */
+.wpvfh-metadata-dropzones {
+    display: flex;
+    gap: 6px;
+    padding: 10px 12px;
+    background: var(--wpvfh-bg-light);
+    border: 1px solid var(--wpvfh-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-radius: 5px;
+    margin: 12px;
+    flex-wrap: wrap;
+}
+
+.wpvfh-dropzone-metadata {
+    flex: 1 1 auto;
+    min-width: 80px;
+    padding: 8px 6px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px dashed transparent;
+    background: color-mix(in srgb, var(--dropzone-color, #6c757d) 10%, transparent);
+    color: var(--dropzone-color, #6c757d);
+    border-color: color-mix(in srgb, var(--dropzone-color, #6c757d) 30%, transparent);
+}
+
+.wpvfh-dropzone-metadata.drag-over {
+    background: color-mix(in srgb, var(--dropzone-color, #6c757d) 25%, transparent);
+    border-color: var(--dropzone-color, #6c757d);
+    transform: scale(1.02);
+}
+
+.wpvfh-dropzone-metadata .wpvfh-dropzone-label {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Sections des métadonnées */
+.wpvfh-metadata-sections {
+    padding: 12px;
+}
+
+.wpvfh-metadata-section {
+    margin-bottom: 16px;
+}
+
+.wpvfh-metadata-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--section-color, #95a5a6) 10%, transparent);
+    color: var(--section-color, #95a5a6);
+    border-left: 3px solid var(--section-color, #95a5a6);
+}
+
+.wpvfh-metadata-list {
+    min-height: 40px;
+    border: 2px dashed var(--wpvfh-border);
+    border-radius: 8px;
+    padding: 8px;
+    transition: all 0.2s ease;
+}
+
+.wpvfh-metadata-list.drag-over {
+    border-color: var(--wpvfh-primary);
+    background: rgba(52, 152, 219, 0.05);
+}
+
+.wpvfh-metadata-list .wpvfh-pin-item {
+    cursor: grab;
+    margin-bottom: 8px;
+}
+
+.wpvfh-metadata-list .wpvfh-pin-item:last-child {
+    margin-bottom: 0;
+}
+
+.wpvfh-metadata-list .wpvfh-pin-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.wpvfh-metadata-list:empty::after {
+    content: 'Déposez des feedbacks ici';
+    display: block;
+    text-align: center;
+    color: #adb5bd;
+    font-size: 12px;
+    padding: 12px;
+}
+
+/* Fallback pour navigateurs sans color-mix */
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+    .wpvfh-dropzone-metadata {
+        background: rgba(108, 117, 125, 0.1);
+        border-color: rgba(108, 117, 125, 0.3);
+    }
+    .wpvfh-dropzone-metadata.drag-over {
+        background: rgba(108, 117, 125, 0.25);
+    }
+    .wpvfh-metadata-title {
+        background: rgba(149, 165, 166, 0.1);
+    }
+}
+
 /* =====================================================
    Header Actions & Search Button
    ===================================================== */
