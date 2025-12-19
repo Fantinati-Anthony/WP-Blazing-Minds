@@ -186,10 +186,16 @@ $priority_settings = WPVFH_Options_Manager::get_group_settings( 'priorities' );
 				</button>
 			</div>
 
-			<!-- Bouton repositionner (visible si le feedback a une position) -->
-			<div class="wpvfh-reposition-section" id="wpvfh-reposition-section" hidden>
+			<!-- Bouton ciblage/repositionnement -->
+			<div class="wpvfh-target-section" id="wpvfh-target-section">
 				<hr class="wpvfh-separator">
-				<button type="button" class="wpvfh-btn wpvfh-btn-secondary" id="wpvfh-reposition-feedback-btn">
+				<!-- Bouton ajouter un ciblage (si pas de position) -->
+				<button type="button" class="wpvfh-btn wpvfh-btn-secondary" id="wpvfh-add-target-btn" hidden>
+					<span class="wpvfh-btn-emoji">🎯</span>
+					<?php esc_html_e( 'Ajouter un ciblage', 'blazing-feedback' ); ?>
+				</button>
+				<!-- Bouton repositionner (si position existante) -->
+				<button type="button" class="wpvfh-btn wpvfh-btn-secondary" id="wpvfh-reposition-feedback-btn" hidden>
 					<span class="wpvfh-btn-emoji">📍</span>
 					<?php esc_html_e( 'Repositionner le marqueur', 'blazing-feedback' ); ?>
 				</button>

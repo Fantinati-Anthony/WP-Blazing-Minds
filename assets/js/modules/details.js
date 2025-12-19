@@ -20,18 +20,26 @@
         },
 
         /**
-         * Attacher les événements de repositionnement
+         * Attacher les événements de ciblage/repositionnement
          */
         bindRepositionEvents: function() {
+            // Bouton ajouter un ciblage
+            const addTargetBtn = document.getElementById('wpvfh-add-target-btn');
+            if (addTargetBtn) {
+                addTargetBtn.addEventListener('click', () => {
+                    this.startTargeting(this.widget.state.currentFeedbackId, false);
+                });
+            }
+
             // Bouton repositionner
             const repositionBtn = document.getElementById('wpvfh-reposition-feedback-btn');
             if (repositionBtn) {
                 repositionBtn.addEventListener('click', () => {
-                    this.startRepositioning(this.widget.state.currentFeedbackId);
+                    this.startTargeting(this.widget.state.currentFeedbackId, true);
                 });
             }
 
-            // Écouter l'événement de placement du pin (mode repositionnement)
+            // Écouter l'événement de placement du pin (mode ciblage/repositionnement)
             document.addEventListener('blazing-feedback:pin-placed', (e) => {
                 if (this.state.repositioningFeedbackId) {
                     this.handleNewPosition(e.detail);
@@ -44,7 +52,7 @@
                     // Annulé sans nouvelle position
                     this.state.repositioningFeedbackId = null;
                     if (this.widget.modules.notifications) {
-                        this.widget.modules.notifications.show('Repositionnement annulé', 'info');
+                        this.widget.modules.notifications.show('Ciblage annulé', 'info');
                     }
                 }
             });
@@ -129,20 +137,25 @@
                 }, 300);
             }
 
-            // Afficher/masquer le bouton repositionner
-            const repositionSection = document.getElementById('wpvfh-reposition-section');
-            if (repositionSection) {
-                repositionSection.hidden = !hasPosition;
+            // Afficher le bon bouton selon la présence d'une position
+            const addTargetBtn = document.getElementById('wpvfh-add-target-btn');
+            const repositionBtn = document.getElementById('wpvfh-reposition-feedback-btn');
+            if (addTargetBtn) {
+                addTargetBtn.hidden = hasPosition;
+            }
+            if (repositionBtn) {
+                repositionBtn.hidden = !hasPosition;
             }
         },
 
         /**
-         * Démarrer le mode repositionnement
-         * @param {number} feedbackId - ID du feedback à repositionner
+         * Démarrer le mode ciblage/repositionnement
+         * @param {number} feedbackId - ID du feedback à cibler
+         * @param {boolean} isReposition - true si repositionnement, false si nouveau ciblage
          */
-        startRepositioning: function(feedbackId) {
+        startTargeting: function(feedbackId, isReposition) {
             if (!feedbackId) {
-                console.warn('[Blazing Feedback] Pas de feedback à repositionner');
+                console.warn('[Blazing Feedback] Pas de feedback à cibler');
                 return;
             }
 
@@ -153,15 +166,16 @@
                 this.widget.modules.panel.closePanel();
             }
 
-            // Activer le mode annotation en mode repositionnement
+            // Activer le mode annotation
             if (window.BlazingAnnotation) {
                 window.BlazingAnnotation.activate({
-                    reposition: true,
+                    reposition: isReposition,
                     feedbackId: feedbackId,
                 });
             }
 
-            console.log('[Blazing Feedback] Mode repositionnement activé pour feedback #' + feedbackId);
+            const action = isReposition ? 'repositionnement' : 'ciblage';
+            console.log('[Blazing Feedback] Mode ' + action + ' activé pour feedback #' + feedbackId);
         },
 
         /**
@@ -208,15 +222,15 @@
                 }
 
                 if (this.widget.modules.notifications) {
-                    this.widget.modules.notifications.show('Position mise à jour', 'success');
+                    this.widget.modules.notifications.show('Ciblage enregistré', 'success');
                 }
 
-                console.log('[Blazing Feedback] Feedback #' + feedbackId + ' repositionné avec succès');
+                console.log('[Blazing Feedback] Feedback #' + feedbackId + ' ciblé avec succès');
 
             } catch (error) {
-                console.error('[Blazing Feedback] Erreur lors du repositionnement:', error);
+                console.error('[Blazing Feedback] Erreur lors du ciblage:', error);
                 if (this.widget.modules.notifications) {
-                    this.widget.modules.notifications.show('Erreur lors du repositionnement', 'error');
+                    this.widget.modules.notifications.show('Erreur lors du ciblage', 'error');
                 }
             }
         },

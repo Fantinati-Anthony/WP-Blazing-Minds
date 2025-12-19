@@ -255,9 +255,15 @@
                 // Mettre à jour le texte du hint selon le mode
                 const hintText = this.elements.overlay.querySelector('.wpvfh-hint-text');
                 if (hintText) {
-                    if (this.state.isRepositionMode) {
-                        hintText.textContent = 'Cliquez pour repositionner le marqueur';
+                    if (this.state.repositionFeedbackId) {
+                        // Mode ciblage d'un feedback existant
+                        if (this.state.isRepositionMode) {
+                            hintText.textContent = 'Cliquez pour repositionner le marqueur';
+                        } else {
+                            hintText.textContent = 'Cliquez pour cibler un élément';
+                        }
                     } else {
+                        // Mode création nouveau feedback
                         hintText.textContent = 'Cliquez pour placer un marqueur';
                     }
                 }
