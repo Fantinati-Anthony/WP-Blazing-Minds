@@ -1262,38 +1262,22 @@ class WPVFH_REST_API {
             $path = '/';
         }
 
+        // Préparer les arguments pour la requête
         $args = array(
-            'post_type'      => WPVFH_CPT_Feedback::POST_TYPE,
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'meta_query'     => array(
-                array(
-                    'key'     => '_wpvfh_url',
-                    'value'   => $path,
-                    'compare' => 'LIKE',
-                ),
-            ),
+            'include_resolved' => $include_resolved,
         );
-
-        // Exclure les feedbacks résolus/rejetés si demandé
-        if ( ! $include_resolved ) {
-            $args['meta_query'][] = array(
-                'key'     => '_wpvfh_status',
-                'value'   => array( 'resolved', 'rejected' ),
-                'compare' => 'NOT IN',
-            );
-        }
 
         // Restreindre aux feedbacks de l'utilisateur si pas de capacité read_others_feedback
         if ( ! current_user_can( 'read_others_feedback' ) ) {
-            $args['author'] = get_current_user_id();
+            $args['user_id'] = get_current_user_id();
         }
 
-        $query = new WP_Query( $args );
+        // Utiliser la table personnalisée via WPVFH_Database
+        $raw_feedbacks = WPVFH_Database::get_feedbacks_by_page_path( $path, $args );
         $feedbacks = array();
 
-        foreach ( $query->posts as $post ) {
-            $feedbacks[] = WPVFH_CPT_Feedback::get_feedback_data( $post );
+        foreach ( $raw_feedbacks as $feedback ) {
+            $feedbacks[] = WPVFH_CPT_Feedback::get_feedback_data( $feedback );
         }
 
         return new WP_REST_Response( $feedbacks );
