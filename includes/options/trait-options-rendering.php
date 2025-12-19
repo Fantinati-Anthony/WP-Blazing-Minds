@@ -580,20 +580,4 @@ trait WPVFH_Options_Rendering_Trait {
         </div>
         <?php
     }
-
-    /**
-     * Obtenir toutes les options pour le frontend
-     * Filtre par utilisateur et options activées
-     *
-     * @since 1.1.0
-     * @param int|null $user_id ID utilisateur (null = courant)
-     * @return array
-     */
-    public static function get_all_options_for_frontend( $user_id = null ) {
-        return array(
-            'statuses'   => array_values( self::filter_accessible_options( self::get_statuses(), $user_id ) ),
-            'types'      => array_values( self::filter_accessible_options( self::get_types(), $user_id ) ),
-            'priorities' => array_values( self::filter_accessible_options( self::get_priorities(), $user_id ) ),
-            'tags'       => array_values( self::filter_accessible_options( self::get_predefined_tags(), $user_id ) ),
-        );
-    }}
+}
