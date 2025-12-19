@@ -145,6 +145,16 @@ class WPVFH_Admin_UI {
             )
         );
 
+        register_setting(
+            'wpvfh_general_settings',
+            'wpvfh_post_feedback_action',
+            array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_key',
+                'default'           => 'close',
+            )
+        );
+
         // ========================================
         // Onglet Graphisme
         // ========================================
@@ -1062,6 +1072,12 @@ class WPVFH_Admin_UI {
                     <th scope="row"><?php esc_html_e( 'Pages actives', 'blazing-feedback' ); ?></th>
                     <td>
                         <?php self::render_pages_field(); ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'Après ajout d\'un feedback', 'blazing-feedback' ); ?></th>
+                    <td>
+                        <?php self::render_post_feedback_action_field(); ?>
                     </td>
                 </tr>
             </table>
@@ -2593,6 +2609,31 @@ class WPVFH_Admin_UI {
         </label>
         <p class="description">
             <?php esc_html_e( 'Attention : cela peut générer du spam. Utilisez avec précaution.', 'blazing-feedback' ); ?>
+        </p>
+        <?php
+    }
+
+    /**
+     * Champ Action après ajout d'un feedback
+     *
+     * @since 1.9.0
+     * @return void
+     */
+    public static function render_post_feedback_action_field() {
+        $value = get_option( 'wpvfh_post_feedback_action', 'close' );
+        ?>
+        <fieldset>
+            <label style="display: block; margin-bottom: 8px;">
+                <input type="radio" name="wpvfh_post_feedback_action" value="close" <?php checked( $value, 'close' ); ?>>
+                <?php esc_html_e( 'Fermer le volet latéral', 'blazing-feedback' ); ?>
+            </label>
+            <label style="display: block;">
+                <input type="radio" name="wpvfh_post_feedback_action" value="list" <?php checked( $value, 'list' ); ?>>
+                <?php esc_html_e( 'Ouvrir la liste des feedbacks', 'blazing-feedback' ); ?>
+            </label>
+        </fieldset>
+        <p class="description">
+            <?php esc_html_e( 'Choisissez ce qui se passe après l\'envoi d\'un feedback.', 'blazing-feedback' ); ?>
         </p>
         <?php
     }

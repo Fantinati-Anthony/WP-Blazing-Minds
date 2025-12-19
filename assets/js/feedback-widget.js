@@ -1842,11 +1842,19 @@
                         window.BlazingAnnotation.createPin(response);
                     }
 
-                    // Fermer le panel
-                    this.closePanel();
-
                     // Ajouter à la liste locale
                     this.state.currentFeedbacks.push(response);
+
+                    // Action post-feedback selon la configuration
+                    const postAction = this.config.postFeedbackAction || 'close';
+                    if (postAction === 'list') {
+                        // Ouvrir la liste des feedbacks
+                        this.resetForm();
+                        this.switchTab('list');
+                    } else {
+                        // Fermer le panel (comportement par défaut)
+                        this.closePanel();
+                    }
 
                     // Mettre à jour les compteurs
                     const count = this.state.currentFeedbacks.length;
