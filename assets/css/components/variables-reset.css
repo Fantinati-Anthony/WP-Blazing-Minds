@@ -12,6 +12,7 @@
    ========================================================================== */
 
 :root {
+    /* Couleurs */
     --wpvfh-primary: #FE5100;
     --wpvfh-primary-hover: #E04800;
     --wpvfh-secondary: #263e4b;
@@ -24,8 +25,18 @@
     --wpvfh-bg-light: #f8f9fa;
     --wpvfh-border: #e0e4e8;
     --wpvfh-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+    /* Border Radius */
+    --wpvfh-radius-panel: 12px;
     --wpvfh-radius: 8px;
     --wpvfh-radius-sm: 4px;
+    --wpvfh-radius-pin-item: 10px;
+    --wpvfh-radius-badge: 12px;
+    --wpvfh-radius-button: 8px;
+    --wpvfh-radius-input: 6px;
+    --wpvfh-radius-modal: 12px;
+
+    /* Autres */
     --wpvfh-transition: 0.2s ease;
     --wpvfh-z-index: 999999;
 }

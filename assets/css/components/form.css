@@ -66,7 +66,7 @@
     width: 100% !important;
     padding: 8px 10px !important;
     border: 1px solid var(--wpvfh-border) !important;
-    border-radius: var(--wpvfh-radius-sm) !important;
+    border-radius: var(--wpvfh-radius-input) !important;
     background: var(--wpvfh-bg) !important;
     color: var(--wpvfh-text) !important;
     font-size: 13px !important;
@@ -88,7 +88,7 @@
     width: 100% !important;
     padding: 8px 10px !important;
     border: 1px solid var(--wpvfh-border) !important;
-    border-radius: var(--wpvfh-radius-sm) !important;
+    border-radius: var(--wpvfh-radius-input) !important;
     background: var(--wpvfh-bg) !important;
     color: var(--wpvfh-text) !important;
     font-size: 13px !important;

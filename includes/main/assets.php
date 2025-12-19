@@ -128,6 +128,12 @@ function wpvfh_enqueue_frontend_assets() {
 		wp_add_inline_style( 'wpvfh-feedback', $custom_colors_css );
 	}
 
+	// Border-radius personnalisés
+	$custom_radius_css = wpvfh_get_custom_border_radius_css();
+	if ( ! empty( $custom_radius_css ) ) {
+		wp_add_inline_style( 'wpvfh-feedback', $custom_radius_css );
+	}
+
 	// Passer les données au JavaScript
 	wp_localize_script( 'wpvfh-widget', 'wpvfhData', wpvfh_get_frontend_data() );
 
@@ -170,6 +176,12 @@ function wpvfh_enqueue_admin_assets( $hook ) {
 	$custom_colors_css = wpvfh_get_custom_colors_css();
 	if ( ! empty( $custom_colors_css ) ) {
 		wp_add_inline_style( 'wpvfh-admin', $custom_colors_css );
+	}
+
+	// Border-radius personnalisés
+	$custom_radius_css = wpvfh_get_custom_border_radius_css();
+	if ( ! empty( $custom_radius_css ) ) {
+		wp_add_inline_style( 'wpvfh-admin', $custom_radius_css );
 	}
 
 	// Modules du widget (dans l'ordre de dépendance)
@@ -279,6 +291,53 @@ function wpvfh_get_custom_colors_css() {
 	$css .= '--wpvfh-bg: ' . esc_attr( $colors['bg'] ) . ';';
 	$css .= '--wpvfh-bg-light: ' . esc_attr( $colors['bg_light'] ) . ';';
 	$css .= '--wpvfh-border: ' . esc_attr( $colors['border'] ) . ';';
+	$css .= '}';
+
+	return $css;
+}
+
+/**
+ * Générer le CSS inline pour les border-radius personnalisés
+ *
+ * @since 1.9.0
+ * @return string
+ */
+function wpvfh_get_custom_border_radius_css() {
+	$defaults = array(
+		'wpvfh_radius_panel'    => 12,
+		'wpvfh_radius_general'  => 8,
+		'wpvfh_radius_small'    => 4,
+		'wpvfh_radius_pin_item' => 10,
+		'wpvfh_radius_badge'    => 12,
+		'wpvfh_radius_button'   => 8,
+		'wpvfh_radius_input'    => 6,
+		'wpvfh_radius_modal'    => 12,
+	);
+
+	$values = array();
+	$has_custom = false;
+
+	foreach ( $defaults as $option_name => $default ) {
+		$value = get_option( $option_name, $default );
+		$values[ $option_name ] = intval( $value );
+		if ( intval( $value ) !== $default ) {
+			$has_custom = true;
+		}
+	}
+
+	if ( ! $has_custom ) {
+		return '';
+	}
+
+	$css = ':root {';
+	$css .= '--wpvfh-radius-panel: ' . $values['wpvfh_radius_panel'] . 'px;';
+	$css .= '--wpvfh-radius: ' . $values['wpvfh_radius_general'] . 'px;';
+	$css .= '--wpvfh-radius-sm: ' . $values['wpvfh_radius_small'] . 'px;';
+	$css .= '--wpvfh-radius-pin-item: ' . $values['wpvfh_radius_pin_item'] . 'px;';
+	$css .= '--wpvfh-radius-badge: ' . $values['wpvfh_radius_badge'] . 'px;';
+	$css .= '--wpvfh-radius-button: ' . $values['wpvfh_radius_button'] . 'px;';
+	$css .= '--wpvfh-radius-input: ' . $values['wpvfh_radius_input'] . 'px;';
+	$css .= '--wpvfh-radius-modal: ' . $values['wpvfh_radius_modal'] . 'px;';
 	$css .= '}';
 
 	return $css;

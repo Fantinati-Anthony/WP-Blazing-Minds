@@ -202,7 +202,7 @@
     align-items: center;
     gap: 12px;
     padding: 0px;
-    border-radius: 10px;
+    border-radius: var(--wpvfh-radius-pin-item);
     margin-bottom: 12px;
     background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(243, 156, 18, 0.05) 100%);
     border: 2px solid rgba(243, 156, 18, 0.3);
@@ -238,7 +238,7 @@ button.wpvfh-btn-validate {
     all: revert !important;
     width: 100% !important;
     padding: 14px 20px !important;
-    border-radius: 10px !important;
+    border-radius: var(--wpvfh-radius-button) !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -310,7 +310,7 @@ button#wpvfh-validate-page-btn {
 .wpvfh-attachments-label .wpvfh-optional-badge {
     background: #e9ecef;
     padding: 2px 8px;
-    border-radius: 10px;
+    border-radius: var(--wpvfh-radius-badge);
     font-size: 10px;
     font-weight: 500;
     color: #6c757d;

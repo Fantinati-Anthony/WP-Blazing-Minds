@@ -419,6 +419,32 @@ trait WPVFH_Admin_Settings {
         }
 
         // ========================================
+        // Border Radius (Arrondis)
+        // ========================================
+        $border_radius_settings = array(
+            'wpvfh_radius_panel'    => 12,
+            'wpvfh_radius_general'  => 8,
+            'wpvfh_radius_small'    => 4,
+            'wpvfh_radius_pin_item' => 10,
+            'wpvfh_radius_badge'    => 12,
+            'wpvfh_radius_button'   => 8,
+            'wpvfh_radius_input'    => 6,
+            'wpvfh_radius_modal'    => 12,
+        );
+
+        foreach ( $border_radius_settings as $option_name => $default ) {
+            register_setting(
+                'wpvfh_general_settings',
+                $option_name,
+                array(
+                    'type'              => 'integer',
+                    'sanitize_callback' => 'absint',
+                    'default'           => $default,
+                )
+            );
+        }
+
+        // ========================================
         // Onglet Notifications
         // ========================================
         register_setting(
