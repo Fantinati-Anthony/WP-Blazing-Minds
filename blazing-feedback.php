@@ -487,6 +487,7 @@ final class WP_Visual_Feedback_Hub {
             'canManage'      => current_user_can( 'manage_feedback' ),
             'pluginUrl'      => WPVFH_PLUGIN_URL,
             'screenshotEnabled' => $this->is_screenshot_enabled(),
+            'postFeedbackAction' => get_option( 'wpvfh_post_feedback_action', 'close' ),
             // Mode de thème
             'themeMode'      => $theme_mode,
             // Style du bouton
