@@ -1,7 +1,26 @@
 /**
- * Blazing Feedback - Module Core
+ * État, éléments, initialisation, thème
+ * 
+ * Reference file for feedback-widget.js lines 1-330
+ * See main file: assets/js/feedback-widget.js
+ * 
+ * Methods included:
+ * - 
+init * - applyThemeColors * - moveFixedElementsToBody * - cacheElements
+ * 
+ * @package Blazing_Feedback
+ */
+
+/* 
+ * To view this section, read feedback-widget.js with:
+ * offset=1, limit=330
+ */
+
+/**
+ * Blazing Feedback - Widget Principal
  *
- * Configuration, état, éléments DOM, initialisation, thème
+ * Contrôleur principal qui orchestre les modules
+ * Screenshot et Annotation
  *
  * @package Blazing_Feedback
  * @since 1.0.0
@@ -11,29 +30,69 @@
     'use strict';
 
     /**
-     * Module Core
-     * Gère l'initialisation, le thème, le cache des éléments DOM
+     * Widget Blazing Feedback
+     * @namespace
      */
-    const CoreModule = {
+    const BlazingFeedback = {
 
         /**
-         * Initialiser le module core
-         * @param {Object} widget - Instance du widget principal
+         * Configuration depuis WordPress
+         * @type {Object}
          */
-        init: function(widget) {
-            this.cacheElements(widget);
-            this.moveFixedElementsToBody(widget);
-            this.applyThemeColors(widget);
+        config: window.wpvfhData || {},
 
-            console.log('[Blazing Feedback Core] Module initialisé');
+        /**
+         * État du widget
+         * @type {Object}
+         */
+        state: {
+            isOpen: false,
+            isSubmitting: false,
+            feedbackMode: 'view',      // 'view' | 'create' | 'annotate'
+            currentFeedbacks: [],
+            screenshotData: null,
+            pinPosition: null,
+            currentFeedbackId: null,   // ID du feedback en cours de visualisation
+            currentFilter: 'all',       // Filtre actif
+            allPages: [],              // Liste de toutes les pages avec feedbacks
+            attachments: [],           // Fichiers attachés au formulaire
+            mentionUsers: [],          // Liste des utilisateurs pour mentions
+            feedbackToDelete: null,    // ID du feedback à supprimer (modal)
+        },
+
+        /**
+         * Éléments DOM
+         * @type {Object}
+         */
+        elements: {},
+
+        /**
+         * Initialiser le widget
+         * @returns {void}
+         */
+        init: function() {
+            // Vérifier les permissions
+            if (!this.config.canCreate && !this.config.canModerate) {
+                console.log('[Blazing Feedback] Utilisateur sans permissions');
+                return;
+            }
+
+            this.cacheElements();
+            this.moveFixedElementsToBody();
+            this.applyThemeColors();
+            this.bindEvents();
+            this.loadExistingFeedbacks();
+            this.checkOpenFeedbackParam();
+
+            console.log('[Blazing Feedback] Widget initialisé');
         },
 
         /**
          * Appliquer les couleurs du thème selon le mode choisi
-         * @param {Object} widget - Instance du widget
+         * @returns {void}
          */
-        applyThemeColors: function(widget) {
-            const themeMode = widget.config.themeMode || 'system';
+        applyThemeColors: function() {
+            const themeMode = this.config.themeMode || 'system';
             let colors;
             let logo;
 
@@ -46,11 +105,11 @@
 
             // Sélectionner les couleurs selon le mode
             if (effectiveMode === 'dark') {
-                colors = widget.config.colorsDark || {};
-                logo = widget.config.panelLogos?.dark;
+                colors = this.config.colorsDark || {};
+                logo = this.config.panelLogos?.dark;
             } else {
-                colors = widget.config.colorsLight || {};
-                logo = widget.config.panelLogos?.light;
+                colors = this.config.colorsLight || {};
+                logo = this.config.panelLogos?.light;
             }
 
             // Appliquer les variables CSS
@@ -78,8 +137,8 @@
             root.style.setProperty('--wpvfh-footer-btn-visibility-hover', colors.footerBtnVisibilityHover || '#2980b9');
 
             // Mettre à jour le logo du panneau
-            if (logo && widget.elements.panel) {
-                const panelLogo = widget.elements.panel.querySelector('.wpvfh-panel-logo');
+            if (logo && this.elements.panel) {
+                const panelLogo = this.elements.panel.querySelector('.wpvfh-panel-logo');
                 if (panelLogo) {
                     panelLogo.src = logo;
                 }
@@ -92,50 +151,50 @@
             // Écouter les changements de préférence système si en mode système
             if (themeMode === 'system' && window.matchMedia) {
                 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                    this.applyThemeColors(widget);
+                    this.applyThemeColors();
                 });
             }
 
-            console.log('[Blazing Feedback Core] Thème appliqué:', effectiveMode);
+            console.log('[Blazing Feedback] Thème appliqué:', effectiveMode);
         },
 
         /**
          * Déplacer les éléments fixed vers body pour éviter les problèmes de stacking context
-         * @param {Object} widget - Instance du widget
+         * @returns {void}
          */
-        moveFixedElementsToBody: function(widget) {
+        moveFixedElementsToBody: function() {
             // Déplacer le bouton coin vers body
-            if (widget.elements.toggleBtn && widget.elements.toggleBtn.parentNode !== document.body) {
-                document.body.appendChild(widget.elements.toggleBtn);
-                console.log('[Blazing Feedback Core] Bouton coin déplacé vers body');
+            if (this.elements.toggleBtn && this.elements.toggleBtn.parentNode !== document.body) {
+                document.body.appendChild(this.elements.toggleBtn);
+                console.log('[Blazing Feedback] Bouton coin déplacé vers body');
             }
 
             // Déplacer le panel vers body pour éviter les problèmes avec transform/filter des parents
-            if (widget.elements.panel && widget.elements.panel.parentNode !== document.body) {
-                document.body.appendChild(widget.elements.panel);
-                console.log('[Blazing Feedback Core] Panel déplacé vers body');
+            if (this.elements.panel && this.elements.panel.parentNode !== document.body) {
+                document.body.appendChild(this.elements.panel);
+                console.log('[Blazing Feedback] Panel déplacé vers body');
             }
 
             // Déplacer l'overlay vers body aussi
-            if (widget.elements.sidebarOverlay && widget.elements.sidebarOverlay.parentNode !== document.body) {
-                document.body.appendChild(widget.elements.sidebarOverlay);
+            if (this.elements.sidebarOverlay && this.elements.sidebarOverlay.parentNode !== document.body) {
+                document.body.appendChild(this.elements.sidebarOverlay);
             }
 
             // Déplacer les modals vers body
-            if (widget.elements.confirmModal && widget.elements.confirmModal.parentNode !== document.body) {
-                document.body.appendChild(widget.elements.confirmModal);
+            if (this.elements.confirmModal && this.elements.confirmModal.parentNode !== document.body) {
+                document.body.appendChild(this.elements.confirmModal);
             }
-            if (widget.elements.validateModal && widget.elements.validateModal.parentNode !== document.body) {
-                document.body.appendChild(widget.elements.validateModal);
+            if (this.elements.validateModal && this.elements.validateModal.parentNode !== document.body) {
+                document.body.appendChild(this.elements.validateModal);
             }
         },
 
         /**
          * Mettre en cache les éléments DOM
-         * @param {Object} widget - Instance du widget
+         * @returns {void}
          */
-        cacheElements: function(widget) {
-            widget.elements = {
+        cacheElements: function() {
+            this.elements = {
                 container: document.getElementById('wpvfh-container'),
                 toggleBtn: document.getElementById('wpvfh-toggle-btn'),
                 panel: document.getElementById('wpvfh-panel'),
@@ -280,28 +339,10 @@
                 detailLabels: document.getElementById('wpvfh-detail-labels'),
                 detailTypeLabel: document.getElementById('wpvfh-detail-type-label'),
                 detailPriorityLabel: document.getElementById('wpvfh-detail-priority-label'),
-                commentInput: document.getElementById('wpvfh-comment'),
             };
         },
 
         /**
-         * Émettre un événement personnalisé
-         * @param {string} name - Nom de l'événement (sera préfixé par 'blazing-feedback:')
-         * @param {Object} detail - Détails de l'événement
+         * Attacher les gestionnaires d'événements
+         * @returns {void}
          */
-        emitEvent: function(name, detail = {}) {
-            const event = new CustomEvent('blazing-feedback:' + name, {
-                bubbles: true,
-                detail: detail,
-            });
-            document.dispatchEvent(event);
-        },
-    };
-
-    // Exposer le module via le namespace global
-    if (!window.FeedbackWidget) {
-        window.FeedbackWidget = { modules: {} };
-    }
-    window.FeedbackWidget.modules.core = CoreModule;
-
-})(window, document);
