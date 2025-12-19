@@ -142,29 +142,33 @@
     box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.4) !important;
 }
 
-/* Highlight jaune vif pour identifier le pin sélectionné */
+/* Highlight dynamique basé sur la couleur du statut du feedback */
 .wpvfh-element-feedback-outline.wpvfh-pin-highlighted {
-    border-color: #f1c40f !important;
-    background: rgba(241, 196, 15, 0.15) !important;
+    --highlight-color: var(--wpvfh-highlight-color, #f1c40f);
+    --highlight-r: var(--wpvfh-highlight-r, 241);
+    --highlight-g: var(--wpvfh-highlight-g, 196);
+    --highlight-b: var(--wpvfh-highlight-b, 15);
+    border-color: var(--highlight-color) !important;
+    background: rgba(var(--highlight-r), var(--highlight-g), var(--highlight-b), 0.15) !important;
     box-shadow:
-        0 0 0 4px rgba(241, 196, 15, 0.6),
-        0 0 20px rgba(241, 196, 15, 0.5),
-        0 0 40px rgba(241, 196, 15, 0.3) !important;
+        0 0 0 4px rgba(var(--highlight-r), var(--highlight-g), var(--highlight-b), 0.6),
+        0 0 20px rgba(var(--highlight-r), var(--highlight-g), var(--highlight-b), 0.5),
+        0 0 40px rgba(var(--highlight-r), var(--highlight-g), var(--highlight-b), 0.3) !important;
     animation: wpvfh-highlight-pulse 1s ease-in-out infinite !important;
 }
 
 @keyframes wpvfh-highlight-pulse {
     0%, 100% {
         box-shadow:
-            0 0 0 4px rgba(241, 196, 15, 0.6),
-            0 0 20px rgba(241, 196, 15, 0.5),
-            0 0 40px rgba(241, 196, 15, 0.3);
+            0 0 0 4px rgba(var(--wpvfh-highlight-r, 241), var(--wpvfh-highlight-g, 196), var(--wpvfh-highlight-b, 15), 0.6),
+            0 0 20px rgba(var(--wpvfh-highlight-r, 241), var(--wpvfh-highlight-g, 196), var(--wpvfh-highlight-b, 15), 0.5),
+            0 0 40px rgba(var(--wpvfh-highlight-r, 241), var(--wpvfh-highlight-g, 196), var(--wpvfh-highlight-b, 15), 0.3);
     }
     50% {
         box-shadow:
-            0 0 0 6px rgba(241, 196, 15, 0.8),
-            0 0 30px rgba(241, 196, 15, 0.7),
-            0 0 60px rgba(241, 196, 15, 0.4);
+            0 0 0 6px rgba(var(--wpvfh-highlight-r, 241), var(--wpvfh-highlight-g, 196), var(--wpvfh-highlight-b, 15), 0.8),
+            0 0 30px rgba(var(--wpvfh-highlight-r, 241), var(--wpvfh-highlight-g, 196), var(--wpvfh-highlight-b, 15), 0.7),
+            0 0 60px rgba(var(--wpvfh-highlight-r, 241), var(--wpvfh-highlight-g, 196), var(--wpvfh-highlight-b, 15), 0.4);
     }
 }
 

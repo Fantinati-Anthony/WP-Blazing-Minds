@@ -245,10 +245,8 @@
     display: flex !important;
     flex-wrap: wrap !important;
     gap: 6px !important;
-    padding: 10px !important;
+    padding: 5px !important;
     justify-content: center !important;
-    background: var(--wpvfh-bg-light) !important;
-    border-bottom: 1px solid var(--wpvfh-border) !important;
 }
 
 .wpvfh-pages-stat-item {

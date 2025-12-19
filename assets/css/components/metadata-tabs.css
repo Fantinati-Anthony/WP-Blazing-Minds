@@ -650,49 +650,78 @@ button#wpvfh-validate-page-btn {
 
 .wpvfh-subtabs {
     display: flex;
-    gap: 4px;
-    padding: 8px 12px;
-    background: var(--wpvfh-bg-light);
-    border-bottom: 1px solid var(--wpvfh-border);
+    gap: 3px;
+    padding: 0px;
     overflow-x: auto;
     flex-wrap: nowrap;
-    justify-content: center;
+    justify-content: space-around;
+    margin-top: 5px;
 }
 
+/* Même style que wpvfh-filter-btn */
 .wpvfh-subtab {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 4px !important;
-    padding: 6px 12px !important;
-    background: transparent !important;
-    border: 1px solid var(--wpvfh-border) !important;
-    border-radius: 16px !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
-    color: var(--wpvfh-text-light) !important;
+    gap: 6px !important;
+    padding: 2px !important;
+    border: 2px solid transparent !important;
+    border-radius: 5px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
+    background: #fff !important;
+    color: #6c757d !important;
+    line-height: 1.4 !important;
+    min-height: auto !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
 }
 
 .wpvfh-subtab:hover {
-    background: var(--wpvfh-border) !important;
-    color: var(--wpvfh-text) !important;
+    background: #e9ecef !important;
 }
 
 .wpvfh-subtab.active {
-    background: var(--wpvfh-primary) !important;
-    border-color: var(--wpvfh-primary) !important;
+    border-color: currentColor !important;
+    background: var(--wpvfh-primary, #FE5100) !important;
     color: #fff !important;
 }
 
 .wpvfh-subtab-icon {
     font-size: 12px;
+    margin-left: 4px;
 }
 
 .wpvfh-subtab-text {
-    font-size: 11px;
+    display: none;
+}
+
+/* Badge compteur pour subtabs */
+.wpvfh-subtab .wpvfh-subtab-count {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    padding: 0 6px !important;
+    background: currentColor !important;
+    border-radius: 5px !important;
+    font-weight: 700 !important;
+}
+
+.wpvfh-subtab .wpvfh-subtab-count span {
+    color: #ffffff !important;
+}
+
+.wpvfh-subtab.active .wpvfh-subtab-count {
+    background: #ffffff !important;
+}
+
+.wpvfh-subtab.active .wpvfh-subtab-count span {
+    color: var(--wpvfh-primary, #FE5100) !important;
 }
 
 /* Contenu des sous-onglets */

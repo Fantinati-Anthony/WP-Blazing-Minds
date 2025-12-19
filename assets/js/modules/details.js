@@ -153,7 +153,7 @@
             const hasPosition = feedback.selector || feedback.position_x || feedback.position_y;
             if (hasPosition && window.BlazingAnnotation) {
                 setTimeout(() => {
-                    window.BlazingAnnotation.scrollToPinWithHighlight(feedback.id);
+                    window.BlazingAnnotation.scrollToPinWithHighlight(feedback.id, statusColor);
                 }, 300);
             }
 
