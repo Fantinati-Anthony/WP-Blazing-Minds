@@ -260,3 +260,138 @@ body .wpvfh-panel-logo {
 .wpvfh-search-btn:hover {
     opacity: 1;
 }
+
+/* ==========================================================================
+   Onglets (Tabs)
+   ========================================================================== */
+
+.wpvfh-tabs,
+.wpvfh-container .wpvfh-tabs,
+.wpvfh-panel .wpvfh-tabs,
+html body .wpvfh-tabs,
+html body.elementor-page .wpvfh-tabs,
+html body.elementor-default .wpvfh-tabs,
+.elementor .wpvfh-tabs {
+    display: flex !important;
+    border-bottom: 2px solid var(--wpvfh-border) !important;
+    background: var(--wpvfh-bg-light) !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.wpvfh-container .wpvfh-tab,
+.wpvfh-container button.wpvfh-tab,
+.wpvfh-panel .wpvfh-tab,
+.wpvfh-panel button.wpvfh-tab,
+html body .wpvfh-tab,
+html body .wpvfh-tabs .wpvfh-tab,
+html body.elementor-page .wpvfh-tab,
+html body.elementor-page .wpvfh-tabs .wpvfh-tab,
+html body.elementor-default .wpvfh-tab,
+html body.elementor-default .wpvfh-tabs .wpvfh-tab,
+.elementor .wpvfh-tab,
+.elementor .wpvfh-tabs .wpvfh-tab,
+.elementor-widget-container .wpvfh-tab {
+    all: revert !important;
+    flex: 1 !important;
+    padding: 14px 16px !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    border-radius: 0 !important;
+    margin-bottom: -2px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    color: var(--wpvfh-text-light) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    text-decoration: none !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    line-height: 1.4 !important;
+    box-shadow: none !important;
+}
+
+.wpvfh-container .wpvfh-tab:hover,
+.wpvfh-container button.wpvfh-tab:hover,
+.wpvfh-panel .wpvfh-tab:hover,
+html body .wpvfh-tab:hover,
+html body .wpvfh-tabs .wpvfh-tab:hover,
+html body.elementor-page .wpvfh-tab:hover,
+html body.elementor-default .wpvfh-tab:hover,
+.elementor .wpvfh-tab:hover {
+    color: var(--wpvfh-text) !important;
+    background: var(--wpvfh-bg-light) !important;
+    background-color: var(--wpvfh-bg-light) !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    text-decoration: none !important;
+}
+
+.wpvfh-container .wpvfh-tab.active,
+.wpvfh-container button.wpvfh-tab.active,
+.wpvfh-panel .wpvfh-tab.active,
+html body .wpvfh-tab.active,
+html body .wpvfh-tabs .wpvfh-tab.active,
+html body.elementor-page .wpvfh-tab.active,
+html body.elementor-default .wpvfh-tab.active,
+.elementor .wpvfh-tab.active {
+    color: var(--wpvfh-primary) !important;
+    border: none !important;
+    border-bottom: 3px solid var(--wpvfh-primary) !important;
+    background: var(--wpvfh-bg) !important;
+    background-color: var(--wpvfh-bg) !important;
+}
+
+/* Onglets cachés */
+.wpvfh-tab[hidden],
+.wpvfh-tabs .wpvfh-tab[hidden],
+.wpvfh-tabs button.wpvfh-tab[hidden],
+.wpvfh-container .wpvfh-tab[hidden],
+.wpvfh-container .wpvfh-tabs .wpvfh-tab[hidden],
+.wpvfh-container button.wpvfh-tab[hidden],
+.wpvfh-panel .wpvfh-tab[hidden],
+.wpvfh-panel .wpvfh-tabs .wpvfh-tab[hidden],
+html body .wpvfh-tab[hidden],
+html body .wpvfh-tabs .wpvfh-tab[hidden],
+html body.elementor-page .wpvfh-tab[hidden],
+html body.elementor-page .wpvfh-tabs .wpvfh-tab[hidden],
+html body.elementor-default .wpvfh-tab[hidden],
+html body.elementor-default .wpvfh-tabs .wpvfh-tab[hidden],
+.elementor .wpvfh-tab[hidden],
+.elementor .wpvfh-tabs .wpvfh-tab[hidden],
+button.wpvfh-tab[hidden] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    flex: 0 !important;
+}
+
+.wpvfh-tab-icon {
+    font-size: 16px !important;
+    line-height: 1 !important;
+}
+
+.wpvfh-tab-count {
+    font-size: 12px !important;
+    background: var(--wpvfh-primary) !important;
+    color: #fff !important;
+    padding: 2px 8px !important;
+    border-radius: 10px !important;
+    margin-left: 4px !important;
+}
