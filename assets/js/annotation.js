@@ -925,11 +925,12 @@
         },
 
         /**
-         * Scroller vers un pin avec highlight jaune
+         * Scroller vers un pin avec highlight coloré selon le statut
          * @param {number} feedbackId - ID du feedback
+         * @param {string} statusColor - Couleur hexadécimale du statut (ex: #3498db)
          * @returns {void}
          */
-        scrollToPinWithHighlight: function(feedbackId) {
+        scrollToPinWithHighlight: function(feedbackId, statusColor) {
             const pin = this.state.pins.find(p => p.data.id === feedbackId);
 
             if (!pin) return;
@@ -942,12 +943,27 @@
                 behavior: 'smooth',
             });
 
-            // Ajouter le highlight jaune après le scroll
+            // Ajouter le highlight coloré après le scroll
             setTimeout(() => {
                 // Retirer le highlight des autres pins
                 this.state.pins.forEach(p => {
                     p.element.classList.remove('wpvfh-pin-highlighted');
+                    p.element.style.removeProperty('--wpvfh-highlight-color');
+                    p.element.style.removeProperty('--wpvfh-highlight-r');
+                    p.element.style.removeProperty('--wpvfh-highlight-g');
+                    p.element.style.removeProperty('--wpvfh-highlight-b');
                 });
+
+                // Appliquer la couleur du statut si fournie
+                if (statusColor) {
+                    const rgb = this.hexToRgb(statusColor);
+                    if (rgb) {
+                        pin.element.style.setProperty('--wpvfh-highlight-color', statusColor);
+                        pin.element.style.setProperty('--wpvfh-highlight-r', rgb.r);
+                        pin.element.style.setProperty('--wpvfh-highlight-g', rgb.g);
+                        pin.element.style.setProperty('--wpvfh-highlight-b', rgb.b);
+                    }
+                }
 
                 // Ajouter le highlight au pin actuel
                 pin.element.classList.add('wpvfh-pin-highlighted');
@@ -955,8 +971,34 @@
                 // Retirer le highlight après 3 secondes
                 setTimeout(() => {
                     pin.element.classList.remove('wpvfh-pin-highlighted');
+                    pin.element.style.removeProperty('--wpvfh-highlight-color');
+                    pin.element.style.removeProperty('--wpvfh-highlight-r');
+                    pin.element.style.removeProperty('--wpvfh-highlight-g');
+                    pin.element.style.removeProperty('--wpvfh-highlight-b');
                 }, 3000);
             }, 500);
+        },
+
+        /**
+         * Convertir une couleur hexadécimale en RGB
+         * @param {string} hex - Couleur hexadécimale (ex: #3498db ou 3498db)
+         * @returns {Object|null} Objet avec r, g, b ou null si invalide
+         */
+        hexToRgb: function(hex) {
+            // Retirer le # si présent
+            hex = hex.replace(/^#/, '');
+
+            // Gérer les formats courts (ex: #fff -> #ffffff)
+            if (hex.length === 3) {
+                hex = hex.split('').map(c => c + c).join('');
+            }
+
+            const result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
         },
 
         /**
