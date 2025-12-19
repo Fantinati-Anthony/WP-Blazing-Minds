@@ -4156,12 +4156,8 @@
                 // On est sur la bonne page, trouver le feedback et ouvrir les détails
                 const feedback = this.state.currentFeedbacks.find(f => f.id === feedbackId);
                 if (feedback) {
+                    // showFeedbackDetails appelle déjà openPanel('details')
                     this.showFeedbackDetails(feedback);
-                }
-
-                // S'assurer que le panneau est ouvert
-                if (this.elements.panel && !this.elements.panel.classList.contains('active')) {
-                    this.openPanel();
                 }
             }
         },
@@ -4179,10 +4175,8 @@
                     const id = parseInt(feedbackId, 10);
                     const feedback = this.state.currentFeedbacks.find(f => f.id === id);
                     if (feedback) {
+                        // showFeedbackDetails appelle déjà openPanel('details')
                         this.showFeedbackDetails(feedback);
-                    }
-                    if (this.elements.panel && !this.elements.panel.classList.contains('active')) {
-                        this.openPanel();
                     }
 
                     // Nettoyer l'URL
