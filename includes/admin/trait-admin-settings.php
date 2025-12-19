@@ -370,6 +370,22 @@ trait WPVFH_Admin_Settings {
             'wpvfh_color_text_light_dark'   => '#b0bcc4',
             'wpvfh_color_secondary_dark'    => '#4a6572',
             'wpvfh_color_border_dark'       => '#3d5564',
+            // Couleurs éléments de liste (pin-item) mode clair
+            'wpvfh_color_pin_item_bg'           => '#f8f9fa',
+            'wpvfh_color_pin_item_bg_hover'     => '#ffffff',
+            'wpvfh_color_pin_item_bg_selected'  => '#fff5f3',
+            'wpvfh_color_pin_item_border'       => '#e0e4e8',
+            'wpvfh_color_pin_item_border_hover' => '#FE5100',
+            'wpvfh_color_pin_item_text'         => '#263e4b',
+            'wpvfh_color_pin_item_text_light'   => '#5a7282',
+            // Couleurs éléments de liste (pin-item) mode sombre
+            'wpvfh_color_pin_item_bg_dark'           => '#334a5a',
+            'wpvfh_color_pin_item_bg_hover_dark'     => '#3d5564',
+            'wpvfh_color_pin_item_bg_selected_dark'  => '#4a3530',
+            'wpvfh_color_pin_item_border_dark'       => '#3d5564',
+            'wpvfh_color_pin_item_border_hover_dark' => '#FE5100',
+            'wpvfh_color_pin_item_text_dark'         => '#ffffff',
+            'wpvfh_color_pin_item_text_light_dark'   => '#b0bcc4',
             // Couleurs footer mode clair
             'wpvfh_color_footer_bg'                  => '#f8f9fa',
             'wpvfh_color_footer_border'              => '#e9ecef',
