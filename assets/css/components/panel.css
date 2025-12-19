@@ -28,7 +28,7 @@
     gap: 8px !important;
     padding: 10px 16px !important;
     border: none !important;
-    border-radius: 8px !important;
+    border-radius: var(--wpvfh-radius-button) !important;
     cursor: pointer !important;
     font-size: 13px !important;
     font-weight: 500 !important;

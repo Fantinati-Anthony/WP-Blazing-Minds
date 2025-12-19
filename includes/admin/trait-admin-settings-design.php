@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/trait-admin-settings-design-theme-mode.php';
 require_once __DIR__ . '/trait-admin-settings-design-button.php';
 require_once __DIR__ . '/trait-admin-settings-design-colors.php';
+require_once __DIR__ . '/trait-admin-settings-design-border-radius.php';
 require_once __DIR__ . '/trait-admin-settings-design-preview.php';
 
 /**
@@ -27,6 +28,7 @@ trait WPVFH_Admin_Settings_Design {
 	use WPVFH_Admin_Settings_Design_Theme_Mode;
 	use WPVFH_Admin_Settings_Design_Button;
 	use WPVFH_Admin_Settings_Design_Colors;
+	use WPVFH_Admin_Settings_Design_Border_Radius;
 	use WPVFH_Admin_Settings_Design_Preview;
 
 	/**
@@ -55,6 +57,9 @@ trait WPVFH_Admin_Settings_Design {
 
 				// Section Couleurs du thème
 				self::render_design_colors_section();
+
+				// Section Border Radius (Arrondis)
+				self::render_design_border_radius_section();
 				?>
 			</div>
 
