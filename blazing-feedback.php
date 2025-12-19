@@ -1650,15 +1650,17 @@ final class WP_Visual_Feedback_Hub {
             <div id="wpvfh-confirm-modal" class="wpvfh-modal" hidden>
                 <div class="wpvfh-modal-overlay"></div>
                 <div class="wpvfh-modal-content">
-                    <h3 class="wpvfh-modal-title"><?php esc_html_e( 'Confirmer la suppression', 'blazing-feedback' ); ?></h3>
-                    <p class="wpvfh-modal-text"><?php esc_html_e( 'Êtes-vous sûr de vouloir supprimer ce feedback ? Cette action est irréversible.', 'blazing-feedback' ); ?></p>
-                    <div class="wpvfh-modal-actions">
-                        <button type="button" class="wpvfh-btn wpvfh-btn-secondary" id="wpvfh-cancel-delete">
-                            <?php esc_html_e( 'Annuler', 'blazing-feedback' ); ?>
-                        </button>
-                        <button type="button" class="wpvfh-btn wpvfh-btn-danger" id="wpvfh-confirm-delete">
-                            <?php esc_html_e( 'Supprimer', 'blazing-feedback' ); ?>
-                        </button>
+                    <div class="wpvfh-modal-body">
+                        <h3 class="wpvfh-modal-title"><?php esc_html_e( 'Confirmer la suppression', 'blazing-feedback' ); ?></h3>
+                        <p class="wpvfh-modal-text"><?php esc_html_e( 'Êtes-vous sûr de vouloir supprimer ce feedback ? Cette action est irréversible.', 'blazing-feedback' ); ?></p>
+                        <div class="wpvfh-modal-actions">
+                            <button type="button" class="wpvfh-btn wpvfh-btn-secondary" id="wpvfh-cancel-delete">
+                                <?php esc_html_e( 'Annuler', 'blazing-feedback' ); ?>
+                            </button>
+                            <button type="button" class="wpvfh-btn wpvfh-btn-danger" id="wpvfh-confirm-delete">
+                                <?php esc_html_e( 'Supprimer', 'blazing-feedback' ); ?>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1667,16 +1669,18 @@ final class WP_Visual_Feedback_Hub {
             <div id="wpvfh-validate-modal" class="wpvfh-modal" hidden>
                 <div class="wpvfh-modal-overlay"></div>
                 <div class="wpvfh-modal-content">
-                    <div class="wpvfh-modal-icon">✅</div>
-                    <h3 class="wpvfh-modal-title"><?php esc_html_e( 'Valider cette page', 'blazing-feedback' ); ?></h3>
-                    <p class="wpvfh-modal-text"><?php esc_html_e( 'En validant cette page, vous confirmez que tous les feedbacks ont été traités. Cette page sera marquée comme terminée.', 'blazing-feedback' ); ?></p>
-                    <div class="wpvfh-modal-actions">
-                        <button type="button" class="wpvfh-btn wpvfh-btn-secondary" id="wpvfh-cancel-validate">
-                            <?php esc_html_e( 'Annuler', 'blazing-feedback' ); ?>
-                        </button>
-                        <button type="button" class="wpvfh-btn wpvfh-btn-success" id="wpvfh-confirm-validate">
-                            <?php esc_html_e( 'Valider', 'blazing-feedback' ); ?>
-                        </button>
+                    <div class="wpvfh-modal-body">
+                        <div class="wpvfh-modal-icon">✅</div>
+                        <h3 class="wpvfh-modal-title"><?php esc_html_e( 'Valider cette page', 'blazing-feedback' ); ?></h3>
+                        <p class="wpvfh-modal-text"><?php esc_html_e( 'En validant cette page, vous confirmez que tous les feedbacks ont été traités. Cette page sera marquée comme terminée.', 'blazing-feedback' ); ?></p>
+                        <div class="wpvfh-modal-actions">
+                            <button type="button" class="wpvfh-btn wpvfh-btn-secondary" id="wpvfh-cancel-validate">
+                                <?php esc_html_e( 'Annuler', 'blazing-feedback' ); ?>
+                            </button>
+                            <button type="button" class="wpvfh-btn wpvfh-btn-success" id="wpvfh-confirm-validate">
+                                <?php esc_html_e( 'Valider', 'blazing-feedback' ); ?>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
