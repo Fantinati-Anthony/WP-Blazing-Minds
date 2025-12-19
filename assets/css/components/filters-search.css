@@ -240,51 +240,75 @@
    Onglet Pages
    ========================================================================== */
 
-/* Stats des pages */
+/* Stats des pages - même style que wpvfh-filter-btn.active */
 #wpvfh-pages-stats {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 8px !important;
+    gap: 6px !important;
     padding: 10px !important;
     justify-content: center !important;
+    background: var(--wpvfh-bg-light) !important;
+    border-bottom: 1px solid var(--wpvfh-border) !important;
 }
 
 .wpvfh-pages-stat-item {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 4px !important;
-    padding: 6px 10px !important;
-    background: var(--wpvfh-pin-item-bg) !important;
-    border: 1px solid var(--wpvfh-pin-item-border) !important;
-    border-radius: 16px !important;
-    font-size: 12px !important;
-    color: var(--wpvfh-pin-item-text) !important;
+    gap: 6px !important;
+    padding: 2px !important;
+    border: 2px solid currentColor !important;
+    border-radius: 5px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    color: #fff !important;
+    background: var(--wpvfh-primary, #FE5100) !important;
 }
 
 .wpvfh-pages-stat-item .wpvfh-stat-icon {
-    font-size: 14px !important;
+    font-size: 12px !important;
+    margin-left: 4px !important;
 }
 
 .wpvfh-pages-stat-item .wpvfh-stat-label {
-    color: var(--wpvfh-pin-item-text-light) !important;
+    display: none !important;
 }
 
 .wpvfh-pages-stat-item .wpvfh-stat-count {
-    font-weight: 700 !important;
-    background: var(--wpvfh-primary, #FE5100) !important;
-    color: #fff !important;
-    padding: 2px 8px !important;
-    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     min-width: 20px !important;
-    text-align: center !important;
+    height: 20px !important;
+    padding: 0 6px !important;
+    background: #ffffff !important;
+    border-radius: 5px !important;
+    font-weight: 700 !important;
+    color: var(--wpvfh-primary, #FE5100) !important;
 }
 
+/* Feedbacks - bleu */
+.wpvfh-pages-stat-item:nth-child(2) {
+    background: #3498db !important;
+}
+.wpvfh-pages-stat-item:nth-child(2) .wpvfh-stat-count {
+    color: #3498db !important;
+}
+
+/* Validées - vert */
+.wpvfh-pages-stat-item.wpvfh-stat-validated {
+    background: #27ae60 !important;
+}
 .wpvfh-pages-stat-item.wpvfh-stat-validated .wpvfh-stat-count {
-    background: var(--wpvfh-success, #27ae60) !important;
+    color: #27ae60 !important;
 }
 
+/* En cours - orange */
+.wpvfh-pages-stat-item.wpvfh-stat-pending {
+    background: #f39c12 !important;
+}
 .wpvfh-pages-stat-item.wpvfh-stat-pending .wpvfh-stat-count {
-    background: var(--wpvfh-warning, #f39c12) !important;
+    color: #f39c12 !important;
 }
 
 .wpvfh-pages-list {
