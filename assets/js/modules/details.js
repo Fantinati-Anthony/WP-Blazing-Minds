@@ -7,8 +7,55 @@
     'use strict';
 
     const Details = {
+        /**
+         * État du module
+         */
+        state: {
+            repositioningFeedbackId: null,
+        },
+
         init: function(widget) {
             this.widget = widget;
+            this.bindRepositionEvents();
+        },
+
+        /**
+         * Attacher les événements de ciblage/repositionnement
+         */
+        bindRepositionEvents: function() {
+            // Bouton ajouter un ciblage
+            const addTargetBtn = document.getElementById('wpvfh-add-target-btn');
+            if (addTargetBtn) {
+                addTargetBtn.addEventListener('click', () => {
+                    this.startTargeting(this.widget.state.currentFeedbackId, false);
+                });
+            }
+
+            // Bouton repositionner
+            const repositionBtn = document.getElementById('wpvfh-reposition-feedback-btn');
+            if (repositionBtn) {
+                repositionBtn.addEventListener('click', () => {
+                    this.startTargeting(this.widget.state.currentFeedbackId, true);
+                });
+            }
+
+            // Écouter l'événement de placement du pin (mode ciblage/repositionnement)
+            document.addEventListener('blazing-feedback:pin-placed', (e) => {
+                if (this.state.repositioningFeedbackId) {
+                    this.handleNewPosition(e.detail);
+                }
+            });
+
+            // Écouter l'annulation du mode annotation
+            document.addEventListener('blazing-feedback:annotation-deactivated', () => {
+                if (this.state.repositioningFeedbackId && !window.BlazingAnnotation.getPosition()) {
+                    // Annulé sans nouvelle position
+                    this.state.repositioningFeedbackId = null;
+                    if (this.widget.modules.notifications) {
+                        this.widget.modules.notifications.show('Ciblage annulé', 'info');
+                    }
+                }
+            });
         },
 
         showFeedbackDetails: function(feedback) {
@@ -88,6 +135,103 @@
                 setTimeout(() => {
                     window.BlazingAnnotation.scrollToPinWithHighlight(feedback.id);
                 }, 300);
+            }
+
+            // Afficher le bon bouton selon la présence d'une position
+            const addTargetBtn = document.getElementById('wpvfh-add-target-btn');
+            const repositionBtn = document.getElementById('wpvfh-reposition-feedback-btn');
+            if (addTargetBtn) {
+                addTargetBtn.hidden = hasPosition;
+            }
+            if (repositionBtn) {
+                repositionBtn.hidden = !hasPosition;
+            }
+        },
+
+        /**
+         * Démarrer le mode ciblage/repositionnement
+         * @param {number} feedbackId - ID du feedback à cibler
+         * @param {boolean} isReposition - true si repositionnement, false si nouveau ciblage
+         */
+        startTargeting: function(feedbackId, isReposition) {
+            if (!feedbackId) {
+                console.warn('[Blazing Feedback] Pas de feedback à cibler');
+                return;
+            }
+
+            this.state.repositioningFeedbackId = feedbackId;
+
+            // Fermer le panel pour permettre de cliquer sur la page
+            if (this.widget.modules.panel) {
+                this.widget.modules.panel.closePanel();
+            }
+
+            // Activer le mode annotation
+            if (window.BlazingAnnotation) {
+                window.BlazingAnnotation.activate({
+                    reposition: isReposition,
+                    feedbackId: feedbackId,
+                });
+            }
+
+            const action = isReposition ? 'repositionnement' : 'ciblage';
+            console.log('[Blazing Feedback] Mode ' + action + ' activé pour feedback #' + feedbackId);
+        },
+
+        /**
+         * Gérer la nouvelle position après repositionnement
+         * @param {Object} positionData - Données de la nouvelle position
+         */
+        handleNewPosition: async function(positionData) {
+            const feedbackId = this.state.repositioningFeedbackId;
+            this.state.repositioningFeedbackId = null;
+
+            if (!feedbackId || !positionData) {
+                console.warn('[Blazing Feedback] Données de repositionnement invalides');
+                return;
+            }
+
+            try {
+                // Préparer les données pour l'API
+                const updateData = {
+                    position_x: positionData.position_x,
+                    position_y: positionData.position_y,
+                    selector: positionData.selector,
+                    element_offset_x: positionData.element_offset_x,
+                    element_offset_y: positionData.element_offset_y,
+                    scroll_x: positionData.scrollX,
+                    scroll_y: positionData.scrollY,
+                };
+
+                // Mettre à jour via l'API
+                await this.widget.modules.api.request('PUT', `feedbacks/${feedbackId}`, updateData);
+
+                // Supprimer le pin temporaire
+                if (window.BlazingAnnotation) {
+                    window.BlazingAnnotation.removeTemporaryPin();
+                }
+
+                // Recharger les feedbacks pour mettre à jour les pins
+                if (this.widget.modules.list && typeof this.widget.modules.list.loadFeedbacks === 'function') {
+                    await this.widget.modules.list.loadFeedbacks();
+                }
+
+                // Rouvrir le panel sur les détails
+                if (this.widget.modules.panel) {
+                    this.widget.modules.panel.openPanel('details');
+                }
+
+                if (this.widget.modules.notifications) {
+                    this.widget.modules.notifications.show('Ciblage enregistré', 'success');
+                }
+
+                console.log('[Blazing Feedback] Feedback #' + feedbackId + ' ciblé avec succès');
+
+            } catch (error) {
+                console.error('[Blazing Feedback] Erreur lors du ciblage:', error);
+                if (this.widget.modules.notifications) {
+                    this.widget.modules.notifications.show('Erreur lors du ciblage', 'error');
+                }
             }
         },
 

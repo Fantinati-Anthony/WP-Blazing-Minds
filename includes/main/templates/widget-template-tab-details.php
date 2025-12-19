@@ -186,6 +186,21 @@ $priority_settings = WPVFH_Options_Manager::get_group_settings( 'priorities' );
 				</button>
 			</div>
 
+			<!-- Bouton ciblage/repositionnement -->
+			<div class="wpvfh-target-section" id="wpvfh-target-section">
+				<hr class="wpvfh-separator">
+				<!-- Bouton ajouter un ciblage (si pas de position) -->
+				<button type="button" class="wpvfh-btn wpvfh-btn-secondary" id="wpvfh-add-target-btn" hidden>
+					<span class="wpvfh-btn-emoji">🎯</span>
+					<?php esc_html_e( 'Ajouter un ciblage', 'blazing-feedback' ); ?>
+				</button>
+				<!-- Bouton repositionner (si position existante) -->
+				<button type="button" class="wpvfh-btn wpvfh-btn-secondary" id="wpvfh-reposition-feedback-btn" hidden>
+					<span class="wpvfh-btn-emoji">📍</span>
+					<?php esc_html_e( 'Repositionner le marqueur', 'blazing-feedback' ); ?>
+				</button>
+			</div>
+
 			<!-- Bouton supprimer (visible pour créateur/admin) -->
 			<div class="wpvfh-delete-section" id="wpvfh-delete-section" hidden>
 				<hr class="wpvfh-separator">
