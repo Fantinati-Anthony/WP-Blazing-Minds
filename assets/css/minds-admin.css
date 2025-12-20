@@ -1,0 +1,580 @@
+/**
+ * Blazing Minds - Admin Styles
+ *
+ * @package Blazing_Minds
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   Variables
+   ========================================================================== */
+:root {
+	--bzmi-primary: #3498db;
+	--bzmi-secondary: #2ecc71;
+	--bzmi-danger: #e74c3c;
+	--bzmi-warning: #f39c12;
+	--bzmi-info: #1abc9c;
+	--bzmi-dark: #2c3e50;
+	--bzmi-light: #ecf0f1;
+	--bzmi-border: #ddd;
+	--bzmi-shadow: 0 2px 4px rgba(0,0,0,0.1);
+	--bzmi-radius: 4px;
+}
+
+/* ==========================================================================
+   Dashboard
+   ========================================================================== */
+.bzmi-dashboard {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 20px;
+	margin: 20px 0;
+}
+
+.bzmi-stat-card {
+	background: #fff;
+	border: 1px solid var(--bzmi-border);
+	border-radius: var(--bzmi-radius);
+	padding: 20px;
+	box-shadow: var(--bzmi-shadow);
+}
+
+.bzmi-stat-card h3 {
+	margin: 0 0 10px;
+	font-size: 14px;
+	color: #666;
+	text-transform: uppercase;
+}
+
+.bzmi-stat-card .value {
+	font-size: 36px;
+	font-weight: bold;
+	color: var(--bzmi-dark);
+}
+
+.bzmi-stat-card .value.primary { color: var(--bzmi-primary); }
+.bzmi-stat-card .value.success { color: var(--bzmi-secondary); }
+.bzmi-stat-card .value.warning { color: var(--bzmi-warning); }
+.bzmi-stat-card .value.danger { color: var(--bzmi-danger); }
+
+/* ==========================================================================
+   ICAVAL Tabs
+   ========================================================================== */
+.bzmi-icaval-tabs .nav-tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.bzmi-icaval-tabs .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+
+.bzmi-icaval-tabs .bzmi-count {
+	background: var(--bzmi-primary);
+	color: #fff;
+	font-size: 11px;
+	padding: 2px 6px;
+	border-radius: 10px;
+	margin-left: 4px;
+}
+
+.bzmi-icaval-tabs .nav-tab-active .bzmi-count {
+	background: var(--bzmi-dark);
+}
+
+/* ==========================================================================
+   Workflow Diagram
+   ========================================================================== */
+.bzmi-workflow-diagram {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 30px;
+	background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+	border-radius: var(--bzmi-radius);
+	margin: 20px 0;
+}
+
+.bzmi-workflow-diagram .bzmi-stage {
+	background: #fff;
+	border: 2px solid var(--bzmi-primary);
+	border-radius: 50%;
+	width: 80px;
+	height: 80px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	font-weight: bold;
+	font-size: 20px;
+	color: var(--bzmi-primary);
+	box-shadow: var(--bzmi-shadow);
+}
+
+.bzmi-workflow-diagram .bzmi-stage small {
+	font-size: 9px;
+	text-transform: uppercase;
+	font-weight: normal;
+	margin-top: 4px;
+}
+
+.bzmi-workflow-diagram .bzmi-arrow {
+	font-size: 24px;
+	color: var(--bzmi-primary);
+}
+
+/* ==========================================================================
+   Tables
+   ========================================================================== */
+.bzmi-table {
+	width: 100%;
+	border-collapse: collapse;
+	background: #fff;
+	box-shadow: var(--bzmi-shadow);
+}
+
+.bzmi-table th,
+.bzmi-table td {
+	padding: 12px 15px;
+	text-align: left;
+	border-bottom: 1px solid var(--bzmi-border);
+}
+
+.bzmi-table th {
+	background: #f5f5f5;
+	font-weight: 600;
+	text-transform: uppercase;
+	font-size: 12px;
+	color: #666;
+}
+
+.bzmi-table tr:hover {
+	background: #fafafa;
+}
+
+.bzmi-table .actions {
+	white-space: nowrap;
+}
+
+.bzmi-table .actions a {
+	margin-right: 10px;
+	text-decoration: none;
+}
+
+/* Status badges */
+.bzmi-status {
+	display: inline-block;
+	padding: 4px 10px;
+	border-radius: 12px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.bzmi-status.active,
+.bzmi-status.completed { background: #d4edda; color: #155724; }
+.bzmi-status.pending,
+.bzmi-status.new { background: #fff3cd; color: #856404; }
+.bzmi-status.inactive,
+.bzmi-status.archived { background: #e2e3e5; color: #383d41; }
+.bzmi-status.in_progress { background: #cce5ff; color: #004085; }
+.bzmi-status.cancelled { background: #f8d7da; color: #721c24; }
+
+/* Priority badges */
+.bzmi-priority {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 10px;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.bzmi-priority.low { background: #e2e3e5; color: #666; }
+.bzmi-priority.normal { background: #cce5ff; color: #004085; }
+.bzmi-priority.high { background: #fff3cd; color: #856404; }
+.bzmi-priority.critical { background: #f8d7da; color: #721c24; }
+
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+.bzmi-form {
+	max-width: 800px;
+}
+
+.bzmi-form .form-field {
+	margin-bottom: 20px;
+}
+
+.bzmi-form label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 5px;
+}
+
+.bzmi-form input[type="text"],
+.bzmi-form input[type="email"],
+.bzmi-form input[type="url"],
+.bzmi-form input[type="number"],
+.bzmi-form input[type="date"],
+.bzmi-form input[type="datetime-local"],
+.bzmi-form textarea,
+.bzmi-form select {
+	width: 100%;
+	max-width: 500px;
+	padding: 8px 12px;
+	border: 1px solid var(--bzmi-border);
+	border-radius: var(--bzmi-radius);
+	font-size: 14px;
+}
+
+.bzmi-form textarea {
+	min-height: 120px;
+	resize: vertical;
+}
+
+.bzmi-form .description {
+	color: #666;
+	font-size: 13px;
+	margin-top: 5px;
+}
+
+/* Color picker */
+.bzmi-color-options {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.bzmi-color-option {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	border: 2px solid transparent;
+	cursor: pointer;
+	transition: transform 0.2s, border-color 0.2s;
+}
+
+.bzmi-color-option:hover {
+	transform: scale(1.1);
+}
+
+.bzmi-color-option.selected {
+	border-color: var(--bzmi-dark);
+}
+
+/* ==========================================================================
+   Cards
+   ========================================================================== */
+.bzmi-card {
+	background: #fff;
+	border: 1px solid var(--bzmi-border);
+	border-radius: var(--bzmi-radius);
+	box-shadow: var(--bzmi-shadow);
+	margin-bottom: 20px;
+}
+
+.bzmi-card-header {
+	padding: 15px 20px;
+	border-bottom: 1px solid var(--bzmi-border);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.bzmi-card-header h3 {
+	margin: 0;
+	font-size: 16px;
+}
+
+.bzmi-card-body {
+	padding: 20px;
+}
+
+.bzmi-card-footer {
+	padding: 15px 20px;
+	border-top: 1px solid var(--bzmi-border);
+	background: #fafafa;
+}
+
+/* ==========================================================================
+   ICAVAL Progress
+   ========================================================================== */
+.bzmi-icaval-progress {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	margin: 10px 0;
+}
+
+.bzmi-icaval-step {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: #e2e3e5;
+	color: #666;
+	font-size: 11px;
+	font-weight: bold;
+}
+
+.bzmi-icaval-step.active {
+	background: var(--bzmi-primary);
+	color: #fff;
+}
+
+.bzmi-icaval-step.completed {
+	background: var(--bzmi-secondary);
+	color: #fff;
+}
+
+.bzmi-icaval-connector {
+	flex: 1;
+	height: 2px;
+	background: #e2e3e5;
+	max-width: 30px;
+}
+
+.bzmi-icaval-connector.completed {
+	background: var(--bzmi-secondary);
+}
+
+/* ==========================================================================
+   AI Section
+   ========================================================================== */
+.bzmi-ai-settings .bzmi-notice {
+	padding: 15px 20px;
+	border-radius: var(--bzmi-radius);
+	margin-bottom: 20px;
+}
+
+.bzmi-ai-settings .bzmi-notice-info {
+	background: #e7f3ff;
+	border-left: 4px solid var(--bzmi-primary);
+}
+
+.bzmi-ai-settings .bzmi-notice-warning {
+	background: #fff8e6;
+	border-left: 4px solid var(--bzmi-warning);
+}
+
+/* Temperature slider */
+#ai_temperature {
+	width: 200px;
+	vertical-align: middle;
+}
+
+#ai_temperature_value {
+	display: inline-block;
+	width: 40px;
+	text-align: center;
+	font-weight: bold;
+	margin-left: 10px;
+}
+
+/* ==========================================================================
+   Notices
+   ========================================================================== */
+.bzmi-notice {
+	padding: 12px 15px;
+	border-radius: var(--bzmi-radius);
+	margin: 10px 0;
+}
+
+.bzmi-notice-success {
+	background: #d4edda;
+	border-left: 4px solid var(--bzmi-secondary);
+	color: #155724;
+}
+
+.bzmi-notice-error {
+	background: #f8d7da;
+	border-left: 4px solid var(--bzmi-danger);
+	color: #721c24;
+}
+
+.bzmi-notice-warning {
+	background: #fff3cd;
+	border-left: 4px solid var(--bzmi-warning);
+	color: #856404;
+}
+
+.bzmi-notice-info {
+	background: #d1ecf1;
+	border-left: 4px solid var(--bzmi-info);
+	color: #0c5460;
+}
+
+/* ==========================================================================
+   Empty States
+   ========================================================================== */
+.bzmi-empty-state {
+	text-align: center;
+	padding: 60px 20px;
+	background: #f9f9f9;
+	border-radius: var(--bzmi-radius);
+}
+
+.bzmi-empty-state .dashicons {
+	font-size: 48px;
+	width: 48px;
+	height: 48px;
+	color: #ccc;
+	margin-bottom: 20px;
+}
+
+.bzmi-empty-state h3 {
+	color: #666;
+	margin-bottom: 10px;
+}
+
+.bzmi-empty-state p {
+	color: #999;
+	margin-bottom: 20px;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media screen and (max-width: 782px) {
+	.bzmi-dashboard {
+		grid-template-columns: 1fr;
+	}
+
+	.bzmi-workflow-diagram {
+		flex-wrap: wrap;
+	}
+
+	.bzmi-workflow-diagram .bzmi-arrow {
+		display: none;
+	}
+
+	.bzmi-icaval-tabs .nav-tab {
+		display: block;
+		margin-bottom: 5px;
+	}
+}
+
+/* ==========================================================================
+   Loading States
+   ========================================================================== */
+.bzmi-loading {
+	position: relative;
+	pointer-events: none;
+	opacity: 0.7;
+}
+
+.bzmi-loading::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 24px;
+	height: 24px;
+	margin: -12px 0 0 -12px;
+	border: 3px solid var(--bzmi-primary);
+	border-top-color: transparent;
+	border-radius: 50%;
+	animation: bzmi-spin 0.8s linear infinite;
+}
+
+@keyframes bzmi-spin {
+	to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+.bzmi-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	border: none;
+	border-radius: var(--bzmi-radius);
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	text-decoration: none;
+	transition: background 0.2s, transform 0.1s;
+}
+
+.bzmi-btn:hover {
+	transform: translateY(-1px);
+}
+
+.bzmi-btn-primary {
+	background: var(--bzmi-primary);
+	color: #fff;
+}
+
+.bzmi-btn-primary:hover {
+	background: #2980b9;
+	color: #fff;
+}
+
+.bzmi-btn-success {
+	background: var(--bzmi-secondary);
+	color: #fff;
+}
+
+.bzmi-btn-success:hover {
+	background: #27ae60;
+	color: #fff;
+}
+
+.bzmi-btn-danger {
+	background: var(--bzmi-danger);
+	color: #fff;
+}
+
+.bzmi-btn-danger:hover {
+	background: #c0392b;
+	color: #fff;
+}
+
+.bzmi-btn-outline {
+	background: transparent;
+	border: 1px solid var(--bzmi-border);
+	color: #666;
+}
+
+.bzmi-btn-outline:hover {
+	background: #f5f5f5;
+	color: #333;
+}
+
+/* ==========================================================================
+   View Details
+   ========================================================================== */
+.bzmi-details-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 20px;
+}
+
+.bzmi-detail-item {
+	padding: 15px;
+	background: #f9f9f9;
+	border-radius: var(--bzmi-radius);
+}
+
+.bzmi-detail-item label {
+	display: block;
+	font-size: 11px;
+	text-transform: uppercase;
+	color: #666;
+	margin-bottom: 5px;
+}
+
+.bzmi-detail-item .value {
+	font-size: 16px;
+	font-weight: 500;
+	color: var(--bzmi-dark);
+}
