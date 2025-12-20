@@ -16,10 +16,10 @@ $title = $is_edit ? __( 'Modifier le projet', 'blazing-feedback' ) : __( 'Nouvea
 	<h1><?php echo esc_html( $title ); ?></h1>
 
 	<form method="post" class="bzmi-form">
-		<?php wp_nonce_field( 'save_project' ); ?>
+		<?php wp_nonce_field( 'bzmi_save_project' ); ?>
 		<input type="hidden" name="action" value="save">
 		<?php if ( $is_edit ) : ?>
-			<input type="hidden" name="id" value="<?php echo intval( $project->id ); ?>">
+			<input type="hidden" name="project_id" value="<?php echo intval( $project->id ); ?>">
 		<?php endif; ?>
 
 		<table class="form-table">
@@ -73,11 +73,12 @@ $title = $is_edit ? __( 'Modifier le projet', 'blazing-feedback' ) : __( 'Nouvea
 				<th><label for="status"><?php esc_html_e( 'Statut', 'blazing-feedback' ); ?></label></th>
 				<td>
 					<select name="status" id="status">
-						<option value="new" <?php selected( $project->status ?? 'new', 'new' ); ?>><?php esc_html_e( 'Nouveau', 'blazing-feedback' ); ?></option>
-						<option value="in_progress" <?php selected( $project->status ?? '', 'in_progress' ); ?>><?php esc_html_e( 'En cours', 'blazing-feedback' ); ?></option>
+						<option value="pending" <?php selected( $project->status ?? 'pending', 'pending' ); ?>><?php esc_html_e( 'En attente', 'blazing-feedback' ); ?></option>
 						<option value="active" <?php selected( $project->status ?? '', 'active' ); ?>><?php esc_html_e( 'Actif', 'blazing-feedback' ); ?></option>
+						<option value="in_progress" <?php selected( $project->status ?? '', 'in_progress' ); ?>><?php esc_html_e( 'En cours', 'blazing-feedback' ); ?></option>
+						<option value="on_hold" <?php selected( $project->status ?? '', 'on_hold' ); ?>><?php esc_html_e( 'En pause', 'blazing-feedback' ); ?></option>
 						<option value="completed" <?php selected( $project->status ?? '', 'completed' ); ?>><?php esc_html_e( 'Terminé', 'blazing-feedback' ); ?></option>
-						<option value="archived" <?php selected( $project->status ?? '', 'archived' ); ?>><?php esc_html_e( 'Archivé', 'blazing-feedback' ); ?></option>
+						<option value="cancelled" <?php selected( $project->status ?? '', 'cancelled' ); ?>><?php esc_html_e( 'Annulé', 'blazing-feedback' ); ?></option>
 					</select>
 				</td>
 			</tr>
@@ -85,10 +86,10 @@ $title = $is_edit ? __( 'Modifier le projet', 'blazing-feedback' ) : __( 'Nouvea
 				<th><label for="priority"><?php esc_html_e( 'Priorité', 'blazing-feedback' ); ?></label></th>
 				<td>
 					<select name="priority" id="priority">
-						<option value="low" <?php selected( $project->priority ?? '', 'low' ); ?>><?php esc_html_e( 'Basse', 'blazing-feedback' ); ?></option>
-						<option value="normal" <?php selected( $project->priority ?? 'normal', 'normal' ); ?>><?php esc_html_e( 'Normale', 'blazing-feedback' ); ?></option>
-						<option value="high" <?php selected( $project->priority ?? '', 'high' ); ?>><?php esc_html_e( 'Haute', 'blazing-feedback' ); ?></option>
-						<option value="critical" <?php selected( $project->priority ?? '', 'critical' ); ?>><?php esc_html_e( 'Critique', 'blazing-feedback' ); ?></option>
+						<option value="0" <?php selected( $project->priority ?? 1, 0 ); ?>><?php esc_html_e( 'Basse', 'blazing-feedback' ); ?></option>
+						<option value="1" <?php selected( $project->priority ?? 1, 1 ); ?>><?php esc_html_e( 'Normale', 'blazing-feedback' ); ?></option>
+						<option value="2" <?php selected( $project->priority ?? '', 2 ); ?>><?php esc_html_e( 'Haute', 'blazing-feedback' ); ?></option>
+						<option value="3" <?php selected( $project->priority ?? '', 3 ); ?>><?php esc_html_e( 'Urgente', 'blazing-feedback' ); ?></option>
 					</select>
 				</td>
 			</tr>
