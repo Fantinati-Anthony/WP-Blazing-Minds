@@ -193,28 +193,35 @@ body.wpvfh-panel-active.wpvfh-panel-left {
 }
 
 /* Header du panel */
-.wpvfh-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--wpvfh-border);
-    background: var(--wpvfh-bg-light);
-    flex-shrink: 0;
+.wpvfh-panel-header,
+.wp-admin .wpvfh-panel-header,
+body.wp-admin .wpvfh-panel-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 16px 20px !important;
+    border-bottom: 1px solid var(--wpvfh-border) !important;
+    background: var(--wpvfh-bg-light) !important;
+    flex-shrink: 0 !important;
 }
 
-.wpvfh-panel-title {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--wpvfh-text);
+.wpvfh-panel-title,
+.wp-admin .wpvfh-panel-title,
+body.wp-admin .wpvfh-panel-title {
+    margin: 0 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: var(--wpvfh-text) !important;
 }
 
 .wpvfh-panel-logo,
 .wpvfh-panel-header .wpvfh-panel-logo,
 .wpvfh-panel .wpvfh-panel-header .wpvfh-panel-logo,
 .elementor-widget-container .wpvfh-panel-logo,
-body .wpvfh-panel-logo {
+body .wpvfh-panel-logo,
+.wp-admin .wpvfh-panel-logo,
+body.wp-admin .wpvfh-panel-logo,
+body.wp-admin .wpvfh-panel-header .wpvfh-panel-logo {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -246,25 +253,64 @@ body .wpvfh-panel-logo {
 }
 
 /* Header Actions & Search Button */
-.wpvfh-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.wpvfh-header-actions,
+.wp-admin .wpvfh-header-actions,
+body.wp-admin .wpvfh-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
 }
 
-.wpvfh-search-btn {
+.wpvfh-search-btn,
+.wp-admin .wpvfh-search-btn,
+body.wp-admin .wpvfh-search-btn,
+.wp-admin button.wpvfh-search-btn,
+body.wp-admin button.wpvfh-search-btn {
     background: transparent !important;
     border: none !important;
     padding: 4px 8px !important;
     cursor: pointer !important;
     font-size: 16px !important;
     line-height: 1 !important;
-    opacity: 0.7;
+    opacity: 0.7 !important;
     transition: opacity 0.2s ease !important;
+    min-height: auto !important;
+    min-width: auto !important;
+    box-shadow: none !important;
 }
 
-.wpvfh-search-btn:hover {
-    opacity: 1;
+.wpvfh-search-btn:hover,
+.wp-admin .wpvfh-search-btn:hover,
+body.wp-admin .wpvfh-search-btn:hover {
+    opacity: 1 !important;
+    background: transparent !important;
+}
+
+/* Bouton Close */
+.wpvfh-close-btn,
+.wp-admin .wpvfh-close-btn,
+body.wp-admin .wpvfh-close-btn,
+.wp-admin button.wpvfh-close-btn,
+body.wp-admin button.wpvfh-close-btn {
+    background: transparent !important;
+    border: none !important;
+    padding: 4px 8px !important;
+    cursor: pointer !important;
+    font-size: 24px !important;
+    line-height: 1 !important;
+    opacity: 0.7 !important;
+    transition: opacity 0.2s ease !important;
+    min-height: auto !important;
+    min-width: auto !important;
+    box-shadow: none !important;
+    color: var(--wpvfh-text) !important;
+}
+
+.wpvfh-close-btn:hover,
+.wp-admin .wpvfh-close-btn:hover,
+body.wp-admin .wpvfh-close-btn:hover {
+    opacity: 1 !important;
+    background: transparent !important;
 }
 
 /* ==========================================================================
@@ -277,7 +323,11 @@ body .wpvfh-panel-logo {
 html body .wpvfh-tabs,
 html body.elementor-page .wpvfh-tabs,
 html body.elementor-default .wpvfh-tabs,
-.elementor .wpvfh-tabs {
+.elementor .wpvfh-tabs,
+.wp-admin .wpvfh-tabs,
+body.wp-admin .wpvfh-tabs,
+.wp-admin .wpvfh-panel .wpvfh-tabs,
+body.wp-admin .wpvfh-panel .wpvfh-tabs {
     display: flex !important;
     border-bottom: 2px solid var(--wpvfh-border) !important;
     background: var(--wpvfh-bg-light) !important;
@@ -298,7 +348,13 @@ html body.elementor-default .wpvfh-tab,
 html body.elementor-default .wpvfh-tabs .wpvfh-tab,
 .elementor .wpvfh-tab,
 .elementor .wpvfh-tabs .wpvfh-tab,
-.elementor-widget-container .wpvfh-tab {
+.elementor-widget-container .wpvfh-tab,
+.wp-admin .wpvfh-tab,
+.wp-admin .wpvfh-tabs .wpvfh-tab,
+.wp-admin button.wpvfh-tab,
+body.wp-admin .wpvfh-tab,
+body.wp-admin .wpvfh-tabs .wpvfh-tab,
+body.wp-admin button.wpvfh-tab {
     all: revert !important;
     flex: 1 !important;
     padding: 14px 16px !important;
@@ -326,6 +382,8 @@ html body.elementor-default .wpvfh-tabs .wpvfh-tab,
     letter-spacing: normal !important;
     line-height: 1.4 !important;
     box-shadow: none !important;
+    min-height: auto !important;
+    height: auto !important;
 }
 
 .wpvfh-container .wpvfh-tab:hover,
@@ -335,7 +393,11 @@ html body .wpvfh-tab:hover,
 html body .wpvfh-tabs .wpvfh-tab:hover,
 html body.elementor-page .wpvfh-tab:hover,
 html body.elementor-default .wpvfh-tab:hover,
-.elementor .wpvfh-tab:hover {
+.elementor .wpvfh-tab:hover,
+.wp-admin .wpvfh-tab:hover,
+.wp-admin .wpvfh-tabs .wpvfh-tab:hover,
+body.wp-admin .wpvfh-tab:hover,
+body.wp-admin .wpvfh-tabs .wpvfh-tab:hover {
     color: var(--wpvfh-text) !important;
     background: var(--wpvfh-bg-light) !important;
     background-color: var(--wpvfh-bg-light) !important;
@@ -351,7 +413,11 @@ html body .wpvfh-tab.active,
 html body .wpvfh-tabs .wpvfh-tab.active,
 html body.elementor-page .wpvfh-tab.active,
 html body.elementor-default .wpvfh-tab.active,
-.elementor .wpvfh-tab.active {
+.elementor .wpvfh-tab.active,
+.wp-admin .wpvfh-tab.active,
+.wp-admin .wpvfh-tabs .wpvfh-tab.active,
+body.wp-admin .wpvfh-tab.active,
+body.wp-admin .wpvfh-tabs .wpvfh-tab.active {
     color: var(--wpvfh-primary) !important;
     border: none !important;
     border-bottom: 3px solid var(--wpvfh-primary) !important;
