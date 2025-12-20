@@ -189,9 +189,10 @@ function wpvfh_get_metadata_groups_for_frontend() {
 			'name'     => wpvfh_get_group_label( $slug ),
 			'type'     => 'standard',
 			'settings' => array(
-				'enabled'         => $settings['enabled'],
-				'required'        => $settings['required'],
-				'show_in_sidebar' => $settings['show_in_sidebar'],
+				'enabled'             => $settings['enabled'],
+				'required'            => $settings['required'],
+				'show_in_sidebar'     => $settings['show_in_sidebar'],
+				'hide_empty_sections' => $settings['hide_empty_sections'],
 			),
 			'items'    => WPVFH_Options_Manager::get_items_by_type( $slug ),
 		);
@@ -213,9 +214,10 @@ function wpvfh_get_metadata_groups_for_frontend() {
 			'name'     => $group['name'],
 			'type'     => 'custom',
 			'settings' => array(
-				'enabled'         => $settings['enabled'],
-				'required'        => $settings['required'],
-				'show_in_sidebar' => $settings['show_in_sidebar'],
+				'enabled'             => $settings['enabled'],
+				'required'            => $settings['required'],
+				'show_in_sidebar'     => $settings['show_in_sidebar'],
+				'hide_empty_sections' => $settings['hide_empty_sections'],
 			),
 			'items'    => WPVFH_Options_Manager::get_custom_group_items( $slug ),
 		);

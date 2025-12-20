@@ -958,6 +958,7 @@
             var enabled = $panel.find('.wpvfh-group-enabled').is(':checked');
             var required = $panel.find('.wpvfh-group-required').is(':checked');
             var showInSidebar = $panel.find('.wpvfh-group-show-in-sidebar').is(':checked');
+            var hideEmptySections = $panel.find('.wpvfh-group-hide-empty-sections').is(':checked');
             var aiPrompt = $panel.find('.wpvfh-group-ai-prompt').val();
             var allowedRoles = $panel.find('.wpvfh-group-allowed-roles').val();
             var allowedUsers = $panel.find('.wpvfh-group-allowed-users').val();
@@ -973,6 +974,7 @@
                 enabled: enabled ? 'true' : 'false',
                 required: required ? 'true' : 'false',
                 show_in_sidebar: showInSidebar ? 'true' : 'false',
+                hide_empty_sections: hideEmptySections ? 'true' : 'false',
                 ai_prompt: aiPrompt,
                 allowed_roles: allowedRoles,
                 allowed_users: allowedUsers

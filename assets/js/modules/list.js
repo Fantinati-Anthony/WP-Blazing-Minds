@@ -170,7 +170,11 @@
                     });
                 });
 
-                // Mettre à jour les compteurs dans les titres de section
+                // Vérifier si on doit masquer les sections vides
+                const groupSettings = window.wpvfhData?.metadataGroups?.[groupSlug]?.settings;
+                const hideEmptySections = groupSettings?.hide_empty_sections || false;
+
+                // Mettre à jour les compteurs dans les titres de section et gérer la visibilité
                 sections.forEach(section => {
                     const value = section.dataset.value;
                     const count = groupedFeedbacks[value]?.length || 0;
@@ -184,6 +188,13 @@
                             title.appendChild(countSpan);
                         }
                         countSpan.textContent = count > 0 ? ` (${count})` : '';
+                    }
+
+                    // Afficher ou masquer la section selon le réglage
+                    if (hideEmptySections && count === 0) {
+                        section.style.display = 'none';
+                    } else {
+                        section.style.display = '';
                     }
                 });
 

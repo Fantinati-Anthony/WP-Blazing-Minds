@@ -178,6 +178,7 @@
         $enabled = isset( $_POST['enabled'] ) && $_POST['enabled'] === 'true';
         $required = isset( $_POST['required'] ) && $_POST['required'] === 'true';
         $show_in_sidebar = isset( $_POST['show_in_sidebar'] ) && $_POST['show_in_sidebar'] === 'true';
+        $hide_empty_sections = isset( $_POST['hide_empty_sections'] ) && $_POST['hide_empty_sections'] === 'true';
         $ai_prompt = isset( $_POST['ai_prompt'] ) ? sanitize_textarea_field( $_POST['ai_prompt'] ) : '';
 
         $allowed_roles = array();
@@ -193,12 +194,13 @@
         }
 
         $settings = array(
-            'enabled'         => $enabled,
-            'required'        => $required,
-            'show_in_sidebar' => $show_in_sidebar,
-            'allowed_roles'   => $allowed_roles,
-            'allowed_users'   => $allowed_users,
-            'ai_prompt'       => $ai_prompt,
+            'enabled'             => $enabled,
+            'required'            => $required,
+            'show_in_sidebar'     => $show_in_sidebar,
+            'hide_empty_sections' => $hide_empty_sections,
+            'allowed_roles'       => $allowed_roles,
+            'allowed_users'       => $allowed_users,
+            'ai_prompt'           => $ai_prompt,
         );
 
         if ( ! self::save_group_settings( $slug, $settings ) ) {
