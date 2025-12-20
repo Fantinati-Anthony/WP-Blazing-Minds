@@ -96,10 +96,10 @@ trait WPVFH_Admin_Settings_Tabs_Small {
      * @return void
      */
     public static function render_tab_ai() {
-        $ai_enabled = get_option( 'wpvfh_ai_enabled', false );
-        $api_key = get_option( 'wpvfh_ai_api_key', '' );
-        $system_prompt = get_option( 'wpvfh_ai_system_prompt', '' );
-        $analysis_prompt = get_option( 'wpvfh_ai_analysis_prompt', '' );
+        $ai_enabled = WPVFH_Database::get_setting( 'wpvfh_ai_enabled', false );
+        $api_key = WPVFH_Database::get_setting( 'wpvfh_ai_api_key', '' );
+        $system_prompt = WPVFH_Database::get_setting( 'wpvfh_ai_system_prompt', '' );
+        $analysis_prompt = WPVFH_Database::get_setting( 'wpvfh_ai_analysis_prompt', '' );
         ?>
         <div class="wpvfh-settings-section">
             <h2><?php esc_html_e( 'Intelligence Artificielle', 'blazing-feedback' ); ?></h2>

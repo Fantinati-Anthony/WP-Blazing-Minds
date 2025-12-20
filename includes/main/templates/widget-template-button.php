@@ -11,18 +11,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$icon_mode = get_option( 'wpvfh_icon_mode', 'emoji' );
-$icon_emoji = get_option( 'wpvfh_icon_emoji', '💬' );
-$icon_image_url = get_option( 'wpvfh_icon_image_url', '' );
-$button_style = get_option( 'wpvfh_button_style', 'detached' );
+$icon_mode = WPVFH_Database::get_setting( 'wpvfh_icon_mode', 'emoji' );
+$icon_emoji = WPVFH_Database::get_setting( 'wpvfh_icon_emoji', '💬' );
+$icon_image_url = WPVFH_Database::get_setting( 'wpvfh_icon_image_url', '' );
+$button_style = WPVFH_Database::get_setting( 'wpvfh_button_style', 'detached' );
 // Forme automatique selon la position (angle = quart de cercle, centre = demi-cercle)
 $corner_positions = array( 'bottom-right', 'bottom-left', 'top-right', 'top-left' );
 $button_shape = in_array( $button_position, $corner_positions, true ) ? 'quarter' : 'half';
-$button_size = absint( get_option( 'wpvfh_button_size', 56 ) );
-$button_border_radius = absint( get_option( 'wpvfh_button_border_radius', 50 ) );
-$button_border_radius_unit = get_option( 'wpvfh_button_border_radius_unit', 'percent' );
-$button_margin = absint( get_option( 'wpvfh_button_margin', 20 ) );
-$button_color = get_option( 'wpvfh_button_color', '#e74c3c' );
+$button_size = absint( WPVFH_Database::get_setting( 'wpvfh_button_size', 56 ) );
+$button_border_radius = absint( WPVFH_Database::get_setting( 'wpvfh_button_border_radius', 50 ) );
+$button_border_radius_unit = WPVFH_Database::get_setting( 'wpvfh_button_border_radius_unit', 'percent' );
+$button_margin = absint( WPVFH_Database::get_setting( 'wpvfh_button_margin', 20 ) );
+$button_color = WPVFH_Database::get_setting( 'wpvfh_button_color', '#e74c3c' );
 
 // Calculer les styles inline
 $btn_styles = array();

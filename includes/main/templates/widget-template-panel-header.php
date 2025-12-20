@@ -13,14 +13,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div class="wpvfh-panel-header">
 	<?php
-	$logo_mode = get_option( 'wpvfh_logo_mode', 'none' );
+	$logo_mode = WPVFH_Database::get_setting( 'wpvfh_logo_mode', 'none' );
 	$logo_url = '';
 	if ( $logo_mode === 'light' ) {
 		$logo_url = WPVFH_PLUGIN_URL . 'assets/logo/light-mode-feedback.png';
 	} elseif ( $logo_mode === 'dark' ) {
 		$logo_url = WPVFH_PLUGIN_URL . 'assets/logo/dark-mode-feedback.png';
 	} elseif ( $logo_mode === 'custom' ) {
-		$logo_url = get_option( 'wpvfh_logo_custom_url', '' );
+		$logo_url = WPVFH_Database::get_setting( 'wpvfh_logo_custom_url', '' );
 	}
 	if ( $logo_mode !== 'none' && $logo_url ) : ?>
 	<img src="<?php echo esc_url( $logo_url ); ?>" alt="<?php esc_attr_e( 'Blazing Feedback', 'blazing-feedback' ); ?>" class="wpvfh-panel-logo">

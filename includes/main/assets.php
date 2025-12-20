@@ -240,17 +240,17 @@ function wpvfh_enqueue_admin_assets( $hook ) {
  */
 function wpvfh_get_custom_colors_css() {
 	$colors = array(
-		'primary'       => get_option( 'wpvfh_color_primary', '#e74c3c' ),
-		'primary_hover' => get_option( 'wpvfh_color_primary_hover', '#c0392b' ),
-		'secondary'     => get_option( 'wpvfh_color_secondary', '#3498db' ),
-		'success'       => get_option( 'wpvfh_color_success', '#27ae60' ),
-		'warning'       => get_option( 'wpvfh_color_warning', '#f39c12' ),
-		'danger'        => get_option( 'wpvfh_color_danger', '#e74c3c' ),
-		'text'          => get_option( 'wpvfh_color_text', '#333333' ),
-		'text_light'    => get_option( 'wpvfh_color_text_light', '#666666' ),
-		'bg'            => get_option( 'wpvfh_color_bg', '#ffffff' ),
-		'bg_light'      => get_option( 'wpvfh_color_bg_light', '#f5f5f5' ),
-		'border'        => get_option( 'wpvfh_color_border', '#dddddd' ),
+		'primary'       => WPVFH_Database::get_setting( 'wpvfh_color_primary', '#e74c3c' ),
+		'primary_hover' => WPVFH_Database::get_setting( 'wpvfh_color_primary_hover', '#c0392b' ),
+		'secondary'     => WPVFH_Database::get_setting( 'wpvfh_color_secondary', '#3498db' ),
+		'success'       => WPVFH_Database::get_setting( 'wpvfh_color_success', '#27ae60' ),
+		'warning'       => WPVFH_Database::get_setting( 'wpvfh_color_warning', '#f39c12' ),
+		'danger'        => WPVFH_Database::get_setting( 'wpvfh_color_danger', '#e74c3c' ),
+		'text'          => WPVFH_Database::get_setting( 'wpvfh_color_text', '#333333' ),
+		'text_light'    => WPVFH_Database::get_setting( 'wpvfh_color_text_light', '#666666' ),
+		'bg'            => WPVFH_Database::get_setting( 'wpvfh_color_bg', '#ffffff' ),
+		'bg_light'      => WPVFH_Database::get_setting( 'wpvfh_color_bg_light', '#f5f5f5' ),
+		'border'        => WPVFH_Database::get_setting( 'wpvfh_color_border', '#dddddd' ),
 	);
 
 	$defaults = array(
@@ -304,7 +304,7 @@ function wpvfh_get_custom_colors_css() {
  */
 function wpvfh_get_custom_border_radius_css() {
 	$default = 8;
-	$value = intval( get_option( 'wpvfh_border_radius', $default ) );
+	$value = intval( WPVFH_Database::get_setting( 'wpvfh_border_radius', $default ) );
 
 	if ( $value === $default ) {
 		return '';

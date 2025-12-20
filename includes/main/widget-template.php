@@ -12,8 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Variables globales utilisées par les sous-templates
-$button_position = get_option( 'wpvfh_button_position', 'bottom-right' );
-$panel_position = get_option( 'wpvfh_panel_position', 'right' );
+$button_position = WPVFH_Database::get_setting( 'wpvfh_button_position', 'bottom-right' );
+$panel_position = WPVFH_Database::get_setting( 'wpvfh_panel_position', 'right' );
 
 // Chemin vers les templates
 $templates_dir = __DIR__ . '/templates/';

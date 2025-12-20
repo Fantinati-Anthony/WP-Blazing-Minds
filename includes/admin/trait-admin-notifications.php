@@ -26,7 +26,7 @@ trait WPVFH_Admin_Notifications {
      */
     public static function show_admin_notices() {
         // Notice de bienvenue (première activation) - ne s'affiche qu'une seule fois
-        $welcome_notice = get_option( 'wpvfh_welcome_notice_dismissed' );
+        $welcome_notice = WPVFH_Database::get_setting( 'wpvfh_welcome_notice_dismissed' );
         if ( false === $welcome_notice && current_user_can( 'manage_feedback' ) ) {
             ?>
             <div class="notice notice-info is-dismissible wpvfh-welcome-notice" data-notice="wpvfh-welcome">
@@ -51,7 +51,7 @@ trait WPVFH_Admin_Notifications {
             </script>
             <?php
             // Marquer comme vu dès l'affichage
-            update_option( 'wpvfh_welcome_notice_dismissed', '1' );
+            WPVFH_Database::update_setting( 'wpvfh_welcome_notice_dismissed', '1' );
         }
     }
 
@@ -82,11 +82,11 @@ trait WPVFH_Admin_Notifications {
  */
 function wpvfh_send_new_feedback_notification( $feedback_id, $data ) {
     // Vérifier si les notifications sont activées
-    if ( ! get_option( 'wpvfh_email_notifications', true ) ) {
+    if ( ! WPVFH_Database::get_setting( 'wpvfh_email_notifications', true ) ) {
         return;
     }
 
-    $to = get_option( 'wpvfh_notification_email', get_option( 'admin_email' ) );
+    $to = WPVFH_Database::get_setting( 'wpvfh_notification_email', get_option( 'admin_email' ) );
     if ( ! is_email( $to ) ) {
         return;
     }
