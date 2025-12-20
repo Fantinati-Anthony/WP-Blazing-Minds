@@ -16,10 +16,10 @@ $title = $is_edit ? __( 'Modifier le portefeuille', 'blazing-feedback' ) : __( '
 	<h1><?php echo esc_html( $title ); ?></h1>
 
 	<form method="post" class="bzmi-form">
-		<?php wp_nonce_field( 'save_portfolio' ); ?>
+		<?php wp_nonce_field( 'bzmi_save_portfolio' ); ?>
 		<input type="hidden" name="action" value="save">
 		<?php if ( $is_edit ) : ?>
-			<input type="hidden" name="id" value="<?php echo intval( $portfolio->id ); ?>">
+			<input type="hidden" name="portfolio_id" value="<?php echo intval( $portfolio->id ); ?>">
 		<?php endif; ?>
 
 		<table class="form-table">
