@@ -23,6 +23,12 @@ class BZMI_Admin_Portfolios {
 	 * @return void
 	 */
 	public static function render_page() {
+		// Traiter la sauvegarde en premier (POST)
+		if ( isset( $_POST['action'] ) && 'save' === $_POST['action'] ) {
+			self::handle_save();
+			return;
+		}
+
 		$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : 'list';
 
 		BZMI_Admin::display_messages();
@@ -49,10 +55,6 @@ class BZMI_Admin_Portfolios {
 	 * @return void
 	 */
 	private static function render_list() {
-		if ( isset( $_POST['action'] ) && 'save' === $_POST['action'] ) {
-			self::handle_save();
-		}
-
 		$per_page = BZMI_Database::get_setting( 'items_per_page', 20 );
 		$current_page = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
 		$client_id = isset( $_GET['client_id'] ) ? intval( $_GET['client_id'] ) : 0;
