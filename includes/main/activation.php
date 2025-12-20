@@ -40,7 +40,7 @@ function wpvfh_activate() {
 	wpvfh_create_upload_directory();
 
 	// Sauvegarder la version pour les mises à jour futures
-	update_option( 'wpvfh_version', WPVFH_VERSION );
+	WPVFH_Database::update_setting( 'wpvfh_version', WPVFH_VERSION );
 
 	/**
 	 * Action déclenchée après l'activation du plugin

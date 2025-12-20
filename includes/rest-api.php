@@ -1401,7 +1401,7 @@ class WPVFH_REST_API {
 
         foreach ( $pages_data as $page ) {
             // Vérifier si la page est validée
-            $validated = get_option( 'wpvfh_validated_pages', array() );
+            $validated = WPVFH_Database::get_setting( 'wpvfh_validated_pages', array() );
             $is_validated = in_array( $page->url, $validated, true );
 
             // Essayer de récupérer le titre de la page WordPress
@@ -1438,10 +1438,10 @@ class WPVFH_REST_API {
         }
 
         // Ajouter à la liste des pages validées
-        $validated = get_option( 'wpvfh_validated_pages', array() );
+        $validated = WPVFH_Database::get_setting( 'wpvfh_validated_pages', array() );
         if ( ! in_array( $url, $validated, true ) ) {
             $validated[] = $url;
-            update_option( 'wpvfh_validated_pages', $validated );
+            WPVFH_Database::update_setting( 'wpvfh_validated_pages', $validated );
         }
 
         // Marquer tous les feedbacks de cette page comme résolus (si pas déjà)

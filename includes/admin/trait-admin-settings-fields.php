@@ -65,9 +65,9 @@ trait WPVFH_Admin_Settings_Fields {
      * @return void
      */
     public static function render_icon_mode_field() {
-        $mode = get_option( 'wpvfh_icon_mode', 'emoji' );
-        $emoji = get_option( 'wpvfh_icon_emoji', '💬' );
-        $image_url = get_option( 'wpvfh_icon_image_url', '' );
+        $mode = WPVFH_Database::get_setting( 'wpvfh_icon_mode', 'emoji' );
+        $emoji = WPVFH_Database::get_setting( 'wpvfh_icon_emoji', '💬' );
+        $image_url = WPVFH_Database::get_setting( 'wpvfh_icon_image_url', '' );
         ?>
         <fieldset>
             <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
@@ -172,7 +172,7 @@ trait WPVFH_Admin_Settings_Fields {
      * @return void
      */
     public static function render_screenshot_field() {
-        $value = get_option( 'wpvfh_screenshot_enabled', true );
+        $value = WPVFH_Database::get_setting( 'wpvfh_screenshot_enabled', true );
         ?>
         <label>
             <input type="checkbox" name="wpvfh_screenshot_enabled" value="1" <?php checked( $value, true ); ?>>
@@ -191,7 +191,7 @@ trait WPVFH_Admin_Settings_Fields {
      * @return void
      */
     public static function render_guest_field() {
-        $value = get_option( 'wpvfh_guest_feedback', false );
+        $value = WPVFH_Database::get_setting( 'wpvfh_guest_feedback', false );
         ?>
         <label>
             <input type="checkbox" name="wpvfh_guest_feedback" value="1" <?php checked( $value, true ); ?>>
@@ -210,7 +210,7 @@ trait WPVFH_Admin_Settings_Fields {
      * @return void
      */
     public static function render_post_feedback_action_field() {
-        $value = get_option( 'wpvfh_post_feedback_action', 'close' );
+        $value = WPVFH_Database::get_setting( 'wpvfh_post_feedback_action', 'close' );
         ?>
         <fieldset>
             <label style="display: block; margin-bottom: 8px;">
@@ -235,7 +235,7 @@ trait WPVFH_Admin_Settings_Fields {
      * @return void
      */
     public static function render_position_field() {
-        $value = get_option( 'wpvfh_button_position', 'bottom-right' );
+        $value = WPVFH_Database::get_setting( 'wpvfh_button_position', 'bottom-right' );
         $positions = array(
             'top-left'      => __( 'Haut gauche', 'blazing-feedback' ),
             'top-center'    => __( 'Haut centre', 'blazing-feedback' ),
@@ -373,7 +373,7 @@ trait WPVFH_Admin_Settings_Fields {
      * @return void
      */
     public static function render_panel_position_field() {
-        $value = get_option( 'wpvfh_panel_position', 'right' );
+        $value = WPVFH_Database::get_setting( 'wpvfh_panel_position', 'right' );
         ?>
         <fieldset>
             <label style="display: inline-flex; align-items: center; gap: 5px; margin-right: 20px;">
@@ -410,7 +410,7 @@ trait WPVFH_Admin_Settings_Fields {
      * @return void
      */
     public static function render_color_field() {
-        $value = get_option( 'wpvfh_button_color', '#e74c3c' );
+        $value = WPVFH_Database::get_setting( 'wpvfh_button_color', '#e74c3c' );
         ?>
         <input type="color" name="wpvfh_button_color" value="<?php echo esc_attr( $value ); ?>">
         <p class="description">
@@ -426,7 +426,7 @@ trait WPVFH_Admin_Settings_Fields {
      * @return void
      */
     public static function render_pages_field() {
-        $value = get_option( 'wpvfh_enabled_pages', '*' );
+        $value = WPVFH_Database::get_setting( 'wpvfh_enabled_pages', '*' );
         ?>
         <textarea name="wpvfh_enabled_pages" rows="4" class="large-text code"><?php echo esc_textarea( $value ); ?></textarea>
         <p class="description">
@@ -442,7 +442,7 @@ trait WPVFH_Admin_Settings_Fields {
      * @return void
      */
     public static function render_email_notifications_field() {
-        $value = get_option( 'wpvfh_email_notifications', true );
+        $value = WPVFH_Database::get_setting( 'wpvfh_email_notifications', true );
         ?>
         <label>
             <input type="checkbox" name="wpvfh_email_notifications" value="1" <?php checked( $value, true ); ?>>
@@ -458,7 +458,7 @@ trait WPVFH_Admin_Settings_Fields {
      * @return void
      */
     public static function render_notification_email_field() {
-        $value = get_option( 'wpvfh_notification_email', get_option( 'admin_email' ) );
+        $value = WPVFH_Database::get_setting( 'wpvfh_notification_email', get_option( 'admin_email' ) );
         ?>
         <input type="email" name="wpvfh_notification_email" value="<?php echo esc_attr( $value ); ?>" class="regular-text">
         <p class="description">

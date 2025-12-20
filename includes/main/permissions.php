@@ -46,5 +46,5 @@ function wpvfh_is_screenshot_enabled() {
 	 * @since 1.0.0
 	 * @param bool $enabled Activé ou non (défaut: true)
 	 */
-	return apply_filters( 'wpvfh_screenshot_enabled', get_option( 'wpvfh_screenshot_enabled', true ) );
+	return apply_filters( 'wpvfh_screenshot_enabled', WPVFH_Database::get_setting( 'wpvfh_screenshot_enabled', true ) );
 }

@@ -84,51 +84,51 @@ trait WPVFH_Admin_Settings_Design {
 	 * @return array
 	 */
 	private static function get_design_options() {
-		$button_position = get_option( 'wpvfh_button_position', 'bottom-right' );
+		$button_position = WPVFH_Database::get_setting( 'wpvfh_button_position', 'bottom-right' );
 		$corner_positions = array( 'bottom-right', 'bottom-left', 'top-right', 'top-left' );
 
 		return array(
 			// Mode du thème
-			'theme_mode'           => get_option( 'wpvfh_theme_mode', 'system' ),
+			'theme_mode'           => WPVFH_Database::get_setting( 'wpvfh_theme_mode', 'system' ),
 
 			// Icônes mode clair
-			'light_icon_type'      => get_option( 'wpvfh_light_icon_type', 'emoji' ),
-			'light_icon_emoji'     => get_option( 'wpvfh_light_icon_emoji', '💬' ),
-			'light_icon_url'       => get_option( 'wpvfh_light_icon_url', '' ),
+			'light_icon_type'      => WPVFH_Database::get_setting( 'wpvfh_light_icon_type', 'emoji' ),
+			'light_icon_emoji'     => WPVFH_Database::get_setting( 'wpvfh_light_icon_emoji', '💬' ),
+			'light_icon_url'       => WPVFH_Database::get_setting( 'wpvfh_light_icon_url', '' ),
 
 			// Icônes mode sombre
-			'dark_icon_type'       => get_option( 'wpvfh_dark_icon_type', 'emoji' ),
-			'dark_icon_emoji'      => get_option( 'wpvfh_dark_icon_emoji', '💬' ),
-			'dark_icon_url'        => get_option( 'wpvfh_dark_icon_url', '' ),
+			'dark_icon_type'       => WPVFH_Database::get_setting( 'wpvfh_dark_icon_type', 'emoji' ),
+			'dark_icon_emoji'      => WPVFH_Database::get_setting( 'wpvfh_dark_icon_emoji', '💬' ),
+			'dark_icon_url'        => WPVFH_Database::get_setting( 'wpvfh_dark_icon_url', '' ),
 
 			// URLs par défaut
 			'default_light_icon'   => WPVFH_PLUGIN_URL . 'assets/logo/light-mode-feedback.png',
 			'default_dark_icon'    => WPVFH_PLUGIN_URL . 'assets/logo/dark-mode-feedback.png',
 
 			// Logos du panneau
-			'panel_logo_light_url' => get_option( 'wpvfh_panel_logo_light_url', '' ),
-			'panel_logo_dark_url'  => get_option( 'wpvfh_panel_logo_dark_url', '' ),
+			'panel_logo_light_url' => WPVFH_Database::get_setting( 'wpvfh_panel_logo_light_url', '' ),
+			'panel_logo_dark_url'  => WPVFH_Database::get_setting( 'wpvfh_panel_logo_dark_url', '' ),
 
 			// Bouton
-			'button_color'         => get_option( 'wpvfh_button_color', '#FE5100' ),
-			'button_color_hover'   => get_option( 'wpvfh_button_color_hover', '#E04800' ),
-			'button_size'          => get_option( 'wpvfh_button_size', 56 ),
-			'button_style'         => get_option( 'wpvfh_button_style', 'detached' ),
+			'button_color'         => WPVFH_Database::get_setting( 'wpvfh_button_color', '#FE5100' ),
+			'button_color_hover'   => WPVFH_Database::get_setting( 'wpvfh_button_color_hover', '#E04800' ),
+			'button_size'          => WPVFH_Database::get_setting( 'wpvfh_button_size', 56 ),
+			'button_style'         => WPVFH_Database::get_setting( 'wpvfh_button_style', 'detached' ),
 			'button_position'      => $button_position,
-			'border_radius'        => get_option( 'wpvfh_button_border_radius', 50 ),
-			'border_radius_unit'   => get_option( 'wpvfh_button_border_radius_unit', 'percent' ),
-			'button_margin'        => get_option( 'wpvfh_button_margin', 20 ),
+			'border_radius'        => WPVFH_Database::get_setting( 'wpvfh_button_border_radius', 50 ),
+			'border_radius_unit'   => WPVFH_Database::get_setting( 'wpvfh_button_border_radius_unit', 'percent' ),
+			'button_margin'        => WPVFH_Database::get_setting( 'wpvfh_button_margin', 20 ),
 
 			// Bordure et ombre
-			'button_border_width'  => get_option( 'wpvfh_button_border_width', 0 ),
-			'button_border_color'  => get_option( 'wpvfh_button_border_color', '#ffffff' ),
-			'button_shadow_blur'   => get_option( 'wpvfh_button_shadow_blur', 12 ),
-			'button_shadow_opacity'=> get_option( 'wpvfh_button_shadow_opacity', 15 ),
-			'button_shadow_color'  => get_option( 'wpvfh_button_shadow_color', '#000000' ),
+			'button_border_width'  => WPVFH_Database::get_setting( 'wpvfh_button_border_width', 0 ),
+			'button_border_color'  => WPVFH_Database::get_setting( 'wpvfh_button_border_color', '#ffffff' ),
+			'button_shadow_blur'   => WPVFH_Database::get_setting( 'wpvfh_button_shadow_blur', 12 ),
+			'button_shadow_opacity'=> WPVFH_Database::get_setting( 'wpvfh_button_shadow_opacity', 15 ),
+			'button_shadow_color'  => WPVFH_Database::get_setting( 'wpvfh_button_shadow_color', '#000000' ),
 
 			// Badge
-			'badge_bg_color'       => get_option( 'wpvfh_badge_bg_color', '#263e4b' ),
-			'badge_text_color'     => get_option( 'wpvfh_badge_text_color', '#ffffff' ),
+			'badge_bg_color'       => WPVFH_Database::get_setting( 'wpvfh_badge_bg_color', '#263e4b' ),
+			'badge_text_color'     => WPVFH_Database::get_setting( 'wpvfh_badge_text_color', '#ffffff' ),
 
 			// Helper
 			'is_corner'            => in_array( $button_position, $corner_positions, true ),
@@ -143,17 +143,17 @@ trait WPVFH_Admin_Settings_Design {
 	 */
 	public static function get_theme_colors() {
 		return array(
-			'primary'       => get_option( 'wpvfh_color_primary', '#e74c3c' ),
-			'primary_hover' => get_option( 'wpvfh_color_primary_hover', '#c0392b' ),
-			'secondary'     => get_option( 'wpvfh_color_secondary', '#3498db' ),
-			'success'       => get_option( 'wpvfh_color_success', '#27ae60' ),
-			'warning'       => get_option( 'wpvfh_color_warning', '#f39c12' ),
-			'danger'        => get_option( 'wpvfh_color_danger', '#e74c3c' ),
-			'text'          => get_option( 'wpvfh_color_text', '#333333' ),
-			'text_light'    => get_option( 'wpvfh_color_text_light', '#666666' ),
-			'bg'            => get_option( 'wpvfh_color_bg', '#ffffff' ),
-			'bg_light'      => get_option( 'wpvfh_color_bg_light', '#f5f5f5' ),
-			'border'        => get_option( 'wpvfh_color_border', '#dddddd' ),
+			'primary'       => WPVFH_Database::get_setting( 'wpvfh_color_primary', '#e74c3c' ),
+			'primary_hover' => WPVFH_Database::get_setting( 'wpvfh_color_primary_hover', '#c0392b' ),
+			'secondary'     => WPVFH_Database::get_setting( 'wpvfh_color_secondary', '#3498db' ),
+			'success'       => WPVFH_Database::get_setting( 'wpvfh_color_success', '#27ae60' ),
+			'warning'       => WPVFH_Database::get_setting( 'wpvfh_color_warning', '#f39c12' ),
+			'danger'        => WPVFH_Database::get_setting( 'wpvfh_color_danger', '#e74c3c' ),
+			'text'          => WPVFH_Database::get_setting( 'wpvfh_color_text', '#333333' ),
+			'text_light'    => WPVFH_Database::get_setting( 'wpvfh_color_text_light', '#666666' ),
+			'bg'            => WPVFH_Database::get_setting( 'wpvfh_color_bg', '#ffffff' ),
+			'bg_light'      => WPVFH_Database::get_setting( 'wpvfh_color_bg_light', '#f5f5f5' ),
+			'border'        => WPVFH_Database::get_setting( 'wpvfh_color_border', '#dddddd' ),
 		);
 	}
 

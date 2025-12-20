@@ -21,7 +21,7 @@ class WPVFH_Database {
     /**
      * Database version
      */
-    const DB_VERSION = '1.3.0';
+    const DB_VERSION = '1.4.0';
 
     /**
      * Option name for database version
@@ -38,6 +38,14 @@ class WPVFH_Database {
     const TABLE_METADATA_ITEMS  = 'blazingfeedback_metadata_items';
     const TABLE_CUSTOM_GROUPS   = 'blazingfeedback_custom_groups';
     const TABLE_GROUP_SETTINGS  = 'blazingfeedback_group_settings';
+    const TABLE_SETTINGS        = 'blazingfeedback_settings';
+
+    /**
+     * Settings cache to avoid repeated DB queries
+     *
+     * @var array|null
+     */
+    private static $settings_cache = null;
 
     /**
      * Get table name with WordPress base prefix
@@ -70,6 +78,7 @@ class WPVFH_Database {
         self::create_metadata_items_table( $charset_collate );
         self::create_custom_groups_table( $charset_collate );
         self::create_group_settings_table( $charset_collate );
+        self::create_settings_table( $charset_collate );
 
         // Run migrations if updating from a previous version
         if ( $current_version !== '0.0.0' && version_compare( $current_version, self::DB_VERSION, '<' ) ) {
@@ -295,6 +304,29 @@ class WPVFH_Database {
     }
 
     /**
+     * Create settings table
+     *
+     * @param string $charset_collate Charset collate string.
+     */
+    private static function create_settings_table( $charset_collate ) {
+        $table_name = self::get_table_name( self::TABLE_SETTINGS );
+
+        $sql = "CREATE TABLE $table_name (
+            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            option_name varchar(191) NOT NULL,
+            option_value longtext DEFAULT NULL,
+            autoload varchar(20) NOT NULL DEFAULT 'yes',
+            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY option_name (option_name),
+            KEY autoload (autoload)
+        ) $charset_collate;";
+
+        dbDelta( $sql );
+    }
+
+    /**
      * Check if database needs update
      *
      * @return bool True if update needed.
@@ -323,6 +355,132 @@ class WPVFH_Database {
         // Migration 1.3.0: Add sort_order column to group_settings
         if ( version_compare( $from_version, '1.3.0', '<' ) ) {
             self::migrate_130_sort_order();
+        }
+
+        // Migration 1.4.0: Migrate settings from wp_options to custom table
+        if ( version_compare( $from_version, '1.4.0', '<' ) ) {
+            self::migrate_140_settings_to_table();
+        }
+    }
+
+    /**
+     * Migration 1.4.0: Migrate settings from wp_options to custom table
+     *
+     * @since 1.4.0
+     */
+    private static function migrate_140_settings_to_table() {
+        global $wpdb;
+
+        // List of all plugin options to migrate
+        $options_to_migrate = array(
+            // Design - Button
+            'wpvfh_button_position',
+            'wpvfh_panel_position',
+            'wpvfh_button_color',
+            // Design - Theme mode
+            'wpvfh_theme_mode',
+            // Design - Light mode icons
+            'wpvfh_light_icon_type',
+            'wpvfh_light_icon_emoji',
+            'wpvfh_light_icon_url',
+            // Design - Dark mode icons
+            'wpvfh_dark_icon_type',
+            'wpvfh_dark_icon_emoji',
+            'wpvfh_dark_icon_url',
+            // Design - Border radius
+            'wpvfh_border_radius',
+            // Design - Colors (light mode)
+            'wpvfh_light_primary',
+            'wpvfh_light_secondary',
+            'wpvfh_light_accent',
+            'wpvfh_light_text',
+            'wpvfh_light_text_light',
+            'wpvfh_light_bg',
+            'wpvfh_light_border',
+            'wpvfh_light_pin_item_bg',
+            'wpvfh_light_pin_item_bg_hover',
+            'wpvfh_light_pin_item_bg_selected',
+            'wpvfh_light_pin_item_border',
+            'wpvfh_light_pin_item_border_hover',
+            'wpvfh_light_pin_item_text',
+            'wpvfh_light_pin_item_text_light',
+            'wpvfh_light_footer_bg',
+            'wpvfh_light_footer_border',
+            'wpvfh_light_footer_text',
+            // Design - Colors (dark mode)
+            'wpvfh_dark_primary',
+            'wpvfh_dark_secondary',
+            'wpvfh_dark_accent',
+            'wpvfh_dark_text',
+            'wpvfh_dark_text_light',
+            'wpvfh_dark_bg',
+            'wpvfh_dark_border',
+            'wpvfh_dark_pin_item_bg',
+            'wpvfh_dark_pin_item_bg_hover',
+            'wpvfh_dark_pin_item_bg_selected',
+            'wpvfh_dark_pin_item_border',
+            'wpvfh_dark_pin_item_border_hover',
+            'wpvfh_dark_pin_item_text',
+            'wpvfh_dark_pin_item_text_light',
+            'wpvfh_dark_footer_bg',
+            'wpvfh_dark_footer_border',
+            'wpvfh_dark_footer_text',
+            // Functionality
+            'wpvfh_screenshot_enabled',
+            'wpvfh_guest_feedback',
+            'wpvfh_post_feedback_action',
+            'wpvfh_enabled_pages',
+            // Notifications
+            'wpvfh_email_notifications',
+            'wpvfh_notification_email',
+            // AI
+            'wpvfh_ai_enabled',
+            'wpvfh_ai_api_key',
+            'wpvfh_ai_system_prompt',
+            'wpvfh_ai_analysis_prompt',
+            // Legacy icon settings
+            'wpvfh_icon_mode',
+            'wpvfh_icon_emoji',
+            'wpvfh_icon_image_url',
+            // Admin
+            'wpvfh_welcome_notice_dismissed',
+        );
+
+        $table_name = self::get_table_name( self::TABLE_SETTINGS );
+
+        foreach ( $options_to_migrate as $option_name ) {
+            // Check if option exists in wp_options
+            $value = get_option( $option_name, null );
+
+            if ( $value !== null ) {
+                // Check if already exists in our table
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                $exists = $wpdb->get_var(
+                    $wpdb->prepare(
+                        "SELECT id FROM $table_name WHERE option_name = %s",
+                        $option_name
+                    )
+                );
+
+                if ( ! $exists ) {
+                    // Serialize if needed
+                    $serialized_value = maybe_serialize( $value );
+
+                    // Insert into our table
+                    $wpdb->insert(
+                        $table_name,
+                        array(
+                            'option_name'  => $option_name,
+                            'option_value' => $serialized_value,
+                            'autoload'     => 'yes',
+                        ),
+                        array( '%s', '%s', '%s' )
+                    );
+
+                    // Delete from wp_options
+                    delete_option( $option_name );
+                }
+            }
         }
     }
 
@@ -1600,6 +1758,162 @@ class WPVFH_Database {
         }
 
         return $result;
+    }
+
+    // =========================================================================
+    // SETTINGS CRUD OPERATIONS
+    // =========================================================================
+
+    /**
+     * Get a setting value from custom table
+     *
+     * @since 1.4.0
+     * @param string $option_name Option name.
+     * @param mixed  $default     Default value if not found.
+     * @return mixed Option value or default.
+     */
+    public static function get_setting( $option_name, $default = false ) {
+        global $wpdb;
+
+        // Check cache first
+        if ( self::$settings_cache === null ) {
+            self::load_settings_cache();
+        }
+
+        if ( isset( self::$settings_cache[ $option_name ] ) ) {
+            return self::$settings_cache[ $option_name ];
+        }
+
+        return $default;
+    }
+
+    /**
+     * Update a setting value in custom table
+     *
+     * @since 1.4.0
+     * @param string $option_name  Option name.
+     * @param mixed  $option_value Option value.
+     * @param string $autoload     Whether to autoload (yes/no).
+     * @return bool True on success.
+     */
+    public static function update_setting( $option_name, $option_value, $autoload = 'yes' ) {
+        global $wpdb;
+
+        $table_name = self::get_table_name( self::TABLE_SETTINGS );
+        $serialized_value = maybe_serialize( $option_value );
+
+        // Check if exists
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $exists = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT id FROM $table_name WHERE option_name = %s",
+                $option_name
+            )
+        );
+
+        if ( $exists ) {
+            $result = $wpdb->update(
+                $table_name,
+                array(
+                    'option_value' => $serialized_value,
+                    'autoload'     => $autoload,
+                ),
+                array( 'option_name' => $option_name ),
+                array( '%s', '%s' ),
+                array( '%s' )
+            );
+        } else {
+            $result = $wpdb->insert(
+                $table_name,
+                array(
+                    'option_name'  => $option_name,
+                    'option_value' => $serialized_value,
+                    'autoload'     => $autoload,
+                ),
+                array( '%s', '%s', '%s' )
+            );
+        }
+
+        // Update cache
+        if ( $result !== false ) {
+            if ( self::$settings_cache === null ) {
+                self::$settings_cache = array();
+            }
+            self::$settings_cache[ $option_name ] = $option_value;
+        }
+
+        return $result !== false;
+    }
+
+    /**
+     * Delete a setting from custom table
+     *
+     * @since 1.4.0
+     * @param string $option_name Option name.
+     * @return bool True on success.
+     */
+    public static function delete_setting( $option_name ) {
+        global $wpdb;
+
+        $table_name = self::get_table_name( self::TABLE_SETTINGS );
+
+        $result = $wpdb->delete(
+            $table_name,
+            array( 'option_name' => $option_name ),
+            array( '%s' )
+        );
+
+        // Remove from cache
+        if ( self::$settings_cache !== null && isset( self::$settings_cache[ $option_name ] ) ) {
+            unset( self::$settings_cache[ $option_name ] );
+        }
+
+        return $result !== false;
+    }
+
+    /**
+     * Load all autoload settings into cache
+     *
+     * @since 1.4.0
+     * @return void
+     */
+    private static function load_settings_cache() {
+        global $wpdb;
+
+        self::$settings_cache = array();
+
+        $table_name = self::get_table_name( self::TABLE_SETTINGS );
+
+        // Check if table exists
+        $table_exists = $wpdb->get_var(
+            $wpdb->prepare(
+                "SHOW TABLES LIKE %s",
+                $table_name
+            )
+        );
+
+        if ( ! $table_exists ) {
+            return;
+        }
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $results = $wpdb->get_results( "SELECT option_name, option_value FROM $table_name WHERE autoload = 'yes'" );
+
+        if ( $results ) {
+            foreach ( $results as $row ) {
+                self::$settings_cache[ $row->option_name ] = maybe_unserialize( $row->option_value );
+            }
+        }
+    }
+
+    /**
+     * Clear settings cache (useful after direct DB updates)
+     *
+     * @since 1.4.0
+     * @return void
+     */
+    public static function clear_settings_cache() {
+        self::$settings_cache = null;
     }
 
     // =========================================================================

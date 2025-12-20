@@ -36,7 +36,7 @@ trait WPVFH_Admin_Settings_Design_Border_Radius {
 	 */
 	public static function render_design_border_radius_section() {
 		$default = self::get_border_radius_default();
-		$value = get_option( 'wpvfh_border_radius', $default );
+		$value = WPVFH_Database::get_setting( 'wpvfh_border_radius', $default );
 		?>
 		<div class="wpvfh-settings-section">
 			<h2><?php esc_html_e( 'Arrondis des coins (Border Radius)', 'blazing-feedback' ); ?></h2>
@@ -188,7 +188,7 @@ trait WPVFH_Admin_Settings_Design_Border_Radius {
 	 */
 	public static function get_custom_border_radius_css() {
 		$default = self::get_border_radius_default();
-		$value = intval( get_option( 'wpvfh_border_radius', $default ) );
+		$value = intval( WPVFH_Database::get_setting( 'wpvfh_border_radius', $default ) );
 
 		if ( $value === $default ) {
 			return '';
