@@ -696,7 +696,8 @@ button#wpvfh-validate-page-btn {
 }
 
 .wpvfh-subtab-text {
-    display: none;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 /* Badge compteur pour subtabs */

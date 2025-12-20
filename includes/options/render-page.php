@@ -125,6 +125,12 @@
                         <span class="wpvfh-toggle-slider"></span>
                     </label>
                     <span class="wpvfh-toggle-label"><?php esc_html_e( 'Sidebar', 'blazing-feedback' ); ?></span>
+                    <span class="wpvfh-toggle-separator">|</span>
+                    <label class="wpvfh-toggle">
+                        <input type="checkbox" class="wpvfh-group-hide-empty-sections" <?php checked( $group_settings['hide_empty_sections'] ); ?>>
+                        <span class="wpvfh-toggle-slider"></span>
+                    </label>
+                    <span class="wpvfh-toggle-label"><?php esc_html_e( 'Masquer vides', 'blazing-feedback' ); ?></span>
                     <button type="button" class="button wpvfh-group-settings-btn" title="<?php esc_attr_e( 'Paramètres du groupe', 'blazing-feedback' ); ?>">
                         <span class="dashicons dashicons-admin-generic"></span>
                     </button>
