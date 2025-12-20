@@ -59,16 +59,6 @@ function wpvfh() {
 }
 
 /**
- * Fonction helper pour accéder à la configuration IA
- *
- * @since 2.0.0
- * @return BZMI_AI_Config
- */
-function bzmi_ai() {
-	return BZMI_AI_Config::get_instance();
-}
-
-/**
  * Alias pour la compatibilité - Blazing Minds
  *
  * @since 2.0.0
