@@ -9,6 +9,32 @@
     const Validation = {
         init: function(widget) {
             this.widget = widget;
+            // Construire la liste des statuts "traités" à partir de la config
+            this.treatedStatuses = this.getTreatedStatuses();
+        },
+
+        /**
+         * Récupérer les statuts considérés comme traités depuis la config
+         */
+        getTreatedStatuses: function() {
+            const treatedList = [];
+            const config = this.widget.config;
+
+            // Chercher dans metadataGroups.statuses.items
+            if (config.metadataGroups && config.metadataGroups.statuses && config.metadataGroups.statuses.items) {
+                config.metadataGroups.statuses.items.forEach(status => {
+                    if (status.is_treated) {
+                        treatedList.push(status.id);
+                    }
+                });
+            }
+
+            // Fallback: si aucun statut n'est marqué comme traité, utiliser les valeurs par défaut
+            if (treatedList.length === 0) {
+                return ['resolved', 'rejected'];
+            }
+
+            return treatedList;
         },
 
         /**
@@ -20,7 +46,9 @@
 
             const feedbacks = this.widget.state.currentFeedbacks || [];
             const totalCount = feedbacks.length;
-            const resolvedCount = feedbacks.filter(f => f.status === 'resolved' || f.status === 'rejected').length;
+
+            // Utiliser la liste des statuts traités depuis la config
+            const resolvedCount = feedbacks.filter(f => this.treatedStatuses.includes(f.status)).length;
             const allResolved = totalCount > 0 && resolvedCount === totalCount;
 
             section.hidden = totalCount === 0;
