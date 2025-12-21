@@ -408,21 +408,35 @@
    Modals (Confirmation, Validation)
    ========================================================================== */
 
-.wpvfh-modal {
+/* Modales du widget - cachées par défaut avec hidden attribute */
+#wpvfh-confirm-modal,
+#wpvfh-validate-modal,
+#wpvfh-search-modal,
+#wpvfh-screenshot-editor {
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 2147483647;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     padding: 20px;
     height: 100vh;
 }
 
-.wpvfh-modal[hidden] {
-    display: none;
+#wpvfh-confirm-modal:not([hidden]),
+#wpvfh-validate-modal:not([hidden]),
+#wpvfh-search-modal:not([hidden]),
+#wpvfh-screenshot-editor:not([hidden]) {
+    display: flex;
+}
+
+#wpvfh-confirm-modal[hidden],
+#wpvfh-validate-modal[hidden],
+#wpvfh-search-modal[hidden],
+#wpvfh-screenshot-editor[hidden] {
+    display: none !important;
 }
 
 .wpvfh-modal-overlay {
