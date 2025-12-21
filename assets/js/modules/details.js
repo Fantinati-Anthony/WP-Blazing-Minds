@@ -362,6 +362,17 @@
             try {
                 await this.widget.modules.api.request('PUT', `feedbacks/${feedbackId}/status`, { status });
 
+                // Mettre à jour l'état local du feedback
+                const feedback = this.widget.state.currentFeedbacks.find(f => f.id == feedbackId);
+                if (feedback) {
+                    feedback.status = status;
+                }
+
+                // Mettre à jour le feedback courant aussi
+                if (this.state.currentFeedback && this.state.currentFeedback.id == feedbackId) {
+                    this.state.currentFeedback.status = status;
+                }
+
                 if (window.BlazingAnnotation) {
                     window.BlazingAnnotation.updatePin(feedbackId, { status });
                 }
@@ -376,6 +387,21 @@
                             ${statusEmoji} ${statusLabel}
                         </span>
                     `;
+                }
+
+                // Mettre à jour les compteurs de filtres
+                if (this.widget.modules.filters) {
+                    this.widget.modules.filters.updateFilterCounts();
+                }
+
+                // Re-rendre la liste (le feedback reste visible même si le filtre change)
+                if (this.widget.modules.list) {
+                    this.widget.modules.list.renderPinsList();
+                }
+
+                // Mettre à jour la barre de progression
+                if (this.widget.modules.validation) {
+                    this.widget.modules.validation.updateValidationSection();
                 }
 
                 this.widget.modules.notifications.show('Statut mis à jour', 'success');

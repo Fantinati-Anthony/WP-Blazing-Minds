@@ -68,7 +68,8 @@
             try {
                 const currentUrl = this.widget.config.currentUrl || window.location.href;
                 const url = encodeURIComponent(currentUrl);
-                const response = await this.request('GET', `feedbacks/by-url?url=${url}`);
+                // Toujours inclure les feedbacks resolved/rejected pour les afficher dans la liste
+                const response = await this.request('GET', `feedbacks/by-url?url=${url}&include_resolved=true`);
 
                 if (Array.isArray(response)) {
                     let pinIndex = 1;
