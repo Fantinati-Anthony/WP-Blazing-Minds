@@ -80,12 +80,55 @@
                 el.toolButtons.forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.preventDefault();
-                        el.toolButtons.forEach(b => b.classList.remove('active'));
+
+                        const tool = btn.dataset.tool;
+
+                        // Pour les outils toggle (files, links), on toggle l'état actif
+                        if (tool === 'files' || tool === 'links') {
+                            const isActive = btn.classList.contains('active');
+                            // Fermer les autres sections
+                            if (el.voiceSection) el.voiceSection.hidden = true;
+                            if (el.videoSection) el.videoSection.hidden = true;
+                            if (el.attachmentsSection) el.attachmentsSection.hidden = true;
+                            if (el.linksSection) el.linksSection.hidden = true;
+                            el.toolButtons.forEach(b => {
+                                if (b.dataset.tool === 'files' || b.dataset.tool === 'links' ||
+                                    b.dataset.tool === 'voice' || b.dataset.tool === 'video') {
+                                    b.classList.remove('active');
+                                }
+                            });
+
+                            if (!isActive) {
+                                btn.classList.add('active');
+                                if (tool === 'files' && el.attachmentsSection) {
+                                    el.attachmentsSection.hidden = false;
+                                } else if (tool === 'links' && el.linksSection) {
+                                    el.linksSection.hidden = false;
+                                }
+                            }
+                            return;
+                        }
+
+                        // Pour target, on ne toggle pas l'actif des autres
+                        if (tool === 'target') {
+                            if (window.BlazingAnnotation) {
+                                w.state.isSelectingElement = true;
+                                w.modules.panel.closePanel();
+                                window.BlazingAnnotation.startInspector();
+                            }
+                            return;
+                        }
+
+                        // Pour les autres outils (screenshot, voice, video)
+                        el.toolButtons.forEach(b => {
+                            if (b.dataset.tool !== 'files' && b.dataset.tool !== 'links') {
+                                b.classList.remove('active');
+                            }
+                        });
 
                         if (el.voiceSection) el.voiceSection.hidden = true;
                         if (el.videoSection) el.videoSection.hidden = true;
 
-                        const tool = btn.dataset.tool;
                         if (tool === 'screenshot') {
                             btn.classList.add('active');
                             w.modules.screenshot.captureScreenshot();
@@ -108,6 +151,19 @@
             // Enregistrement vidéo
             if (el.videoRecordBtn) {
                 el.videoRecordBtn.addEventListener('click', () => w.modules.media.handleVideoRecord());
+            }
+
+            // Liens enrichis
+            if (el.addLinkBtn && w.modules.links) {
+                el.addLinkBtn.addEventListener('click', () => w.modules.links.addLink());
+            }
+            if (el.linkUrlInput && w.modules.links) {
+                el.linkUrlInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        w.modules.links.addLink();
+                    }
+                });
             }
 
             // Boutons supprimer média

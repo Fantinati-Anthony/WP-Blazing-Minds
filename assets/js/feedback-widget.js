@@ -79,7 +79,7 @@
             const moduleOrder = [
                 'tools', 'notifications', 'core', 'api',
                 'labels', 'tags', 'filters', 'screenshot',
-                'media', 'attachments', 'mentions', 'validation',
+                'media', 'attachments', 'links', 'mentions', 'validation',
                 'form', 'list', 'pages', 'details', 'panel', 'search',
                 'events', 'participants'
             ];

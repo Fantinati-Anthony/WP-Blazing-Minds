@@ -81,6 +81,7 @@ function wpvfh_enqueue_frontend_assets() {
 		'screenshot-editor',
 		'media',
 		'attachments',
+		'links',
 		'mentions',
 		'validation',
 		'form',
