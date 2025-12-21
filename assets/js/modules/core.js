@@ -90,7 +90,7 @@
                 detailReplies: document.getElementById('wpvfh-detail-replies'),
                 repliesList: document.getElementById('wpvfh-replies-list'),
                 detailActions: document.getElementById('wpvfh-detail-actions'),
-                statusSelect: document.getElementById('wpvfh-status-select'),
+                statusSelect: document.getElementById('wpvfh-detail-status-select'),
                 replyInput: document.getElementById('wpvfh-reply-input'),
                 sendReplyBtn: document.getElementById('wpvfh-send-reply'),
                 mediaToolbar: document.querySelector('.wpvfh-media-toolbar'),

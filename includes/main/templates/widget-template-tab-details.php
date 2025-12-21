@@ -75,8 +75,22 @@ $priority_settings = WPVFH_Options_Manager::get_group_settings( 'priorities' );
 			</div>
 		</div>
 
-		<!-- Champs éditables (Type, Priorité, Groupes personnalisés) -->
+		<!-- Champs éditables (Statut, Type, Priorité, Groupes personnalisés) -->
 		<div class="wpvfh-detail-dropdowns" id="wpvfh-detail-dropdowns">
+			<!-- Statut -->
+			<div class="wpvfh-dropdown-group">
+				<label for="wpvfh-detail-status-select">
+					<span class="wpvfh-dropdown-icon">📊</span>
+					<?php esc_html_e( 'Statut', 'blazing-feedback' ); ?>
+				</label>
+				<select id="wpvfh-detail-status-select" class="wpvfh-dropdown">
+					<?php foreach ( WPVFH_Options_Manager::get_statuses() as $status ) : ?>
+						<option value="<?php echo esc_attr( $status['id'] ); ?>" data-color="<?php echo esc_attr( $status['color'] ); ?>">
+							<?php echo esc_html( $status['emoji'] . ' ' . $status['label'] ); ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+			</div>
 			<?php if ( $types_settings['enabled'] && WPVFH_Options_Manager::user_can_access_group( 'types' ) ) : ?>
 			<div class="wpvfh-dropdown-group">
 				<label for="wpvfh-detail-type">
@@ -190,18 +204,7 @@ $priority_settings = WPVFH_Options_Manager::get_group_settings( 'priorities' );
 		</div>
 
 		<!-- Actions modérateur -->
-		<div class="wpvfh-detail-actions" id="wpvfh-detail-actions" hidden>
-			<div class="wpvfh-status-change">
-				<label for="wpvfh-status-select"><?php esc_html_e( 'Statut:', 'blazing-feedback' ); ?></label>
-				<select id="wpvfh-status-select" class="wpvfh-status-select">
-					<?php foreach ( WPVFH_Options_Manager::get_statuses() as $status ) : ?>
-						<option value="<?php echo esc_attr( $status['id'] ); ?>">
-							<?php echo esc_html( $status['emoji'] . ' ' . $status['label'] ); ?>
-						</option>
-					<?php endforeach; ?>
-				</select>
-			</div>
-
+		<div class="wpvfh-detail-actions" id="wpvfh-detail-actions">
 			<div class="wpvfh-reply-section">
 				<label for="wpvfh-reply-input"><?php esc_html_e( 'Ajouter une réponse:', 'blazing-feedback' ); ?></label>
 				<textarea id="wpvfh-reply-input" class="wpvfh-textarea" rows="2" placeholder="<?php esc_attr_e( 'Votre réponse...', 'blazing-feedback' ); ?>"></textarea>

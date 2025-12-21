@@ -33,6 +33,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="wpvfh-icon-visible" aria-hidden="true">👁️</span>
 			<span class="wpvfh-icon-hidden" aria-hidden="true" hidden>🙈</span>
 		</button>
+		<div class="wpvfh-responsive-wrapper">
+			<button type="button" id="wpvfh-responsive-btn" class="wpvfh-header-btn wpvfh-responsive-btn" title="<?php esc_attr_e( 'Mode responsive', 'blazing-feedback' ); ?>">
+				<span aria-hidden="true">📱</span>
+			</button>
+			<div id="wpvfh-responsive-menu" class="wpvfh-responsive-menu" hidden>
+				<button type="button" class="wpvfh-responsive-item" data-device="desktop" data-width="100%" data-height="100%">
+					<span>🖥️</span> Desktop
+				</button>
+				<button type="button" class="wpvfh-responsive-item" data-device="laptop" data-width="1366" data-height="768">
+					<span>💻</span> Laptop (1366×768)
+				</button>
+				<button type="button" class="wpvfh-responsive-item" data-device="tablet" data-width="768" data-height="1024">
+					<span>📱</span> Tablet (768×1024)
+				</button>
+				<button type="button" class="wpvfh-responsive-item" data-device="mobile" data-width="375" data-height="667">
+					<span>📱</span> iPhone (375×667)
+				</button>
+				<button type="button" class="wpvfh-responsive-item" data-device="mobile-large" data-width="414" data-height="896">
+					<span>📱</span> iPhone Plus (414×896)
+				</button>
+				<hr class="wpvfh-responsive-divider">
+				<button type="button" class="wpvfh-responsive-item wpvfh-responsive-reset" data-device="reset">
+					<span>↩️</span> <?php esc_html_e( 'Réinitialiser', 'blazing-feedback' ); ?>
+				</button>
+			</div>
+		</div>
 		<button type="button" class="wpvfh-search-btn" id="wpvfh-search-btn" aria-label="<?php esc_attr_e( 'Rechercher', 'blazing-feedback' ); ?>" title="<?php esc_attr_e( 'Rechercher un feedback', 'blazing-feedback' ); ?>">
 			<span aria-hidden="true">🔍</span>
 		</button>
