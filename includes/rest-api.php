@@ -1389,9 +1389,15 @@ class WPVFH_REST_API {
         // Récupérer toutes les URLs uniques avec leur compte de feedbacks depuis la table personnalisée
         $table_name = WPVFH_Database::get_table_name( WPVFH_Database::TABLE_FEEDBACKS );
 
+        // Récupérer les statuts considérés comme "traités"
+        $treated_statuses = self::get_treated_status_ids();
+        $treated_statuses_sql = "'" . implode( "','", array_map( 'esc_sql', $treated_statuses ) ) . "'";
+
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $pages_data = $wpdb->get_results(
-            "SELECT url, page_path, COUNT(*) as count
+            "SELECT url, page_path,
+                COUNT(*) as count,
+                SUM(CASE WHEN status IN ($treated_statuses_sql) THEN 1 ELSE 0 END) as resolved
             FROM $table_name
             GROUP BY page_path
             ORDER BY count DESC"
@@ -1412,11 +1418,36 @@ class WPVFH_REST_API {
                 'url'       => $page->url,
                 'title'     => $title,
                 'count'     => (int) $page->count,
+                'resolved'  => (int) $page->resolved,
                 'validated' => $is_validated,
             );
         }
 
         return new WP_REST_Response( $pages );
+    }
+
+    /**
+     * Obtenir les IDs des statuts considérés comme "traités"
+     *
+     * @since 1.9.0
+     * @return array
+     */
+    private static function get_treated_status_ids() {
+        $statuses = WPVFH_Options_Manager::get_statuses();
+        $treated = array();
+
+        foreach ( $statuses as $status ) {
+            if ( ! empty( $status['is_treated'] ) ) {
+                $treated[] = $status['id'];
+            }
+        }
+
+        // Fallback si aucun statut n'est marqué comme traité
+        if ( empty( $treated ) ) {
+            $treated = array( 'resolved', 'rejected' );
+        }
+
+        return $treated;
     }
 
     /**
