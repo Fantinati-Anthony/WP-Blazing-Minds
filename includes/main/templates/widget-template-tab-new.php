@@ -35,20 +35,6 @@ $tags_settings     = WPVFH_Options_Manager::get_group_settings( 'tags' );
 		></textarea>
 	</div>
 
-	<!-- Section ciblage d'élément (optionnel) -->
-	<div class="wpvfh-target-section">
-		<button type="button" id="wpvfh-select-element-btn" class="wpvfh-select-element-btn">
-			<span class="wpvfh-btn-emoji">🎯</span>
-			<span><?php esc_html_e( 'Cibler un élément', 'blazing-feedback' ); ?></span>
-			<span class="wpvfh-optional-badge"><?php esc_html_e( 'optionnel', 'blazing-feedback' ); ?></span>
-		</button>
-		<div id="wpvfh-selected-element" class="wpvfh-selected-element" hidden>
-			<span class="wpvfh-selected-icon">✓</span>
-			<span class="wpvfh-selected-text"><?php esc_html_e( 'Élément sélectionné', 'blazing-feedback' ); ?></span>
-			<button type="button" class="wpvfh-clear-selection" title="<?php esc_attr_e( 'Retirer la sélection', 'blazing-feedback' ); ?>">&times;</button>
-		</div>
-	</div>
-
 	<!-- Barre d'outils média -->
 	<div class="wpvfh-media-toolbar">
 		<button type="button" class="wpvfh-tool-btn wpvfh-tool-screenshot" data-tool="screenshot" title="<?php esc_attr_e( 'Capture d\'écran', 'blazing-feedback' ); ?>">
@@ -63,6 +49,25 @@ $tags_settings     = WPVFH_Options_Manager::get_group_settings( 'tags' );
 			<span class="wpvfh-tool-emoji">🎬</span>
 			<span><?php esc_html_e( 'Vidéo', 'blazing-feedback' ); ?></span>
 		</button>
+		<button type="button" class="wpvfh-tool-btn wpvfh-tool-target" data-tool="target" title="<?php esc_attr_e( 'Cibler un élément', 'blazing-feedback' ); ?>">
+			<span class="wpvfh-tool-emoji">🎯</span>
+			<span><?php esc_html_e( 'Cibler', 'blazing-feedback' ); ?></span>
+		</button>
+		<button type="button" class="wpvfh-tool-btn wpvfh-tool-files" data-tool="files" title="<?php esc_attr_e( 'Ajouter des fichiers', 'blazing-feedback' ); ?>">
+			<span class="wpvfh-tool-emoji">📎</span>
+			<span><?php esc_html_e( 'Fichiers', 'blazing-feedback' ); ?></span>
+		</button>
+		<button type="button" class="wpvfh-tool-btn wpvfh-tool-links" data-tool="links" title="<?php esc_attr_e( 'Ajouter des liens', 'blazing-feedback' ); ?>">
+			<span class="wpvfh-tool-emoji">🔗</span>
+			<span><?php esc_html_e( 'Lien', 'blazing-feedback' ); ?></span>
+		</button>
+	</div>
+
+	<!-- Indicateur élément ciblé -->
+	<div id="wpvfh-selected-element" class="wpvfh-selected-element" hidden>
+		<span class="wpvfh-selected-icon">✓</span>
+		<span class="wpvfh-selected-text"><?php esc_html_e( 'Élément sélectionné', 'blazing-feedback' ); ?></span>
+		<button type="button" class="wpvfh-clear-selection" title="<?php esc_attr_e( 'Retirer la sélection', 'blazing-feedback' ); ?>">&times;</button>
 	</div>
 
 	<!-- Section enregistrement vocal -->
@@ -112,12 +117,10 @@ $tags_settings     = WPVFH_Options_Manager::get_group_settings( 'tags' );
 	</div>
 
 	<!-- Section pièces jointes -->
-	<div class="wpvfh-attachments-section">
-		<label class="wpvfh-attachments-label">
-			<span class="wpvfh-label-icon">📎</span>
-			<?php esc_html_e( 'Pièces jointes', 'blazing-feedback' ); ?>
-			<span class="wpvfh-optional-badge"><?php esc_html_e( 'optionnel', 'blazing-feedback' ); ?></span>
-		</label>
+	<div id="wpvfh-attachments-section" class="wpvfh-attachments-section wpvfh-media-section" hidden>
+		<div class="wpvfh-section-header">
+			<span class="wpvfh-section-title">📎 <?php esc_html_e( 'Pièces jointes', 'blazing-feedback' ); ?></span>
+		</div>
 		<div class="wpvfh-attachments-input">
 			<input type="file" id="wpvfh-attachments" name="attachments" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" hidden>
 			<button type="button" id="wpvfh-add-attachment-btn" class="wpvfh-add-attachment-btn">
@@ -127,6 +130,22 @@ $tags_settings     = WPVFH_Options_Manager::get_group_settings( 'tags' );
 		</div>
 		<div id="wpvfh-attachments-preview" class="wpvfh-attachments-preview"></div>
 		<p class="wpvfh-attachments-hint"><?php esc_html_e( 'Images, PDF, documents (max 5 fichiers, 10 Mo chacun)', 'blazing-feedback' ); ?></p>
+	</div>
+
+	<!-- Section liens enrichis -->
+	<div id="wpvfh-links-section" class="wpvfh-links-section wpvfh-media-section" hidden>
+		<div class="wpvfh-section-header">
+			<span class="wpvfh-section-title">🔗 <?php esc_html_e( 'Liens', 'blazing-feedback' ); ?></span>
+		</div>
+		<div id="wpvfh-links-list" class="wpvfh-links-list"></div>
+		<div class="wpvfh-add-link-form">
+			<input type="url" id="wpvfh-link-url" class="wpvfh-link-input" placeholder="<?php esc_attr_e( 'https://exemple.com', 'blazing-feedback' ); ?>">
+			<button type="button" id="wpvfh-add-link-btn" class="wpvfh-add-link-btn">
+				<span>➕</span>
+				<?php esc_html_e( 'Ajouter', 'blazing-feedback' ); ?>
+			</button>
+		</div>
+		<input type="hidden" id="wpvfh-links-data" name="links_data" value="">
 	</div>
 
 	<!-- Champs déroulants (Type, Priorité, Tags, Groupes personnalisés) -->
