@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wpvfh-panel-header">
 	<?php
 	$logo_mode = WPVFH_Database::get_setting( 'wpvfh_logo_mode', 'none' );
-	$logo_url = '';
+	$logo_url  = '';
 	if ( $logo_mode === 'light' ) {
 		$logo_url = WPVFH_PLUGIN_URL . 'assets/logo/light-mode-feedback.png';
 	} elseif ( $logo_mode === 'dark' ) {
@@ -22,11 +22,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	} elseif ( $logo_mode === 'custom' ) {
 		$logo_url = WPVFH_Database::get_setting( 'wpvfh_logo_custom_url', '' );
 	}
-	if ( $logo_mode !== 'none' && $logo_url ) : ?>
+	// Fallback to default light logo if no logo URL
+	if ( empty( $logo_url ) ) {
+		$logo_url = WPVFH_PLUGIN_URL . 'assets/logo/light-mode-feedback.png';
+	}
+	?>
 	<img src="<?php echo esc_url( $logo_url ); ?>" alt="<?php esc_attr_e( 'Blazing Feedback', 'blazing-feedback' ); ?>" class="wpvfh-panel-logo">
-	<?php else : ?>
-	<h3 class="wpvfh-panel-title"><?php esc_html_e( 'Feedbacks', 'blazing-feedback' ); ?></h3>
-	<?php endif; ?>
 	<div class="wpvfh-header-actions">
 		<button type="button" class="wpvfh-search-btn" id="wpvfh-search-btn" aria-label="<?php esc_attr_e( 'Rechercher', 'blazing-feedback' ); ?>" title="<?php esc_attr_e( 'Rechercher un feedback', 'blazing-feedback' ); ?>">
 			<span aria-hidden="true">🔍</span>
