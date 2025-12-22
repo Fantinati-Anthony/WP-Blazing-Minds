@@ -92,7 +92,8 @@ class WPVFH_Options_Manager {
      * @return void
      */
     public static function enqueue_admin_scripts( $hook ) {
-        if ( 'feedbacks_page_wpvfh-options' !== $hook ) {
+        // Vérifier si on est sur la page des options (hook peut varier selon position menu)
+        if ( strpos( $hook, 'wpvfh-options' ) === false ) {
             return;
         }
 
