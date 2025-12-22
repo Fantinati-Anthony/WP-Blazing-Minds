@@ -52,6 +52,7 @@ class WPVFH_Admin_UI {
 	 */
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'add_menu_pages' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'remove_menu_separators' ), 999 ); // Retirer les séparateurs
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'admin_init', array( __CLASS__, 'handle_danger_zone_actions' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_styles' ) );

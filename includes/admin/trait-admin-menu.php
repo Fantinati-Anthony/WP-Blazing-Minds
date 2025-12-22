@@ -59,4 +59,27 @@ trait WPVFH_Admin_Menu {
 			array( __CLASS__, 'render_settings_page' )
 		);
 	}
+
+	/**
+	 * Retirer les séparateurs du menu admin
+	 *
+	 * @since 2.1.0
+	 * @return void
+	 */
+	public static function remove_menu_separators() {
+		global $menu;
+
+		if ( ! is_array( $menu ) ) {
+			return;
+		}
+
+		// Parcourir le menu et retirer tous les séparateurs
+		foreach ( $menu as $key => $item ) {
+			// Les séparateurs ont 'wp-menu-separator' comme classe CSS (index 4)
+			// ou ont un slug vide/separator (index 2)
+			if ( isset( $item[4] ) && strpos( $item[4], 'wp-menu-separator' ) !== false ) {
+				unset( $menu[ $key ] );
+			}
+		}
+	}
 }
