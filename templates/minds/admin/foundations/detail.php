@@ -99,6 +99,11 @@ $mode = $client ? $client->company_mode : 'existing';
 	<!-- Content -->
 	<div class="bzmi-foundation-content" data-foundation-id="<?php echo esc_attr( $foundation->id ); ?>" data-tab="<?php echo esc_attr( $tab ); ?>">
 		<?php
+		// Extraire les variables de $data pour les rendre disponibles dans les templates
+		if ( isset( $data ) && is_array( $data ) ) {
+			extract( $data );
+		}
+
 		// Charger le template de l'onglet
 		$template_file = WPVFH_PLUGIN_DIR . 'templates/minds/admin/foundations/tabs/' . $tab . '.php';
 		if ( file_exists( $template_file ) ) {
