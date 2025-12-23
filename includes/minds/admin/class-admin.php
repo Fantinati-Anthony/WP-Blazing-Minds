@@ -54,7 +54,7 @@ class BZMI_Admin {
 			__( 'Clients', 'blazing-minds' ),
 			__( 'Clients', 'blazing-minds' ),
 			'bzmi_manage_clients',
-			'bzmi-clients',
+			'blazing-minds-clients',
 			array( 'BZMI_Admin_Clients', 'render_page' )
 		);
 
@@ -74,7 +74,7 @@ class BZMI_Admin {
 			__( 'Portefeuilles', 'blazing-minds' ),
 			__( 'Portefeuilles', 'blazing-minds' ),
 			'bzmi_manage_portfolios',
-			'bzmi-portfolios',
+			'blazing-minds-portfolios',
 			array( 'BZMI_Admin_Portfolios', 'render_page' )
 		);
 
@@ -84,7 +84,7 @@ class BZMI_Admin {
 			__( 'Projets', 'blazing-minds' ),
 			__( 'Projets', 'blazing-minds' ),
 			'bzmi_manage_projects',
-			'bzmi-projects',
+			'blazing-minds-projects',
 			array( 'BZMI_Admin_Projects', 'render_page' )
 		);
 
@@ -94,7 +94,7 @@ class BZMI_Admin {
 			__( 'Cycle ICAVAL', 'blazing-minds' ),
 			__( 'Cycle ICAVAL', 'blazing-minds' ),
 			'bzmi_manage_icaval',
-			'bzmi-icaval',
+			'blazing-minds-icaval',
 			array( 'BZMI_Admin_ICAVAL', 'render_page' )
 		);
 

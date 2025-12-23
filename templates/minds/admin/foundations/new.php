@@ -40,7 +40,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 			<h2><?php esc_html_e( 'Aucun client disponible', 'blazing-feedback' ); ?></h2>
 			<p><?php esc_html_e( 'Vous devez d\'abord créer un client pour pouvoir lui associer une fondation.', 'blazing-feedback' ); ?></p>
-			<a href="<?php echo esc_url( admin_url( 'admin.php?page=bzmi-clients&action=new' ) ); ?>" class="button button-primary button-hero">
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=blazing-minds-clients&action=new' ) ); ?>" class="button button-primary button-hero">
 				<?php esc_html_e( 'Créer un client', 'blazing-feedback' ); ?>
 			</a>
 		</div>
